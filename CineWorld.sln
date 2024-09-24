@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FrontEnd", "FrontEnd", "{FECF07FA-77BB-425A-914B-68B62E035903}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{24BBBF88-7375-4F58-BE1F-FCE61A2AB363}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integration", "Integration", "{30B28ACD-CA74-4945-847C-A1A396A45DC4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{638BD48D-F7CA-4449-A9B9-B347AF7F6A01}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.AuthAPI", "CineWorld.Services.AuthAPI\CineWorld.Services.AuthAPI.csproj", "{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.CouponAPI", "CineWorld.Services.CouponAPI\CineWorld.Services.CouponAPI.csproj", "{C260EE92-6044-4908-BE91-9967E9561F17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineWorld.MessageBus", "CineWorld.MessageBus\CineWorld.MessageBus.csproj", "{D62E65F6-A249-438A-B4DB-1F57BBE07E04}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C260EE92-6044-4908-BE91-9967E9561F17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C260EE92-6044-4908-BE91-9967E9561F17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C260EE92-6044-4908-BE91-9967E9561F17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C260EE92-6044-4908-BE91-9967E9561F17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
+		{C260EE92-6044-4908-BE91-9967E9561F17} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
+		{D62E65F6-A249-438A-B4DB-1F57BBE07E04} = {30B28ACD-CA74-4945-847C-A1A396A45DC4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7523F892-D99B-4651-8610-1159CEB851E9}
+	EndGlobalSection
+EndGlobal

@@ -15,7 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.AuthAPI"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.CouponAPI", "CineWorld.Services.CouponAPI\CineWorld.Services.CouponAPI.csproj", "{C260EE92-6044-4908-BE91-9967E9561F17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineWorld.MessageBus", "CineWorld.MessageBus\CineWorld.MessageBus.csproj", "{D62E65F6-A249-438A-B4DB-1F57BBE07E04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.MessageBus", "CineWorld.MessageBus\CineWorld.MessageBus.csproj", "{D62E65F6-A249-438A-B4DB-1F57BBE07E04}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.MovieAPI", "CineWorld.Services.MovieAPI\CineWorld.Services.MovieAPI.csproj", "{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineWorld.Services.EpisodeAPI", "CineWorld.Services.EpisodeAPI\CineWorld.Services.EpisodeAPI.csproj", "{636DEA06-B408-45B7-9CB6-78B82196327D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +39,14 @@ Global
 		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{636DEA06-B408-45B7-9CB6-78B82196327D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{636DEA06-B408-45B7-9CB6-78B82196327D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{636DEA06-B408-45B7-9CB6-78B82196327D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{636DEA06-B408-45B7-9CB6-78B82196327D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +55,8 @@ Global
 		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
 		{C260EE92-6044-4908-BE91-9967E9561F17} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
 		{D62E65F6-A249-438A-B4DB-1F57BBE07E04} = {30B28ACD-CA74-4945-847C-A1A396A45DC4}
+		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
+		{636DEA06-B408-45B7-9CB6-78B82196327D} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7523F892-D99B-4651-8610-1159CEB851E9}

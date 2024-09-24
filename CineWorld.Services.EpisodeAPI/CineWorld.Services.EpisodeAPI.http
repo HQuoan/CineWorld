@@ -1,0 +1,6 @@
+@CineWorld.Services.EpisodeAPI_HostAddress = http://localhost:5164
+
+GET {{CineWorld.Services.EpisodeAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

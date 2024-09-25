@@ -1,26 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace CineWorld.Services.MovieAPI.Models
+namespace CineWorld.Services.MovieAPI.Models.Dtos
 {
-  public class Movie
+  public class MovieDto
   {
-    [Key]
     public int MovieId { get; set; }
-   
+
     public int CategoryId { get; set; }
-    [ForeignKey(nameof(CategoryId))]
-    public Category? Category { get; set; }
+   
     public int CountryId { get; set; }
-    [ForeignKey(nameof(CountryId))]
-    public Country? Country { get; set; }
+   
     public int? SeriesId { get; set; }
-    [ForeignKey(nameof(SeriesId))]
-    public Series? Series { get; set; }
-
-    public IEnumerable<Genre>? Genres { get; set; }
-
-    
     [Required]
     public string Name { get; set; }
     public string? EnglishName { get; set; }

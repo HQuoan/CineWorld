@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MovieAPI.Models;
+using CineWorld.Services.MovieAPI.Models.Dtos;
 
 
 namespace CineWorld.Services.MovieAPI
@@ -9,7 +11,11 @@ namespace CineWorld.Services.MovieAPI
     {
       var mappingConfig = new MapperConfiguration(config =>
       {
-       
+        config.CreateMap<Category, CategoryDto>().ReverseMap();
+        config.CreateMap<Country, CountryDto>().ReverseMap();
+        config.CreateMap<Series, SeriesDto>().ReverseMap();
+        config.CreateMap<Movie, MovieDto>().ReverseMap();
+        config.CreateMap<Series, SeriesDto>().ReverseMap();
       });
 
       return mappingConfig;

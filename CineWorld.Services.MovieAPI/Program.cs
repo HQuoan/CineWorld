@@ -2,6 +2,8 @@ using AutoMapper;
 using CineWorld.Services.MovieAPI;
 using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Extensions;
+using CineWorld.Services.MovieAPI.Repositories;
+using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,6 +53,8 @@ builder.Services.AddSwaggerGen(option =>
 
 builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

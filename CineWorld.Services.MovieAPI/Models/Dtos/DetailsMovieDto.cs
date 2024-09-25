@@ -1,19 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace CineWorld.Services.MovieAPI.Models.Dtos
 {
-  public class MovieDto
+  public class DetailsMovieDto
   {
     public int MovieId { get; set; }
 
     public int? CategoryId { get; set; }
+    public CategoryDto? Category { get; set; }
 
     public int? CountryId { get; set; }
+    public CountryDto? Country { get; set; }
 
     [DefaultValue(null)]
     public int? SeriesId { get; set; }
+    public SeriesDto? Series { get; set; }
     public string? Name { get; set; }
     public string? EnglishName { get; set; }
     public string? Slug { get; set; }

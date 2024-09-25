@@ -4,7 +4,7 @@ using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 
 namespace CineWorld.Services.MovieAPI.Repositories
 {
-  public class CategoryRepository: Repository<Category>, ICategoryRepository
+    public class CategoryRepository: Repository<Category>, ICategoryRepository
   {
     private readonly AppDbContext _db;
 

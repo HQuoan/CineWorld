@@ -9,16 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
-  [Route("api/movies")]
+  [Route("api/series")]
   [ApiController]
   [ExceptionHandling]
-  public class MovieAPIController : ControllerBase
+  public class SeriesAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
 
-    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper)
+    public SeriesAPIController(IUnitOfWork unitOfWork, IMapper mapper)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
@@ -28,8 +28,8 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get()
     {
-      IEnumerable<Movie> movies = await _unitOfWork.Movie.GetAllAsync();
-      _response.Result = _mapper.Map<IEnumerable<MovieDto>>(movies);
+      IEnumerable<Series> series = await _unitOfWork.Series.GetAllAsync();
+      _response.Result = _mapper.Map<IEnumerable<SeriesDto>>(series);
 
       return Ok(_response);
     }
@@ -37,36 +37,35 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
-      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series");
-      if(movie == null)
+      var series = await _unitOfWork.Series.GetAsync(c => c.SeriesId == id);
+      if(series == null)
       {
-        throw new NotFoundException($"Movie with ID: {id} not found.");
+        throw new NotFoundException($"Series with ID: {id} not found.");
       }
 
-      _response.Result = _mapper.Map<DetailsMovieDto>(movie);
+      _response.Result = _mapper.Map<SeriesDto>(series);
       return Ok(_response);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ResponseDto>> Post([FromBody] MovieDto movieDto)
+    public async Task<ActionResult<ResponseDto>> Post([FromBody] SeriesDto seriesDto)
     {
-      Movie movie = _mapper.Map<Movie>(movieDto);
-     
-      await _unitOfWork.Movie.AddAsync(movie);
+      Series series = _mapper.Map<Series>(seriesDto);
+      await _unitOfWork.Series.AddAsync(series);
       await _unitOfWork.SaveAsync();
-      _response.Result = _mapper.Map<MovieDto>(movie);
+      _response.Result = _mapper.Map<SeriesDto>(series);
 
       return Created(string.Empty, _response);
     }
 
     [HttpPut]
-    public async Task<ActionResult<ResponseDto>> Put([FromBody] MovieDto movieDto)
+    public async Task<ActionResult<ResponseDto>> Put([FromBody] SeriesDto seriesDto)
     {
-      Movie movie = _mapper.Map<Movie>(movieDto);
-      await _unitOfWork.Movie.UpdateAsync(movie);
+      Series series = _mapper.Map<Series>(seriesDto);
+      await _unitOfWork.Series.UpdateAsync(series);
       await _unitOfWork.SaveAsync();
 
-      _response.Result = _mapper.Map<MovieDto>(movie);
+      _response.Result = _mapper.Map<SeriesDto>(series);
 
       return Ok(_response);
     }
@@ -74,13 +73,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [HttpDelete]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
-      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id);
-      if(movie == null)
+      var series = await _unitOfWork.Series.GetAsync(c => c.SeriesId == id);
+      if(series == null)
       {
-        throw new NotFoundException($"Movie with ID: {id} not found.");
+        throw new NotFoundException($"Series with ID: {id} not found.");
       }
 
-      await _unitOfWork.Movie.RemoveAsync(movie);
+      await _unitOfWork.Series.RemoveAsync(series);
       await _unitOfWork.SaveAsync();
 
       return NoContent();

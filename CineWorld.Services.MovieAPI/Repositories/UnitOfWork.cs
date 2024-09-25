@@ -3,7 +3,7 @@ using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 
 namespace CineWorld.Services.MovieAPI.Repositories
 {
-  public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
   {
     private readonly AppDbContext _db;
     public ICategoryRepository Category { get; private set; }

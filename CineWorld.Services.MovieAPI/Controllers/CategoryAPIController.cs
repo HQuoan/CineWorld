@@ -11,7 +11,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
-  //[ExceptionHandling]
+  [ExceptionHandling]
   public class CategoryAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
@@ -40,7 +40,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);
       if(category == null)
       {
-
+        throw new NotFoundException($"Category with ID: {id} not found.");
       }
 
       _response.Result = _mapper.Map<CategoryDto>(category);

@@ -1,12 +1,13 @@
 ﻿using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace CineWorld.Services.MovieAPI.Repositories
 {
-  public class Repository<T> : IRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class
   {
     private readonly AppDbContext _db;
     internal DbSet<T> dbSet;

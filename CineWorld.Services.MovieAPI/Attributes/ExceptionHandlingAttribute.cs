@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using CineWorld.Services.MovieAPI.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace CineWorld.Services.CouponAPI.Attributes
 {
@@ -24,7 +25,8 @@ namespace CineWorld.Services.CouponAPI.Attributes
         var response = new ResponseDto
         {
           IsSuccess = false,
-          Message = "An error occurred while processing your request.",
+          //Message = "An error occurred while processing your request.",
+          Message = context.Exception.Message,
         };
 
         // Log the exception for debugging purposes
@@ -37,6 +39,23 @@ namespace CineWorld.Services.CouponAPI.Attributes
           context.Result = new JsonResult(response)
           {
             StatusCode = StatusCodes.Status404NotFound,
+          };
+        }
+        else if (context.Exception is DbUpdateException dbUpdateException) // Handle DbUpdateException
+        {
+          var innerException = dbUpdateException.InnerException;
+          if (innerException != null)
+          {
+            response.Message = $"Database error: {innerException.Message}";
+          }
+          else
+          {
+            response.Message = "An error occurred while updating the database.";
+          }
+
+          context.Result = new JsonResult(response)
+          {
+            StatusCode = StatusCodes.Status400BadRequest, // Có thể là 400 hoặc một mã khác tùy thuộc vào lỗi cụ thể
           };
         }
         else

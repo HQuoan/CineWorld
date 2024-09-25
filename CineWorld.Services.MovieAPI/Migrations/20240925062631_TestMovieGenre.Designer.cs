@@ -4,6 +4,7 @@ using CineWorld.Services.MovieAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240925062631_TestMovieGenre")]
+    partial class TestMovieGenre
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,6 +156,29 @@ namespace CineWorld.Services.MovieAPI.Migrations
                     b.ToTable("Movies");
                 });
 
+            modelBuilder.Entity("CineWorld.Services.MovieAPI.Models.MovieGenre", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GenreId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GenreId");
+
+                    b.HasIndex("MovieId");
+
+                    b.ToTable("MovieGenres");
+                });
+
             modelBuilder.Entity("CineWorld.Services.MovieAPI.Models.Series", b =>
                 {
                     b.Property<int>("SeriesId")
@@ -176,7 +202,7 @@ namespace CineWorld.Services.MovieAPI.Migrations
                     b.ToTable("Series");
                 });
 
-            modelBuilder.Entity("MovieGenres", b =>
+            modelBuilder.Entity("MovieGenre", b =>
                 {
                     b.Property<int>("GenreId")
                         .HasColumnType("int");
@@ -188,7 +214,7 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.HasIndex("MovieId");
 
-                    b.ToTable("MovieGenres");
+                    b.ToTable("MovieGenre");
                 });
 
             modelBuilder.Entity("CineWorld.Services.MovieAPI.Models.Movie", b =>
@@ -216,7 +242,26 @@ namespace CineWorld.Services.MovieAPI.Migrations
                     b.Navigation("Series");
                 });
 
-            modelBuilder.Entity("MovieGenres", b =>
+            modelBuilder.Entity("CineWorld.Services.MovieAPI.Models.MovieGenre", b =>
+                {
+                    b.HasOne("CineWorld.Services.MovieAPI.Models.Genre", "Genre")
+                        .WithMany()
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CineWorld.Services.MovieAPI.Models.Movie", "Movie")
+                        .WithMany()
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Genre");
+
+                    b.Navigation("Movie");
+                });
+
+            modelBuilder.Entity("MovieGenre", b =>
                 {
                     b.HasOne("CineWorld.Services.MovieAPI.Models.Genre", null)
                         .WithMany()

@@ -7,7 +7,7 @@ namespace CineWorld.Services.MovieAPI.Models
   {
     [Key]
     public int MovieId { get; set; }
-   
+    [Required(ErrorMessage = "CategoryId can't null")]
     public int CategoryId { get; set; }
     [ForeignKey(nameof(CategoryId))]
     public Category? Category { get; set; }

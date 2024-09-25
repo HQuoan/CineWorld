@@ -23,7 +23,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
       await dbSet.AddAsync(entity);
     }
 
-    public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
+    public virtual async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
     {
       IQueryable<T> query;
       if (tracked)

@@ -15,6 +15,7 @@ namespace CineWorld.Services.MovieAPI.Data
     public DbSet<Series> Series { get; set; }
     public DbSet<Movie> Movies { get; set; }
     public DbSet<Genre> Genres { get; set; }
+    //public DbSet<MovieGenre> MovieGenres { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,14 +29,14 @@ namespace CineWorld.Services.MovieAPI.Data
           .IsRequired(false); // SeriesId không bắt buộc
 
       // Cấu hình mối quan hệ nhiều-nhiều giữa Movie và Genre
-      modelBuilder.Entity<Movie>()
-                .HasMany(m => m.Genres)
-                .WithMany(g => g.Movies)
-                .UsingEntity<Dictionary<string, object>>(
-                    "MovieGenres",  // Tên của bảng trung gian
-                    j => j.HasOne<Genre>().WithMany().HasForeignKey("GenreId"),
-                    j => j.HasOne<Movie>().WithMany().HasForeignKey("MovieId")
-                );
+      //modelBuilder.Entity<Movie>()
+      //          .HasMany(m => m.Genres)
+      //          .WithMany(g => g.Movies)
+      //          .UsingEntity<Dictionary<string, object>>(
+      //              "MovieGenres",  // Tên của bảng trung gian
+      //              j => j.HasOne<Genre>().WithMany().HasForeignKey("GenreId"),
+      //              j => j.HasOne<Movie>().WithMany().HasForeignKey("MovieId")
+               // );
     }
 
   }

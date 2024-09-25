@@ -1,28 +1,31 @@
 ﻿using AutoMapper;
 using CineWorld.Services.CouponAPI.Attributes;
+using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/movies")]
   [ApiController]
-  [ExceptionHandling]
+ // [ExceptionHandling]
   public class MovieAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
-
-    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper)
+    private readonly AppDbContext _db;
+    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext db)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
+      _db = db;
     }
 
     [HttpGet]
@@ -37,8 +40,9 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
-      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series");
-      if(movie == null)
+      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series,MovieGenres");
+      
+      if (movie == null)
       {
         throw new NotFoundException($"Movie with ID: {id} not found.");
       }
@@ -51,7 +55,15 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MovieDto movieDto)
     {
       Movie movie = _mapper.Map<Movie>(movieDto);
-     
+
+      foreach (var genreId in movieDto.GenreIds)
+      {
+        if(genreId > 0)
+        {
+          movie.MovieGenres.Add(new MovieGenre { GenreId = genreId });
+        }
+      }
+
       await _unitOfWork.Movie.AddAsync(movie);
       await _unitOfWork.SaveAsync();
       _response.Result = _mapper.Map<MovieDto>(movie);
@@ -62,11 +74,27 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [HttpPut]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MovieDto movieDto)
     {
-      Movie movie = _mapper.Map<Movie>(movieDto);
-      await _unitOfWork.Movie.UpdateAsync(movie);
+      var movieFromDb = await _unitOfWork.Movie.GetAsync(m => m.MovieId == movieDto.MovieId, includeProperties: "MovieGenres", tracked: true);
+
+      // Xóa các thể loại hiện tại từ cơ sở dữ liệu
+      movieFromDb.MovieGenres.Clear();
       await _unitOfWork.SaveAsync();
 
-      _response.Result = _mapper.Map<MovieDto>(movie);
+      // Cập nhật các thuộc tính của movieFromDb từ movieDto
+      _mapper.Map(movieDto, movieFromDb);
+
+      foreach (var genreId in movieDto.GenreIds)
+      {
+        if (genreId > 0)
+        {
+          movieFromDb.MovieGenres.Add(new MovieGenre { GenreId = genreId });
+        }
+      }
+
+      await _unitOfWork.Movie.UpdateAsync(movieFromDb);
+      await _unitOfWork.SaveAsync();
+
+      _response.Result = _mapper.Map<MovieDto>(movieFromDb);
 
       return Ok(_response);
     }

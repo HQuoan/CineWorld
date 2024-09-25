@@ -10,6 +10,7 @@ namespace CineWorld.Services.MovieAPI.Models.Dtos
     public CountryDto? Country { get; set; }
 
     public SeriesDto? Series { get; set; }
+    public List<GenreDto> Genres { get; set; } = new List<GenreDto>();
 
   }
 }

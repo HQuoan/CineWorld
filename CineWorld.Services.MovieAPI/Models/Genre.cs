@@ -11,6 +11,6 @@ namespace CineWorld.Services.MovieAPI.Models
     public string? Slug { get; set; }
     public bool Status { get; set; } = true;
 
-    public IEnumerable<Movie>? Movies { get; set;}
+    public ICollection<MovieGenre>? MovieGenres { get; set; }
   }
 }

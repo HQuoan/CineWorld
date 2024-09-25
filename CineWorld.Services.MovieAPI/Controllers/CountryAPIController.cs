@@ -47,6 +47,20 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    [HttpGet]
+    [Route("{id:int}/movies")]
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
+    {
+      var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id, includeProperties: "Movies");
+      if (country == null)
+      {
+        throw new NotFoundException($"Country with ID: {id} not found.");
+      }
+
+      _response.Result = _mapper.Map<CountryMovieDto>(country);
+      return Ok(_response);
+    }
+
     [HttpPost]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CountryDto countryDto)
     {

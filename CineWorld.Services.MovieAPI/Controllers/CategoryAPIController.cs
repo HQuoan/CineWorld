@@ -47,6 +47,20 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    [HttpGet]
+    [Route("{id:int}/movies")]
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
+    {
+      var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id, includeProperties: "Movies");
+      if (category == null)
+      {
+        throw new NotFoundException($"Category with ID: {id} not found.");
+      }
+
+      _response.Result = _mapper.Map<CategoryMovieDto>(category);
+      return Ok(_response);
+    }
+
     [HttpPost]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CategoryDto categoryDto)
     {

@@ -43,7 +43,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Movie with ID: {id} not found.");
       }
 
-      _response.Result = _mapper.Map<DetailsMovieDto>(movie);
+      _response.Result = _mapper.Map<MovieDetailsDto>(movie);
       return Ok(_response);
     }
 

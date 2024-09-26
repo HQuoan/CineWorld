@@ -4,25 +4,33 @@ using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
-  [ExceptionHandling]
+ // [ExceptionHandling]
+  //[Authorize]
   public class CategoryAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
+    private readonly IUtil _util;
 
-    public CategoryAPIController(IUnitOfWork unitOfWork, IMapper mapper)
+
+    public CategoryAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
+      _util = util;
     }
 
     [HttpGet]
@@ -38,7 +46,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);
-      if(category == null)
+      if (category == null)
       {
         throw new NotFoundException($"Category with ID: {id} not found.");
       }
@@ -51,15 +59,22 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
     {
+
+
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id, includeProperties: "Movies");
       if (category == null)
       {
         throw new NotFoundException($"Category with ID: {id} not found.");
       }
 
+      // Remove movie with status = false
+      _util.FilterMoviesByUserRole(category);
+
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
       return Ok(_response);
     }
+
+
 
     [HttpPost]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CategoryDto categoryDto)
@@ -88,7 +103,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);
-      if(category == null)
+      if (category == null)
       {
         throw new NotFoundException($"Category with ID: {id} not found.");
       }

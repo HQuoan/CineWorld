@@ -4,8 +4,10 @@ using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics.Metrics;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -17,12 +19,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
+    private readonly IUtil _util;
 
-    public SeriesAPIController(IUnitOfWork unitOfWork, IMapper mapper)
+    public SeriesAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
+      _util = util;
     }
 
     [HttpGet]
@@ -55,6 +59,9 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         throw new NotFoundException($"Series with ID: {id} not found.");
       }
+
+      // Remove movie with status = false
+      _util.FilterMoviesByUserRole(series);
 
       _response.Result = _mapper.Map<SeriesMovieDto>(series);
       return Ok(_response);

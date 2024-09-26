@@ -4,6 +4,7 @@ using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +18,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
+    private readonly IUtil _util;
 
-    public GenreAPIController(IUnitOfWork unitOfWork, IMapper mapper)
+    public GenreAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
+      _util = util;
     }
 
     [HttpGet]
@@ -50,13 +53,18 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
     {
-      var genre = await _unitOfWork.Genre.GetAsync(c => c.GenreId == id, includeProperties: "MovieGenres");
+      var genre = await _unitOfWork.Genre.GetAsync(c => c.GenreId == id, includeProperties: "MovieGenres.Movie");
       if (genre == null)
       {
         throw new NotFoundException($"Genre with ID: {id} not found.");
       }
 
-      _response.Result = _mapper.Map<GenreMovieDto>(genre);
+      var dto = _mapper.Map<GenreMovieDto>(genre);
+      _util.FilterMoviesByUserRole(dto);
+
+      _response.Result = dto;
+
+      // Remove movie with status = false
       return Ok(_response);
     }
 

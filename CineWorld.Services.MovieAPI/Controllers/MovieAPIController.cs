@@ -5,6 +5,7 @@ using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,25 +14,36 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/movies")]
   [ApiController]
- // [ExceptionHandling]
+  // [ExceptionHandling]
   public class MovieAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
     private readonly AppDbContext _db;
-    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext db)
+    private readonly IUtil _util;
+    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext db, IUtil util)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
       _db = db;
+      _util = util;
     }
 
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get()
     {
-      IEnumerable<Movie> movies = await _unitOfWork.Movie.GetAllAsync();
+      IEnumerable<Movie> movies;
+      if (_util.IsInRoles(new string[] { "ADMIN" }))
+      {
+        movies = await _unitOfWork.Movie.GetAllAsync();
+      }
+      else
+      {
+        movies = await _unitOfWork.Movie.GetAllAsync(c => c.Status == true);
+      }
+
       _response.Result = _mapper.Map<IEnumerable<MovieDto>>(movies);
 
       return Ok(_response);
@@ -40,8 +52,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
-      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series,MovieGenres");
-      
+      Movie movie;
+      if (_util.IsInRoles(new string[] { "ADMIN" }))
+       {
+        movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series,MovieGenres.Genre");
+      }
+      else
+      {
+        movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id && c.Status == true, includeProperties: "Category,Country,Series,MovieGenres.Genre");
+      }
+
       if (movie == null)
       {
         throw new NotFoundException($"Movie with ID: {id} not found.");
@@ -58,7 +78,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       foreach (var genreId in movieDto.GenreIds)
       {
-        if(genreId > 0)
+        if (genreId > 0)
         {
           movie.MovieGenres.Add(new MovieGenre { GenreId = genreId });
         }
@@ -103,7 +123,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id);
-      if(movie == null)
+      if (movie == null)
       {
         throw new NotFoundException($"Movie with ID: {id} not found.");
       }

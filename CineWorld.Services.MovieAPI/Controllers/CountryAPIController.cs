@@ -4,8 +4,10 @@ using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -17,12 +19,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
+    private readonly IUtil _util;
 
-    public CountryAPIController(IUnitOfWork unitOfWork, IMapper mapper)
+    public CountryAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
+      _util = util;
     }
 
     [HttpGet]
@@ -57,6 +61,9 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Country with ID: {id} not found.");
       }
 
+      // Remove movie with status = false
+      _util.FilterMoviesByUserRole(country);
+      
       _response.Result = _mapper.Map<CountryMovieDto>(country);
       return Ok(_response);
     }

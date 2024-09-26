@@ -23,29 +23,26 @@ namespace CineWorld.Services.MovieAPI.Repositories
       await dbSet.AddAsync(entity);
     }
 
-    public virtual async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
+    public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
     {
-      IQueryable<T> query;
-      if (tracked)
+      IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
+
+      if (filter != null)
       {
-        query = dbSet;
-      }
-      else
-      {
-        query = dbSet.AsNoTracking();
+        query = query.Where(filter);
       }
 
-      query = query.Where(filter);
       if (!string.IsNullOrEmpty(includeProperties))
       {
         foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
         {
-          query = query.Include(includeProp);
+            query = query.Include(includeProp);
         }
       }
 
       return await query.FirstOrDefaultAsync();
     }
+
 
     public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
     {

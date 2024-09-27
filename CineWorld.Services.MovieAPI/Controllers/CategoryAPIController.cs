@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
@@ -54,12 +55,24 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _response.Result = _mapper.Map<CategoryDto>(category);
       return Ok(_response);
     }
+    [HttpGet]
+    [Route("{slug}")]
+    public async Task<ActionResult<ResponseDto>> Get(string slug)
+    { 
+      var category = await _unitOfWork.Category.GetAsync(c => c.Slug == slug);
+      if (category == null)
+      {
+        throw new NotFoundException($"Category with Slug: {slug} not found.");
+      }
+
+      _response.Result = _mapper.Map<CategoryDto>(category);
+      return Ok(_response);
+    }
 
     [HttpGet]
     [Route("{id:int}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
     {
-
 
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id, includeProperties: "Movies");
       if (category == null)
@@ -74,25 +87,85 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    [HttpGet]
+    [Route("{slug}/movies")]
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
+    {
+
+      var category = await _unitOfWork.Category.GetAsync(c => c.Slug == slug, includeProperties: "Movies");
+      if (category == null)
+      {
+        throw new NotFoundException($"Category with Slug: {slug} not found.");
+      }
+
+      // Remove movie with status = false
+      _util.FilterMoviesByUserRole(category);
+
+      _response.Result = _mapper.Map<CategoryMovieDto>(category);
+      return Ok(_response);
+    }
 
 
     [HttpPost]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CategoryDto categoryDto)
     {
+
       Category category = _mapper.Map<Category>(categoryDto);
-      await _unitOfWork.Category.AddAsync(category);
-      await _unitOfWork.SaveAsync();
+      // Generate slug
+      category.Slug = SlugGenerator.GenerateSlug(category.Name);
+
+      try
+      {
+        await _unitOfWork.Category.AddAsync(category);
+        await _unitOfWork.SaveAsync();
+        
+      }
+      catch (DbUpdateException ex) 
+      {
+        if (_util.IsUniqueConstraintViolation(ex))
+        {
+          category.Slug = SlugGenerator.CreateUniqueSlugAsync(category.Name);
+          await _unitOfWork.Category.AddAsync(category);
+          await _unitOfWork.SaveAsync();
+        }
+      }
+  
+
       _response.Result = _mapper.Map<CategoryDto>(category);
 
       return Created(string.Empty, _response);
     }
+   
+
 
     [HttpPut]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CategoryDto categoryDto)
     {
       Category category = _mapper.Map<Category>(categoryDto);
-      await _unitOfWork.Category.UpdateAsync(category);
-      await _unitOfWork.SaveAsync();
+
+      Category cateFromDb = await _unitOfWork.Category.GetAsync(c=> c.CategoryId ==  categoryDto.CategoryId);
+      // Generate slug
+      if(cateFromDb.Name != category.Name)
+      {
+        category.Slug = SlugGenerator.GenerateSlug(category.Name);
+      }
+
+      try
+      {
+        await _unitOfWork.Category.UpdateAsync(category);
+        await _unitOfWork.SaveAsync();
+
+      }
+      catch (DbUpdateException ex)
+      {
+        if (_util.IsUniqueConstraintViolation(ex))
+        {
+          category.Slug = SlugGenerator.CreateUniqueSlugAsync(category.Name);
+          await _unitOfWork.Category.UpdateAsync(category);
+          await _unitOfWork.SaveAsync();
+        }
+      }
+
 
       _response.Result = _mapper.Map<CategoryDto>(category);
 

@@ -1,6 +1,6 @@
 ﻿namespace CineWorld.Services.AuthAPI.Utilities
 {
-  public class SD
+  public static class SD
   {
 
     public const string RoleAdmin = "ADMIN";

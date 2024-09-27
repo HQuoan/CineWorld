@@ -23,9 +23,11 @@ namespace CineWorld.Services.MovieAPI.Models
     [Required]
     public string Name { get; set; }
     public string? EnglishName { get; set; }
-    public string? Slug { get; set; }
-    public int? EpisodeCount { get; set; }
-    public int? Duration { get; set; }
+    [Required]
+    public string Slug { get; set; }
+    public int? EpisodeCurrent { get; set; }
+    public int? EpisodeTotal { get; set; }
+    public string? Duration { get; set; }
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public string? Trailer { get; set; }

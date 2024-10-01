@@ -59,6 +59,7 @@ namespace CineWorld.Services.MovieAPI
            Year = mg.Movie.Year,
            IsHot = mg.Movie.IsHot,
            Status = mg.Movie.Status,
+           CreatedDate = mg.Movie.CreatedDate,
          }).ToList()));
 
 

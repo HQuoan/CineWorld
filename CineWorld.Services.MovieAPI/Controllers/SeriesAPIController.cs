@@ -3,6 +3,7 @@ using CineWorld.Services.CouponAPI.Attributes;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
+using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +33,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get()
     {
-      IEnumerable<Series> series = await _unitOfWork.Series.GetAllAsync();
+      IEnumerable<Series> series = await _unitOfWork.Series.GetAllAsync(new QueryParameters<Series>());
       _response.Result = _mapper.Map<IEnumerable<SeriesDto>>(series);
 
       return Ok(_response);

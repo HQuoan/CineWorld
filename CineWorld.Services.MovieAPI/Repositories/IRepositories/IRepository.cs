@@ -7,7 +7,8 @@ namespace CineWorld.Services.MovieAPI.Repositories.IRepositories
   public interface IRepository<T> where T : class
   {
     // Ex: T - Category
-    Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
+    Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters);
+    Task<int> CountAsync(List<Expression<Func<T, bool>>>? filters = null);
     Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false);
     Task AddAsync(T entity);
     Task UpdateAsync(T entity);

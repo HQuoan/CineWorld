@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 
-namespace CineWorld.Services.MovieAPI.Models.Dtos
+namespace CineWorld.Services.EpisodeAPI.Models.Dtos
 {
   public class MovieDto
   {
@@ -27,7 +27,6 @@ namespace CineWorld.Services.MovieAPI.Models.Dtos
     public string? Year { get; set; }
     public bool? IsHot { get; set; }
     public bool? Status { get; set; } = true;
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
 
     public List<int> GenreIds { get; set; } = new List<int>();
 

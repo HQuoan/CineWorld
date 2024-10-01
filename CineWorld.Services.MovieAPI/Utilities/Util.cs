@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Utilities
 {
-  public class Util :  IUtil
+  public class Util : IUtil
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
 

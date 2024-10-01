@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CineWorld.Services.CouponAPI.Attributes;
+using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
@@ -22,7 +23,8 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private ResponseDto _response;
     private readonly AppDbContext _db;
     private readonly IUtil _util;
-    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext db, IUtil util)
+
+    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext db, IUtil util )
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
@@ -32,19 +34,25 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] MovieQueryParameters? queryParameters)
     {
       IEnumerable<Movie> movies;
-      if (_util.IsInRoles(new string[] { "ADMIN" }))
-      {
-        movies = await _unitOfWork.Movie.GetAllAsync();
-      }
-      else
-      {
-        movies = await _unitOfWork.Movie.GetAllAsync(c => c.Status == true);
-      }
+      //if (_util.IsInRoles(new string[] { "ADMIN" }))
+      //{
+      //  movies = await _unitOfWork.Movie.GetAllAsync(includeProperties: "Category,Country,Series,MovieGenres.Genre");
+      //}
+      //else
+      //{
+      //  movies = await _unitOfWork.Movie.GetAllAsync(c => c.Status == true, includeProperties: "Category,Country,Series,MovieGenres.Genre");
+      //}
 
-      _response.Result = _mapper.Map<IEnumerable<MovieDto>>(movies);
+      var query = MovieFeatures.Build(queryParameters);
+      query.IncludeProperties = "Category,Country,Series,MovieGenres.Genre";
+      movies = await _unitOfWork.Movie.GetAllAsync(query);
+
+
+
+      _response.Result = _mapper.Map<IEnumerable<MovieDetailsDto>>(movies);
 
       return Ok(_response);
     }

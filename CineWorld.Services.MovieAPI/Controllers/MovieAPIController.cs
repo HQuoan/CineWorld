@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CineWorld.Services.CouponAPI.Attributes;
 using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
@@ -15,7 +14,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/movies")]
   [ApiController]
-  // [ExceptionHandling]
   public class MovieAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
@@ -53,6 +51,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
 
       _response.Result = _mapper.Map<IEnumerable<MovieDetailsDto>>(movies);
+      _response.TotalItems = movies.Count();
 
       return Ok(_response);
     }

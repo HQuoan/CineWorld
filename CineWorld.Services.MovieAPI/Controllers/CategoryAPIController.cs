@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CineWorld.Services.CouponAPI.Attributes;
 using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
@@ -18,7 +17,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
- // [ExceptionHandling]
   //[Authorize]
   public class CategoryAPIController : ControllerBase
   {
@@ -55,8 +53,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         throw new NotFoundException($"Category with ID: {id} not found.");
       }
-
-
 
       _response.Result = _mapper.Map<CategoryDto>(category);
       return Ok(_response);
@@ -105,7 +101,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         throw new NotFoundException($"Category with Slug: {slug} not found.");
       }
-
 
       // Remove movie with status = false
       _util.FilterMoviesByUserRole(category);

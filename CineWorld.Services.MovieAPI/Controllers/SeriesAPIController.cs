@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CineWorld.Services.CouponAPI.Attributes;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
@@ -14,7 +13,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/series")]
   [ApiController]
-  [ExceptionHandling]
   public class SeriesAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;

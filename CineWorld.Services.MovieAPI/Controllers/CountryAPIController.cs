@@ -5,9 +5,10 @@ using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -31,7 +32,8 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get()
     {
-      IEnumerable<Country> countries = await _unitOfWork.Country.GetAllAsync(new QueryParameters<Country>());
+      IEnumerable<Country> countries = await _unitOfWork.Country.GetAllAsync();
+      _response.TotalItems = countries.Count();
       _response.Result = _mapper.Map<IEnumerable<CountryDto>>(countries);
 
       return Ok(_response);
@@ -41,9 +43,23 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
       var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id);
-      if(country == null)
+      if (country == null)
       {
         throw new NotFoundException($"Country with ID: {id} not found.");
+      }
+
+      _response.Result = _mapper.Map<CountryDto>(country);
+      return Ok(_response);
+    }
+
+    [HttpGet]
+    [Route("{slug}")]
+    public async Task<ActionResult<ResponseDto>> Get(string slug)
+    {
+      var country = await _unitOfWork.Country.GetAsync(c => c.Slug == slug);
+      if (country == null)
+      {
+        throw new NotFoundException($"Country with Slug: {slug} not found.");
       }
 
       _response.Result = _mapper.Map<CountryDto>(country);
@@ -54,36 +70,116 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
     {
-      var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id, includeProperties: "Movies");
+
+      var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id);
+
       if (country == null)
       {
         throw new NotFoundException($"Country with ID: {id} not found.");
       }
 
-      // Remove movie with status = false
-      _util.FilterMoviesByUserRole(country);
-      
+      var filters = new List<Expression<Func<Movie, bool>>> { c => c.CountryId == country.CountryId };
+
+      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      {
+        filters.Add(c => c.Status == true);
+      }
+
+      country.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+
+      _response.TotalItems = country.Movies.Count();
+
       _response.Result = _mapper.Map<CountryMovieDto>(country);
+
       return Ok(_response);
     }
 
+    [HttpGet]
+    [Route("{slug}/movies")]
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
+    {
+      var country = await _unitOfWork.Country.GetAsync(c => c.Slug == slug);
+      if (country == null)
+      {
+        throw new NotFoundException($"Country with Slug: {slug} not found.");
+      }
+
+      var filters = new List<Expression<Func<Movie, bool>>>{ c => c.CountryId == country.CountryId };
+
+      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      {
+        filters.Add(c => c.Status == true);
+      }
+
+      country.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+
+      _response.TotalItems = country.Movies.Count();
+
+      _response.Result = _mapper.Map<CountryMovieDto>(country);
+
+      return Ok(_response);
+    }
+
+
     [HttpPost]
+    [Authorize(Roles ="ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CountryDto countryDto)
     {
+
       Country country = _mapper.Map<Country>(countryDto);
-      await _unitOfWork.Country.AddAsync(country);
-      await _unitOfWork.SaveAsync();
+      // Generate slug
+      country.Slug = SlugGenerator.GenerateSlug(country.Name);
+
+      try
+      {
+        await _unitOfWork.Country.AddAsync(country);
+        await _unitOfWork.SaveAsync();
+
+      }
+      catch (DbUpdateException ex)
+      {
+        if (_util.IsUniqueConstraintViolation(ex))
+        {
+          country.Slug = SlugGenerator.CreateUniqueSlugAsync(country.Name);
+          await _unitOfWork.Country.AddAsync(country);
+          await _unitOfWork.SaveAsync();
+        }
+      }
+
       _response.Result = _mapper.Map<CountryDto>(country);
 
       return Created(string.Empty, _response);
     }
 
     [HttpPut]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CountryDto countryDto)
     {
       Country country = _mapper.Map<Country>(countryDto);
-      await _unitOfWork.Country.UpdateAsync(country);
-      await _unitOfWork.SaveAsync();
+
+      Country cateFromDb = await _unitOfWork.Country.GetAsync(c => c.CountryId == countryDto.CountryId);
+      // Generate slug
+      if (cateFromDb.Name != country.Name)
+      {
+        country.Slug = SlugGenerator.GenerateSlug(country.Name);
+      }
+
+      try
+      {
+        await _unitOfWork.Country.UpdateAsync(country);
+        await _unitOfWork.SaveAsync();
+
+      }
+      catch (DbUpdateException ex)
+      {
+        if (_util.IsUniqueConstraintViolation(ex))
+        {
+          country.Slug = SlugGenerator.CreateUniqueSlugAsync(country.Name);
+          await _unitOfWork.Country.UpdateAsync(country);
+          await _unitOfWork.SaveAsync();
+        }
+      }
+
 
       _response.Result = _mapper.Map<CountryDto>(country);
 
@@ -91,10 +187,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id);
-      if(country == null)
+      if (country == null)
       {
         throw new NotFoundException($"Country with ID: {id} not found.");
       }

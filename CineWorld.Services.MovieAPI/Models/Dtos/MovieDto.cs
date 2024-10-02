@@ -27,7 +27,7 @@ namespace CineWorld.Services.MovieAPI.Models.Dtos
     public string? Year { get; set; }
     public bool? IsHot { get; set; }
     public bool? Status { get; set; } = true;
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
+    public DateTime? CreatedDate { get; set; } 
 
     public List<int> GenreIds { get; set; } = new List<int>();
 

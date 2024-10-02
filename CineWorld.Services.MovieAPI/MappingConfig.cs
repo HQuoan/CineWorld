@@ -34,36 +34,15 @@ namespace CineWorld.Services.MovieAPI
         .ForMember(dest => dest.Genres, opt => opt.MapFrom(src => src.MovieGenres.Select(mg => new GenreDto
         {
           GenreId = mg.Genre.GenreId,
-          Name = mg.Genre.Name
+          Name = mg.Genre.Name,
+          Slug = mg.Genre.Slug,
+          Status = mg.Genre.Status
         }).ToList()));
 
 
         config.CreateMap<Genre, GenreDto>().ReverseMap();
         config.CreateMap<Genre, GenreMovieDto>()
          .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => src));
-         //.ForMember(dest => dest.Movies, opt => opt.MapFrom(src => src.MovieGenres.Select(mg => new MovieDto
-         //{
-         //  MovieId = mg.Movie.MovieId,
-         //  CategoryId = mg.Movie.CategoryId,
-         //  CountryId = mg.Movie.CountryId,
-         //  SeriesId = mg.Movie.SeriesId,
-         //  Name = mg.Movie.Name,
-         //  EnglishName = mg.Movie.EnglishName,
-         //  Slug = mg.Movie.Slug,
-         //  EpisodeCurrent = mg.Movie.EpisodeCurrent,
-         //  EpisodeTotal = mg.Movie.EpisodeTotal,
-         //  Duration = mg.Movie.Duration,
-         //  Description = mg.Movie.Description,
-         //  ImageUrl = mg.Movie.ImageUrl,
-         //  Trailer = mg.Movie.Trailer,
-         //  Year = mg.Movie.Year,
-         //  IsHot = mg.Movie.IsHot,
-         //  Status = mg.Movie.Status,
-         //  CreatedDate = mg.Movie.CreatedDate,
-         //})
-         //.ToList()));
-
-
       });
 
       return mappingConfig;

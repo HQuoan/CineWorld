@@ -23,11 +23,17 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
             case nameof(MovieQueryParameters.CategoryId):
               filters.Add(m => m.CategoryId == (int)value);
               break;
+            case nameof(MovieQueryParameters.Category):
+              filters.Add(m => m.Category.Name == (string)value);
+              break;
             case nameof(MovieQueryParameters.CountryId):
               filters.Add(m => m.CountryId == (int)value);
               break;
+            case nameof(MovieQueryParameters.Country):
+              filters.Add(m => m.Country.Name == (string)value);
+              break;
             case nameof(MovieQueryParameters.Name):
-              filters.Add(m => m.Name.Contains((string)value));
+              filters.Add(m => m.Name.Contains((string)value) || (m.EnglishName != null && m.EnglishName.Contains((string)value)));
               break;
             case nameof(MovieQueryParameters.Year):
               filters.Add(m => m.Year == (string)value);
@@ -51,19 +57,36 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     public static Func<IQueryable<Movie>, IOrderedQueryable<Movie>>? Sorting(MovieQueryParameters queryParameters)
     {
       Func<IQueryable<Movie>, IOrderedQueryable<Movie>>? orderByFunc = null;
+
       if (!string.IsNullOrEmpty(queryParameters.OrderBy))
       {
-        orderByFunc = queryParameters.OrderBy switch
+        var isDescending = queryParameters.OrderBy.StartsWith("-");
+        var property = isDescending ? queryParameters.OrderBy.Substring(1) : queryParameters.OrderBy;
+
+        orderByFunc = property.ToLower() switch
         {
-          "Title" => q => q.OrderBy(m => m.Name),
-          "TitleDesc" => q => q.OrderByDescending(m => m.Name),
-          "Year" => q => q.OrderBy(m => m.Year),
-          "YearDesc" => q => q.OrderByDescending(m => m.Year),
-          _ => q => q.OrderBy(m => m.Name) // Mặc định
+          "name" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Name))
+                                  : q => q.OrderBy(m => m.Name),
+          "movieid" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.MovieId))
+                                  : q => q.OrderBy(m => m.MovieId),
+          "year" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Year))
+                                  : q => q.OrderBy(m => m.Year),
+          "category" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Category))
+                                     : q => q.OrderBy(m => m.Category.Name),
+          "country" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Country))
+                                    : q => q.OrderBy(m => m.Country.Name),
+          "isHot" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.IsHot))
+                                  : q => q.OrderBy(m => m.IsHot),
+          "status" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Status))
+                                   : q => q.OrderBy(m => m.Status),
+          _ => q => q.OrderBy(m => m.CreatedDate) // Mặc định
         };
       }
+
       return orderByFunc;
     }
+
+
 
     public static QueryParameters<Movie> Build(MovieQueryParameters queryParameters)
     {

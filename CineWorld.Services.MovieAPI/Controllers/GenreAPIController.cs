@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
@@ -68,27 +69,23 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{id:int}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id, [FromQuery] MovieQueryParameters? queryParameters)
     {
       var genre = await _unitOfWork.Genre.GetAsync(c => c.GenreId == id);
-
       if (genre == null)
       {
         throw new NotFoundException($"Genre with ID: {id} not found.");
       }
 
-      // Tạo bộ lọc để lấy các bộ phim thuộc thể loại này
-      var filters = new List<Expression<Func<Movie, bool>>>
-      {
-          m => m.MovieGenres.Any(mg => mg.GenreId == genre.GenreId)
-      };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(m => m.MovieGenres.Any(mg => mg.GenreId == genre.GenreId));
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(m => m.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      var movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      var movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = movies.Count();
 
@@ -100,30 +97,27 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+   
 
     [HttpGet]
     [Route("{slug}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug, [FromQuery] MovieQueryParameters? queryParameters)
     {
       var genre = await _unitOfWork.Genre.GetAsync(c => c.Slug == slug);
-
       if (genre == null)
       {
         throw new NotFoundException($"Genre with Slug: {slug} not found.");
       }
 
-      // Tạo bộ lọc để lấy các bộ phim thuộc thể loại này
-      var filters = new List<Expression<Func<Movie, bool>>>
-      {
-          m => m.MovieGenres.Any(mg => mg.GenreId == genre.GenreId)
-      };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(m => m.MovieGenres.Any(mg => mg.GenreId == genre.GenreId));
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(m => m.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      var movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      var movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = movies.Count();
 

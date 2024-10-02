@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
@@ -68,27 +69,25 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{id:int}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id, [FromQuery] MovieQueryParameters? queryParameters)
     {
-
       var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id);
-
       if (country == null)
       {
         throw new NotFoundException($"Country with ID: {id} not found.");
       }
 
-      var filters = new List<Expression<Func<Movie, bool>>> { c => c.CountryId == country.CountryId };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(c => c.CountryId == id);
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(c => c.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      country.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      country.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = country.Movies.Count();
-
       _response.Result = _mapper.Map<CountryMovieDto>(country);
 
       return Ok(_response);
@@ -96,7 +95,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{slug}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug, [FromQuery] MovieQueryParameters? queryParameters)
     {
       var country = await _unitOfWork.Country.GetAsync(c => c.Slug == slug);
       if (country == null)
@@ -104,22 +103,21 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Country with Slug: {slug} not found.");
       }
 
-      var filters = new List<Expression<Func<Movie, bool>>>{ c => c.CountryId == country.CountryId };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(c => c.Slug == slug);
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(c => c.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      country.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      country.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = country.Movies.Count();
-
       _response.Result = _mapper.Map<CountryMovieDto>(country);
 
       return Ok(_response);
     }
-
 
     [HttpPost]
     [Authorize(Roles ="ADMIN")]

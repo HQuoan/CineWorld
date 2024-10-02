@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
@@ -72,27 +73,25 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{id:int}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id, [FromQuery] MovieQueryParameters? queryParameters)
     {
-
       var series = await _unitOfWork.Series.GetAsync(c => c.SeriesId == id);
-
       if (series == null)
       {
         throw new NotFoundException($"Series with ID: {id} not found.");
       }
 
-      var filters = new List<Expression<Func<Movie, bool>>> { c => c.SeriesId == series.SeriesId };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(c => c.SeriesId == id);
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(c => c.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      series.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      series.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = series.Movies.Count();
-
       _response.Result = _mapper.Map<SeriesMovieDto>(series);
 
       return Ok(_response);
@@ -100,7 +99,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{slug}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug, [FromQuery] MovieQueryParameters? queryParameters)
     {
       var series = await _unitOfWork.Series.GetAsync(c => c.Slug == slug);
       if (series == null)
@@ -108,23 +107,21 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Series with Slug: {slug} not found.");
       }
 
-      var filters = new List<Expression<Func<Movie, bool>>>{ c => c.SeriesId == series.SeriesId };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(c => c.Slug == slug);
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(c => c.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      series.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      series.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = series.Movies.Count();
-
       _response.Result = _mapper.Map<SeriesMovieDto>(series);
 
       return Ok(_response);
     }
-
-
     [HttpPost]
     [Authorize(Roles ="ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] SeriesDto seriesDto)

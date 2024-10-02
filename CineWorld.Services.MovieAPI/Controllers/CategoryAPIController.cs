@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
@@ -72,27 +73,25 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{id:int}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(int id, [FromQuery] MovieQueryParameters? queryParameters)
     {
-
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);
-
       if (category == null)
       {
         throw new NotFoundException($"Category with ID: {id} not found.");
       }
 
-      var filters = new List<Expression<Func<Movie, bool>>> { c => c.CategoryId == category.CategoryId };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(c => c.CategoryId == id);
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(c => c.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      category.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      category.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = category.Movies.Count();
-
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
 
       return Ok(_response);
@@ -100,7 +99,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpGet]
     [Route("{slug}/movies")]
-    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
+    public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug, [FromQuery] MovieQueryParameters? queryParameters)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.Slug == slug);
       if (category == null)
@@ -108,17 +107,17 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Category with Slug: {slug} not found.");
       }
 
-      var filters = new List<Expression<Func<Movie, bool>>>{ c => c.CategoryId == category.CategoryId };
+      var query = MovieFeatures.Build(queryParameters);
+      query.Filters.Add(c => c.Slug == slug);
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {
-        filters.Add(c => c.Status == true);
+        query.Filters.Add(c => c.Status == true);
       }
 
-      category.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+      category.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.TotalItems = category.Movies.Count();
-
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
 
       return Ok(_response);

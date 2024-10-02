@@ -7,7 +7,9 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     // Filtering
     public string? Genre { get; set; }
     public int? CategoryId { get; set; }
+    public string? Category { get; set; }
     public int? CountryId { get; set; }
+    public string? Country { get; set; }
     public string? Name { get; set; }
     public string? Year { get; set; }
     public bool? IsHot { get; set; }
@@ -16,7 +18,7 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     public string? IncludeProperties {  get; set; }
 
     // Sorting
-    public string? OrderBy { get; set; } = "Name"; // Giá trị mặc định
+    public string? OrderBy { get; set; } = "CreatedDate"; // Giá trị mặc định
 
     // Pagination
     [DefaultValue(1)]

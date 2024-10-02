@@ -11,35 +11,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
-  //[Authorize]
   public class CategoryAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
     private readonly IUtil _util;
-    private readonly AppDbContext _db;
 
-
-    public CategoryAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, AppDbContext db)
+    public CategoryAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
-      _db = db;
     }
 
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get()
     {
-      IEnumerable<Category> categories = await _unitOfWork.Category.GetAllAsync(new QueryParameters<Category>());
+      IEnumerable<Category> categories = await _unitOfWork.Category.GetAllAsync();
+      _response.TotalItems = categories.Count();
       _response.Result = _mapper.Map<IEnumerable<CategoryDto>>(categories);
 
       return Ok(_response);
@@ -57,10 +55,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _response.Result = _mapper.Map<CategoryDto>(category);
       return Ok(_response);
     }
+
     [HttpGet]
     [Route("{slug}")]
     public async Task<ActionResult<ResponseDto>> Get(string slug)
-    { 
+    {
       var category = await _unitOfWork.Category.GetAsync(c => c.Slug == slug);
       if (category == null)
       {
@@ -77,17 +76,25 @@ namespace CineWorld.Services.MovieAPI.Controllers
     {
 
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);
-      //category.Movies = await _unitOfWork.Movie.GetAllAsync(c => c.CategoryId == category.CategoryId);
+
       if (category == null)
       {
         throw new NotFoundException($"Category with ID: {id} not found.");
       }
 
-      // Remove movie with status = false
+      var filters = new List<Expression<Func<Movie, bool>>> { c => c.CategoryId == category.CategoryId };
 
-      _util.FilterMoviesByUserRole(category);
+      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      {
+        filters.Add(c => c.Status == true);
+      }
+
+      category.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+
+      _response.TotalItems = category.Movies.Count();
 
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
+
       return Ok(_response);
     }
 
@@ -96,22 +103,30 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.Slug == slug);
-     // category.Movies = await _unitOfWork.Movie.GetAllAsync(c => c.CategoryId == category.CategoryId);
       if (category == null)
       {
         throw new NotFoundException($"Category with Slug: {slug} not found.");
       }
 
-      // Remove movie with status = false
-      _util.FilterMoviesByUserRole(category);
+      var filters = new List<Expression<Func<Movie, bool>>>{ c => c.CategoryId == category.CategoryId };
+
+      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      {
+        filters.Add(c => c.Status == true);
+      }
+
+      category.Movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie> { Filters = filters });
+
+      _response.TotalItems = category.Movies.Count();
 
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
-     
+
       return Ok(_response);
     }
 
 
     [HttpPost]
+    [Authorize(Roles ="ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CategoryDto categoryDto)
     {
 
@@ -123,9 +138,9 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         await _unitOfWork.Category.AddAsync(category);
         await _unitOfWork.SaveAsync();
-        
+
       }
-      catch (DbUpdateException ex) 
+      catch (DbUpdateException ex)
       {
         if (_util.IsUniqueConstraintViolation(ex))
         {
@@ -134,23 +149,21 @@ namespace CineWorld.Services.MovieAPI.Controllers
           await _unitOfWork.SaveAsync();
         }
       }
-  
 
       _response.Result = _mapper.Map<CategoryDto>(category);
 
       return Created(string.Empty, _response);
     }
-   
-
 
     [HttpPut]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CategoryDto categoryDto)
     {
       Category category = _mapper.Map<Category>(categoryDto);
 
-      Category cateFromDb = await _unitOfWork.Category.GetAsync(c=> c.CategoryId ==  categoryDto.CategoryId);
+      Category cateFromDb = await _unitOfWork.Category.GetAsync(c => c.CategoryId == categoryDto.CategoryId);
       // Generate slug
-      if(cateFromDb.Name != category.Name)
+      if (cateFromDb.Name != category.Name)
       {
         category.Slug = SlugGenerator.GenerateSlug(category.Name);
       }
@@ -178,6 +191,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
+    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);

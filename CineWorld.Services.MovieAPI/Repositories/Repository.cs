@@ -44,9 +44,14 @@ namespace CineWorld.Services.MovieAPI.Repositories
     }
 
 
-    public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters)
+    public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters = null)
     {
       IQueryable<T> query = dbSet;
+
+      if (queryParameters == null)
+      {
+        return await query.ToListAsync();
+      }
 
       // Filtering
       if (queryParameters.Filters != null && queryParameters.Filters.Any())

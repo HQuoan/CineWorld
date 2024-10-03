@@ -17,7 +17,7 @@ namespace CineWorld.Services.MovieAPI.Models
     public int? SeriesId { get; set; }
     [ForeignKey(nameof(SeriesId))]
     public Series? Series { get; set; }
-
+    public IEnumerable<Episode>? Episodes { get; set; }
     public ICollection<MovieGenre> MovieGenres { get; set; } = new List<MovieGenre>();
 
     [Required]

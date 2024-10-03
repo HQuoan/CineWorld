@@ -10,6 +10,7 @@ using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.Controllers
@@ -55,7 +56,8 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
       Movie movie;
-      if (_util.IsInRoles(new string[] { "ADMIN" }))
+      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      if (isAdmin)
       {
         movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series,MovieGenres.Genre");
       }
@@ -69,6 +71,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Movie with ID: {id} not found.");
       }
 
+      var query = new QueryParameters<Episode>();
+      query.Filters.Add(c => c.MovieId == movie.MovieId);
+
+      if (!isAdmin)
+      {
+        query.Filters.Add(c => c.Status == true);
+      }
+
+      movie.Episodes = await _unitOfWork.Episode.GetAllAsync(query);
+
       _response.Result = _mapper.Map<MovieDetailsDto>(movie);
       return Ok(_response);
     }
@@ -78,7 +90,8 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get(string slug)
     {
       Movie movie;
-      if (_util.IsInRoles(new string[] { "ADMIN" }))
+      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      if (isAdmin)
       {
         movie = await _unitOfWork.Movie.GetAsync(c => c.Slug == slug, includeProperties: "Category,Country,Series,MovieGenres.Genre");
       }
@@ -91,6 +104,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         throw new NotFoundException($"Movie with Slug: {slug} not found.");
       }
+
+      var query = new QueryParameters<Episode>();
+      query.Filters.Add(c => c.MovieId == movie.MovieId);
+
+      if (!isAdmin)
+      {
+        query.Filters.Add(c => c.Status == true);
+      }
+
+      movie.Episodes = await _unitOfWork.Episode.GetAllAsync(query);
 
       _response.Result = _mapper.Map<MovieDetailsDto>(movie);
       return Ok(_response);

@@ -14,10 +14,24 @@ namespace CineWorld.Services.MovieAPI.Data
     public DbSet<Series> Series { get; set; }
     public DbSet<Movie> Movies { get; set; }
     public DbSet<Genre> Genres { get; set; }
+    public DbSet<Episode> Episodes { get; set; }
+    public DbSet<Server> Servers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
+
+      // mặc định tạo CreatedDate khi tạo và không update được 
+      modelBuilder.Entity<Episode>()
+           .Property(m => m.CreatedDate)
+           .HasDefaultValueSql("GETDATE()")
+           .ValueGeneratedOnAdd()
+           .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+
+      modelBuilder.Entity<Episode>()
+         .HasIndex(e => new { e.MovieId, e.EpisodeNumber })
+         .IsUnique()
+         .HasName("IX_Movie_EpisodeNumber");
 
       // mặc định tạo CreatedDate khi tạo và không update được 
       modelBuilder.Entity<Movie>()

@@ -5,6 +5,8 @@ using CineWorld.Services.EpisodeAPI.Data;
 using CineWorld.Services.EpisodeAPI.Extensions;
 using CineWorld.Services.EpisodeAPI.Repositories;
 using CineWorld.Services.EpisodeAPI.Repositories.IRepositories;
+using CineWorld.Services.EpisodeAPI.Services;
+using CineWorld.Services.EpisodeAPI.Services.IService;
 using CineWorld.Services.EpisodeAPI.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
@@ -41,7 +43,11 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
 
+builder.Services.AddScoped<IMovieService, MovieService>();
+
+builder.Services.AddHttpClient("Movie", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MovieAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 
 builder.Services.AddControllers();
 

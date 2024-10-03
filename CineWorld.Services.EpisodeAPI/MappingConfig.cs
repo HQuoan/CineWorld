@@ -11,7 +11,11 @@ namespace CineWorld.Services.EpisodeAPI
     {
       var mappingConfig = new MapperConfiguration(config =>
       {
-        config.CreateMap<Episode, EpisodeDto>().ReverseMap();
+        config.CreateMap<Episode, EpisodeDto>();
+        config.CreateMap<EpisodeDto, Episode>()
+        .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+        .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore());
+
         config.CreateMap<Episode, EpisodeDetailsDto>()
        .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src));
 

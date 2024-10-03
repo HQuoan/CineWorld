@@ -11,6 +11,8 @@ namespace CineWorld.Services.MovieAPI.Repositories
     public IGenreRepository Genre { get; private set; }
     public IMovieRepository Movie { get; private set; }
     public ISeriesRepository Series { get; private set; }
+    public IEpisodeRepository Episode { get; private set; }
+    public IServerRepository Server { get; private set; }
 
     public UnitOfWork(AppDbContext db)
     {
@@ -20,6 +22,8 @@ namespace CineWorld.Services.MovieAPI.Repositories
       Genre = new GenreRepository(_db);
       Movie = new MovieRepository(_db);
       Series = new SeriesRepository(_db);
+      Episode = new EpisodeRepository(_db);
+      Server = new ServerRepository(_db);
     }
 
     public async Task SaveAsync()

@@ -7,6 +7,8 @@
     IGenreRepository Genre { get; }
     IMovieRepository Movie { get; }
     ISeriesRepository Series { get; }
+    IEpisodeRepository Episode { get; }
+    IServerRepository Server { get; }
     Task SaveAsync();
   }
 }

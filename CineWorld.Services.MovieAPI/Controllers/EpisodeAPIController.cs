@@ -1,19 +1,13 @@
 ﻿using AutoMapper;
-using CineWorld.Services.EpisodeAPI.Exceptions;
-using CineWorld.Services.EpisodeAPI.Models;
-using CineWorld.Services.EpisodeAPI.Models.Dtos;
-using CineWorld.Services.EpisodeAPI.Repositories.IRepositories;
-using CineWorld.Services.EpisodeAPI.Services.IService;
-using CineWorld.Services.EpisodeAPI.Utilities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using CineWorld.Services.MovieAPI.Exceptions;
+using CineWorld.Services.MovieAPI.Models;
+using CineWorld.Services.MovieAPI.Models.Dtos;
+using CineWorld.Services.MovieAPI.Repositories;
+using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Security.Claims;
 
-namespace CineWorld.Services.EpisodeAPI.Controllers
+namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/episodes")]
   [ApiController]
@@ -24,21 +18,28 @@ namespace CineWorld.Services.EpisodeAPI.Controllers
     private ResponseDto _response;
     private readonly IUtil _util;
 
-    private readonly IMovieService _movieService;
 
-    public EpisodeAPIController(IMapper mapper, IUtil util, IUnitOfWork unitOfWork, IMovieService movieService)
+    public EpisodeAPIController(IMapper mapper, IUtil util, IUnitOfWork unitOfWork)
     {
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
       _unitOfWork = unitOfWork;
-      _movieService = movieService;
     }
 
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get()
     {
-      IEnumerable<Episode> episodes = await _unitOfWork.Episode.GetAllAsync();
+
+      var query = new QueryParameters<Episode>();
+      
+      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      if (!isAdmin)
+      {
+        query.Filters.Add(c => c.Status == true);
+      }
+
+      IEnumerable<Episode> episodes = await _unitOfWork.Episode.GetAllAsync(query);
       _response.TotalItems = episodes.Count();
       _response.Result = _mapper.Map<IEnumerable<EpisodeDto>>(episodes);
 
@@ -48,7 +49,18 @@ namespace CineWorld.Services.EpisodeAPI.Controllers
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
-      var episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id);
+
+      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      Episode episode;
+      if (isAdmin)
+      {
+        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id);
+      }
+      else
+      {
+        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id && c.Status == true);
+      }
+
       if (episode == null)
       {
         throw new NotFoundException($"Episode with ID: {id} not found.");
@@ -67,11 +79,14 @@ namespace CineWorld.Services.EpisodeAPI.Controllers
         return BadRequest(ModelState);
       }
 
-      var movie = await _movieService.GetMovie(episodeDto.MovieId);
-      if(movie == null)
+      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == episodeDto.MovieId, null, true);
+
+      if (movie == null)
       {
         throw new NotFoundException($"Movie with ID: {episodeDto.MovieId} not found.");
       }
+
+      movie.EpisodeTotal++;
 
       Episode episode = _mapper.Map<Episode>(episodeDto);
 
@@ -87,20 +102,31 @@ namespace CineWorld.Services.EpisodeAPI.Controllers
     //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] EpisodeDto episodeDto)
     {
-      Episode episode = _mapper.Map<Episode>(episodeDto);
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(ModelState);
+      }
 
-      Episode cateFromDb = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == episodeDto.EpisodeId);
-      if (cateFromDb == null)
+      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == episodeDto.MovieId);
+
+      if (movie == null)
+      {
+        throw new NotFoundException($"Movie with ID: {episodeDto.MovieId} not found.");
+      }
+
+      Episode episodeFromDb = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == episodeDto.EpisodeId);
+      if (episodeFromDb == null)
       {
         throw new NotFoundException($"Episode with ID: {episodeDto.EpisodeId} not found.");
       }
+      _mapper.Map(episodeDto, episodeFromDb);
 
-      episode.UpdatedDate = DateTime.Now;
+      episodeFromDb.UpdatedDate = DateTime.Now;
 
-      await _unitOfWork.Episode.UpdateAsync(episode);
+      await _unitOfWork.Episode.UpdateAsync(episodeFromDb);
       await _unitOfWork.SaveAsync();
 
-      _response.Result = _mapper.Map<EpisodeDto>(episode);
+      _response.Result = _mapper.Map<EpisodeDto>(episodeFromDb);
 
       return Ok(_response);
     }
@@ -114,6 +140,9 @@ namespace CineWorld.Services.EpisodeAPI.Controllers
       {
         throw new NotFoundException($"Episode with ID: {id} not found.");
       }
+
+      var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == episode.MovieId, null, true);
+      movie.EpisodeTotal--;
 
       await _unitOfWork.Episode.RemoveAsync(episode);
       await _unitOfWork.SaveAsync();

@@ -45,7 +45,8 @@ namespace CineWorld.Services.MovieAPI.Attributes
             break;
           default:
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            response.Message = "Đã xảy ra lỗi không mong muốn.";
+            //response.Message = "Đã xảy ra lỗi không mong muốn.";
+            response.Message = ex.Message;
             break;
         }
 

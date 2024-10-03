@@ -19,6 +19,13 @@ namespace CineWorld.Services.MovieAPI.Data
     {
       base.OnModelCreating(modelBuilder);
 
+      // mặc định tạo CreatedDate khi tạo và không update được 
+      modelBuilder.Entity<Movie>()
+           .Property(m => m.CreatedDate)
+           .HasDefaultValueSql("GETDATE()") 
+           .ValueGeneratedOnAdd()
+           .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+
       // Cấu hình quan hệ 1-nhiều giữa Series và Movie
       modelBuilder.Entity<Movie>()
           .HasOne(m => m.Series) // 1 Movie có thể có 1 Series

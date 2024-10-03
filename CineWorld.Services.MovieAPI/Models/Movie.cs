@@ -34,7 +34,8 @@ namespace CineWorld.Services.MovieAPI.Models
     public string? Year { get; set; }
     public bool IsHot { get; set; }
     public bool Status { get; set; } = true;
-    public DateTime CreatedDate { get; set; } = DateTime.Now;
+    public DateTime CreatedDate { get; set; }
+    public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
   }
 }

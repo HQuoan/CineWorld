@@ -156,6 +156,10 @@ namespace CineWorld.Services.MovieAPI.Controllers
       Country country = _mapper.Map<Country>(countryDto);
 
       Country cateFromDb = await _unitOfWork.Country.GetAsync(c => c.CountryId == countryDto.CountryId);
+      if (cateFromDb == null)
+      {
+        throw new NotFoundException($"Country with ID: {countryDto.CountryId} not found.");
+      }
       // Generate slug
       if (cateFromDb.Name != country.Name)
       {

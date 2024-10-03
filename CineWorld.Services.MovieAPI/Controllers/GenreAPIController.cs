@@ -167,6 +167,10 @@ namespace CineWorld.Services.MovieAPI.Controllers
       Genre genre = _mapper.Map<Genre>(genreDto);
 
       Genre cateFromDb = await _unitOfWork.Genre.GetAsync(c => c.GenreId == genreDto.GenreId);
+      if (cateFromDb == null)
+      {
+        throw new NotFoundException($"Genre with ID: {genreDto.GenreId} not found.");
+      }
       // Generate slug
       if (cateFromDb.Name != genre.Name)
       {

@@ -159,6 +159,10 @@ namespace CineWorld.Services.MovieAPI.Controllers
       Series series = _mapper.Map<Series>(seriesDto);
 
       Series cateFromDb = await _unitOfWork.Series.GetAsync(c => c.SeriesId == seriesDto.SeriesId);
+      if (cateFromDb == null)
+      {
+        throw new NotFoundException($"Series with ID: {seriesDto.SeriesId} not found.");
+      }
       // Generate slug
       if (cateFromDb.Name != series.Name)
       {

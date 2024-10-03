@@ -12,13 +12,16 @@ namespace CineWorld.Services.EpisodeAPI.Models
     public int MovieId { get; set; }
     [NotMapped]
     public MovieDto? Movie { get; set; }
+    [Required]
     public string Name { get; set; }
     [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "EpisodeNumber phải lớn hơn 0.")]
     public int EpisodeNumber { get; set; }
     public bool IsFree { get; set; } = false;
     public bool Status { get; set; } = true;
-    public DateTime CreatedDate { get; set; } = DateTime.Now;
-    public IEnumerable<Server> Servers { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public DateTime UpdatedDate { get; set; } = DateTime.Now;
+    public ICollection<Server> Servers { get; set; }
 
   }
 }

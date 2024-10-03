@@ -98,7 +98,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MovieDto movieDto)
     {
 
@@ -136,10 +136,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-    [Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MovieDto movieDto)
     {
       var movieFromDb = await _unitOfWork.Movie.GetAsync(m => m.MovieId == movieDto.MovieId, includeProperties: "MovieGenres", tracked: true);
+      if (movieFromDb == null)
+      {
+        throw new NotFoundException($"Movie with ID: {movieDto.MovieId} not found.");
+      }
 
       // Xóa các thể loại hiện tại từ cơ sở dữ liệu
       movieFromDb.MovieGenres.Clear();
@@ -161,6 +165,8 @@ namespace CineWorld.Services.MovieAPI.Controllers
           movieFromDb.MovieGenres.Add(new MovieGenre { GenreId = genreId });
         }
       }
+
+      movieFromDb.UpdatedDate = DateTime.Now;
 
       try
       {

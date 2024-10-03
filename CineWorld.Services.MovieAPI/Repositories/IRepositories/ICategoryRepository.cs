@@ -1,5 +1,4 @@
 ﻿using CineWorld.Services.MovieAPI.Models;
-using CineWorld.Services.MovieAPI.Models;
 
 namespace CineWorld.Services.MovieAPI.Repositories.IRepositories
 {

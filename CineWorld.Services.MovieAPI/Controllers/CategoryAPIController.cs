@@ -161,6 +161,10 @@ namespace CineWorld.Services.MovieAPI.Controllers
       Category category = _mapper.Map<Category>(categoryDto);
 
       Category cateFromDb = await _unitOfWork.Category.GetAsync(c => c.CategoryId == categoryDto.CategoryId);
+      if (cateFromDb == null)
+      {
+        throw new NotFoundException($"Category with ID: {categoryDto.CategoryId} not found.");
+      }
       // Generate slug
       if (cateFromDb.Name != category.Name)
       {

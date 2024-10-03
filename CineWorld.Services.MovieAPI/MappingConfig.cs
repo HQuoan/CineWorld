@@ -24,8 +24,10 @@ namespace CineWorld.Services.MovieAPI
        .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src));
 
 
-
-        config.CreateMap<Movie, MovieDto>().ReverseMap();
+        config.CreateMap<Movie, MovieDto>();
+        config.CreateMap<MovieDto, Movie>()
+           .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+           .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore());
         config.CreateMap<Movie, MovieDetailsDto>()
         .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src))
         .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))

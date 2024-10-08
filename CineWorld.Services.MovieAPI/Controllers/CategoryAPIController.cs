@@ -83,6 +83,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.CategoryId == id);
+      
 
       if (!_util.IsInRoles(new string[] { "ADMIN" }))
       {

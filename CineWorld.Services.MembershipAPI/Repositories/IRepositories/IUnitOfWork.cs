@@ -1,4 +1,4 @@
-﻿namespace CineWorld.Services.MovieAPI.Repositories.IRepositories
+﻿namespace CineWorld.Services.MembershipAPI.Repositories.IRepositories
 {
   public interface IUnitOfWork
   {

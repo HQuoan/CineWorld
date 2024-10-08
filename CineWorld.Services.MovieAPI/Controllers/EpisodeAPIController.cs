@@ -121,7 +121,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
       _mapper.Map(episodeDto, episodeFromDb);
 
-      episodeFromDb.UpdatedDate = DateTime.Now;
+      episodeFromDb.UpdatedDate = DateTime.UtcNow;
 
       await _unitOfWork.Episode.UpdateAsync(episodeFromDb);
       await _unitOfWork.SaveAsync();

@@ -1,9 +1,7 @@
-﻿
+﻿using CineWorld.Services.MembershipAPI.Data;
+using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 
-using CineWorld.Services.MembershipAPI.Data;
-using CineWorld.Services.MovieAPI.Repositories.IRepositories;
-
-namespace CineWorld.Services.MovieAPI.Repositories
+namespace CineWorld.Services.MembershipAPI.Repositories
 {
     public class UnitOfWork : IUnitOfWork
   {

@@ -189,7 +189,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
         }
       }
 
-      movieFromDb.UpdatedDate = DateTime.Now;
+      movieFromDb.UpdatedDate = DateTime.UtcNow;
 
       try
       {

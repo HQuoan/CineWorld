@@ -20,7 +20,7 @@ namespace CineWorld.Services.MovieAPI.Models
     public bool IsFree { get; set; } = false;
     public bool Status { get; set; } = true;
     public DateTime CreatedDate { get; set; }
-    public DateTime UpdatedDate { get; set; } = DateTime.Now;
+    public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
     public IEnumerable<Server> Servers { get; set; }
 
   }

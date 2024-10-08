@@ -8,7 +8,7 @@ namespace CineWorld.Services.MembershipAPI.Models
     [Key]
     public int ReceiptId { get; set; }
     [Required]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
     [Required]
     public int PackageId { get; set; }
     [ForeignKey("PackageId")]

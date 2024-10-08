@@ -2,11 +2,8 @@
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
-using CineWorld.Services.MovieAPI.Repositories.IRepositories;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {

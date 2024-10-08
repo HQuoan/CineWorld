@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace CineWorld.Services.MembershipAPI.Models.Dtos
 {
@@ -7,10 +8,11 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
   {
     public int ReceiptId { get; set; }
     [Required]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
     [Required]
     public int PackageId { get; set; }
-    public Package? Package { get; set; }
+    // public Package? Package { get; set; }
+    [DefaultValue(null)]
     public string? CouponCode { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal PackagePrice { get; set; }

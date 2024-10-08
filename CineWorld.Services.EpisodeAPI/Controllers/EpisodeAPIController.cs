@@ -95,7 +95,7 @@ namespace CineWorld.Services.EpisodeAPI.Controllers
         throw new NotFoundException($"Episode with ID: {episodeDto.EpisodeId} not found.");
       }
 
-      episode.UpdatedDate = DateTime.Now;
+      episode.UpdatedDate = DateTime.UtcNow;
 
       await _unitOfWork.Episode.UpdateAsync(episode);
       await _unitOfWork.SaveAsync();

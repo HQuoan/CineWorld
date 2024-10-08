@@ -2,10 +2,10 @@
 using CineWorld.Services.MembershipAPI.Attributes;
 using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Extensions;
+using CineWorld.Services.MembershipAPI.Repositories;
+using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using CineWorld.Services.MembershipAPI.Utilities;
 using CineWorld.Services.MovieAPI;
-using CineWorld.Services.MovieAPI.Repositories;
-using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;

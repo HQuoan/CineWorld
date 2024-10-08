@@ -27,7 +27,7 @@ namespace CineWorld.Services.MovieAPI
         config.CreateMap<EpisodeDto, Episode>();
 
         config.CreateMap<Episode, EpisodeDetailsDto>()
-       .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src));
+       .ForMember(dest => dest.Episode, opt => opt.MapFrom(src => src));
 
         config.CreateMap<Server, ServerDto>().ReverseMap();
 

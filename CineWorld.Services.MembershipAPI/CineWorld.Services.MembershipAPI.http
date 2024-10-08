@@ -1,0 +1,6 @@
+@CineWorld.Services.MembershipAPI_HostAddress = http://localhost:5265
+
+GET {{CineWorld.Services.MembershipAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

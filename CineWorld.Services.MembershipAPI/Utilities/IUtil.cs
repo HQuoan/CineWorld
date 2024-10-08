@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace CineWorld.Services.MovieAPI.Utilities
+namespace CineWorld.Services.MembershipAPI.Utilities
 {
   public interface IUtil
   {

@@ -1,9 +1,8 @@
-﻿using CineWorld.Services.MovieAPI.Models;
-using CineWorld.Services.MovieAPI.Models.Dtos;
+﻿
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace CineWorld.Services.MovieAPI.Utilities
+namespace CineWorld.Services.MembershipAPI.Utilities
 {
   public class Util : IUtil
   {

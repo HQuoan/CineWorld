@@ -54,7 +54,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       Episode episode;
       if (isAdmin)
       {
-        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id);
+        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id, includeProperties: "Servers");
       }
       else
       {
@@ -66,7 +66,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
         throw new NotFoundException($"Episode with ID: {id} not found.");
       }
 
-      _response.Result = _mapper.Map<EpisodeDto>(episode);
+      _response.Result = _mapper.Map<EpisodeDetailsDto>(episode);
       return Ok(_response);
     }
 

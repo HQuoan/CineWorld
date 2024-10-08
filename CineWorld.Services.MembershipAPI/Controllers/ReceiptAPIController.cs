@@ -8,10 +8,8 @@ using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using CineWorld.Services.MembershipAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stripe;
 using Stripe.Checkout;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Policy;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
@@ -95,9 +93,27 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ReceiptDto receiptDto)
     {
+      Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receiptDto.PackageId);
+      if (package == null)
+      {
+        throw new NotFoundException($"Package with ID: {receiptDto.PackageId} not found.");
+      }
+
+      Coupon coupon = null;
+      if (string.IsNullOrEmpty(receiptDto.CouponCode))
+      {
+         coupon = await _unitOfWork.Coupon.GetAsync(c => c.CouponCode == receiptDto.CouponCode);
+        // ở đây mới chỉ check là coupon có tồn tại hay không, chưa check ngày, số lần dùng 
+        if (coupon == null)
+        {
+          throw new NotFoundException("Coupon is invalid");
+        }
+      }
 
       Receipt receipt = _mapper.Map<Receipt>(receiptDto);
+      receipt.PackagePrice = package.Price;
       receipt.Status = SD.Status_Pending;
+      receipt.DiscountAmount = coupon != null ? coupon.DiscountAmount : 0;
 
       await _unitOfWork.Receipt.AddAsync(receipt);
       await _unitOfWork.SaveAsync();
@@ -141,17 +157,17 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       options.LineItems.Add(sessionLineItem);
 
-      //if (!string.IsNullOrEmpty(stripeRequestDto.Receipt.CouponCode))
-      //{
-      //  var discountsObj = new List<SessionDiscountOptions>
-      //  {
-      //      new SessionDiscountOptions
-      //      {
-      //          Coupon = stripeRequestDto.Receipt.CouponCode
-      //      }
-      //  };
-      //  options.Discounts = discountsObj;
-      //}
+      if (!string.IsNullOrEmpty(stripeRequestDto.Receipt.CouponCode))
+      {
+        var discountsObj = new List<SessionDiscountOptions>
+        {
+            new SessionDiscountOptions
+            {
+                Coupon = stripeRequestDto.Receipt.CouponCode
+            }
+        };
+        options.Discounts = discountsObj;
+      }
 
       var service = new SessionService();
       Session session = await service.CreateAsync(options);
@@ -177,8 +193,8 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       var service = new SessionService();
       Session session = service.Get(receipt.StripeSessionId);
 
-      var paymentIntentService = new PaymentIntentService();
-      PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+      var paymentIntentService = new Stripe.PaymentIntentService();
+      Stripe.PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
 
       if (paymentIntent.Status == "succeeded")
       {

@@ -18,6 +18,10 @@ namespace CineWorld.Services.MembershipAPI.Data
     {
       base.OnModelCreating(modelBuilder);
 
+      modelBuilder.Entity<Coupon>()
+          .HasIndex(c => c.CouponCode)
+          .IsUnique();
+
       // mặc định tạo CreatedDate khi tạo và không update được 
       modelBuilder.Entity<Package>()
            .Property(m => m.CreatedDate)

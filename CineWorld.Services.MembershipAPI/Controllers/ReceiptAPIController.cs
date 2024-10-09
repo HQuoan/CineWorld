@@ -112,6 +112,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       Receipt receipt = _mapper.Map<Receipt>(receiptDto);
       receipt.PackagePrice = package.Price;
+      receipt.TermInMonths = package.TermInMonths;
       receipt.Status = SD.Status_Pending;
       receipt.DiscountAmount = coupon != null ? coupon.DiscountAmount : 0;
 

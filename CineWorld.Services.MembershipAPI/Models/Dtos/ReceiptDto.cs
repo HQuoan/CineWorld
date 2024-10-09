@@ -16,6 +16,7 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     public string? CouponCode { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal PackagePrice { get; set; }
+    public int TermInMonths { get; set; }
     [NotMapped]
     public decimal TotalAmount => PackagePrice - DiscountAmount;
     public DateTime CreatedDate { get; set; }

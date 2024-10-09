@@ -2,7 +2,9 @@
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
+using CineWorld.Services.AuthAPI.Utilities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CineWorld.Services.AuthAPI.Services
 {
@@ -24,7 +26,7 @@ namespace CineWorld.Services.AuthAPI.Services
     {
       var user = _db.ApplicationUsers.FirstOrDefault(c => c.Email.ToLower() == email.ToLower());
 
-      if(user != null)
+      if (user != null)
       {
         if (!_roleManager.RoleExistsAsync(roleName).GetAwaiter().GetResult())
         {
@@ -70,7 +72,7 @@ namespace CineWorld.Services.AuthAPI.Services
       return loginResponseDto;
     }
 
-    public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
+    public async Task<UserDto> Register(RegistrationRequestDto registrationRequestDto)
     {
       ApplicationUser user = new()
       {
@@ -80,6 +82,7 @@ namespace CineWorld.Services.AuthAPI.Services
         Name = registrationRequestDto.Name,
         Gender = registrationRequestDto.Gender,
         DateOfBirth = registrationRequestDto.DateOfBirth,
+        MembershipEndDate = DateTime.UtcNow
       };
 
       try
@@ -87,27 +90,42 @@ namespace CineWorld.Services.AuthAPI.Services
         var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
         if (result.Succeeded)
         {
-          var userToReturn = _db.ApplicationUsers.First(c => c.UserName == registrationRequestDto.Email);
+          // Gán role mặc định là CUSTOMER
+          await _userManager.AddToRoleAsync(user, SD.RoleCustomer);
+
+          var userToReturn = await _db.ApplicationUsers
+                                      .FirstOrDefaultAsync(c => c.UserName == registrationRequestDto.Email);
+
+          if (userToReturn == null)
+          {
+            throw new Exception("User not found after creation.");
+          }
 
           UserDto userDto = new()
           {
-            Email = userToReturn.Email,
             ID = userToReturn.Id,
+            Email = userToReturn.Email,
             Name = userToReturn.Name,
+            Gender = userToReturn.Gender,
+            DateOfBirth = userToReturn.DateOfBirth,
+            MembershipEndDate = userToReturn.MembershipEndDate,
+            Role = SD.RoleCustomer
           };
 
-          return "";
+          return userDto;
         }
         else
         {
-          return result.Errors.FirstOrDefault().Description;
+          // Thu thập các lỗi từ IdentityResult và ném ra ngoại lệ
+          var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+          throw new ApplicationException($"Registration failed: {errors}");
         }
-      }catch(Exception ex)
-      {
-
       }
-
-      return "Error Encounterd";
+      catch (Exception ex)
+      {
+        throw new Exception($"An error occurred during registration. {ex.Message}");
+      }
     }
+
   }
 }

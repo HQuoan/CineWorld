@@ -5,6 +5,7 @@
     ICouponRepository Coupon { get; }
     IPackageRepository Package { get; }
     IReceiptRepository Receipt { get; }
+    IMemberShipRepository MemberShip { get; }
     Task SaveAsync();
   }
 }

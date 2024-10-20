@@ -8,13 +8,16 @@ namespace CineWorld.Services.AuthAPI.Models
   public class ApplicationUser : IdentityUser
   {
     [Required]
-    public string Name { get; set; }
+    [EmailAddress]
+    public override string Email { get; set; }
+    [Required]
+    public override string UserName { get; set; }
+    public string? Avatar { get; set; }
     [Required]
     [RegularExpression("^(Male|Female|Other)$", ErrorMessage = "Gender must be Male, Female, or Other.")]
     public string Gender { get; set; }
     [Required]
     public DateTime DateOfBirth { get; set; }
-    public DateTime? MembershipEndDate { get; set; }
     [NotMapped]
     public string? Role { get; set; }
   }

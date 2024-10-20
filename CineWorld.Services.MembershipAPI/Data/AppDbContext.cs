@@ -12,7 +12,8 @@ namespace CineWorld.Services.MembershipAPI.Data
     public DbSet<Package> Packages { get; set; }
     public DbSet<Coupon> Coupons { get; set; }
     public DbSet<Receipt> Receipts { get; set; }
-  
+    public DbSet<MemberShip> MemberShips { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

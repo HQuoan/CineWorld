@@ -9,6 +9,7 @@ namespace CineWorld.Services.MembershipAPI.Repositories
     public ICouponRepository Coupon { get; private set; }
     public IPackageRepository Package { get; private set; }
     public IReceiptRepository Receipt { get; private set; }
+    public IMemberShipRepository MemberShip { get; private set; }
 
 
     public UnitOfWork(AppDbContext db)
@@ -17,6 +18,7 @@ namespace CineWorld.Services.MembershipAPI.Repositories
       Coupon = new CouponRepository(_db);
       Package = new PackageRepository(_db);
       Receipt = new ReceiptRepository(_db);
+      MemberShip = new MemberShipRepository(_db);
     }
 
     public async Task SaveAsync()

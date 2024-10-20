@@ -14,6 +14,7 @@ namespace CineWorld.Services.MovieAPI
         config.CreateMap<Package, PackageDto>().ReverseMap();
         config.CreateMap<Receipt, ReceiptDto>().ReverseMap();
 
+        config.CreateMap<MemberShip, MemberShipDto>().ReverseMap();
       });
 
       return mappingConfig;

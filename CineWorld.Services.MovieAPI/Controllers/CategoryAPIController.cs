@@ -19,6 +19,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
+  [Authorize]
   public class CategoryAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;

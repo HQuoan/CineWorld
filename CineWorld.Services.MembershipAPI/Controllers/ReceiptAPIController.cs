@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography.Xml;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
@@ -71,9 +73,9 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     [Authorize]
     public async Task<ActionResult<ResponseDto>> GetOrdersByMe()
     {
-      string userId = User.Claims.Where(c => c.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+      string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-      if(userId == null)
+      if (userId == null)
       {
         throw new NotFoundException($"User with ID: {userId} not found.");
       }
@@ -100,7 +102,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       }
 
       Coupon coupon = null;
-      if (string.IsNullOrEmpty(receiptDto.CouponCode))
+      if (!string.IsNullOrEmpty(receiptDto.CouponCode))
       {
          coupon = await _unitOfWork.Coupon.GetAsync(c => c.CouponCode == receiptDto.CouponCode);
         // ở đây mới chỉ check là coupon có tồn tại hay không, chưa check ngày, số lần dùng 
@@ -109,6 +111,11 @@ namespace CineWorld.Services.MembershipAPI.Controllers
           throw new NotFoundException("Coupon is invalid");
         }
       }
+
+      //if (!User.IsInRole("ADMIN"))
+      //{
+      //  receiptDto.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+      //}
 
       Receipt receipt = _mapper.Map<Receipt>(receiptDto);
       receipt.PackagePrice = package.Price;
@@ -189,7 +196,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     [HttpPost("ValidateStripeSession")]
     public async Task<ActionResult<ResponseDto>> ValidateStripeSession([FromBody] int receiptId)
     {
-      Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == receiptId, tracked: true);
+      Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == receiptId);
 
       var service = new SessionService();
       Session session = service.Get(receipt.StripeSessionId);
@@ -199,16 +206,74 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       if (paymentIntent.Status == "succeeded")
       {
-        // then payment was successful
+        // Payment successful
         receipt.PaymentIntentId = paymentIntent.Id;
         receipt.Status = SD.Status_Approved;
-        await _unitOfWork.SaveAsync();
-      }
 
-      _response.Result = _mapper.Map<ReceiptDto>(receipt);
+        await _unitOfWork.Receipt.UpdateAsync(receipt);
+        await _unitOfWork.SaveAsync();
+
+        // Create or update Membership
+        MemberShip membershipFromDb = await _unitOfWork.MemberShip.GetAsync(c => c.UserId == receipt.UserId);
+        MemberShip membershipToReturn;
+
+        if (membershipFromDb == null)
+        {
+          // Create new membership
+          var newMemberShip = new MemberShip
+          {
+            UserId = receipt.UserId,
+            UserEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value,
+            FirstSubscriptionDate = DateTime.UtcNow,
+            RenewalStartDate = DateTime.UtcNow,
+            LastUpdatedDate = DateTime.UtcNow,
+            ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths),
+          };
+
+          await _unitOfWork.MemberShip.AddAsync(newMemberShip);
+          membershipToReturn = newMemberShip; // Assign for return
+        }
+        else
+        {
+          // Update existing membership
+          if (membershipFromDb.ExpirationDate > DateTime.UtcNow)
+          {
+            // Membership still active
+            membershipFromDb.ExpirationDate = membershipFromDb.ExpirationDate.AddMonths(receipt.TermInMonths);
+          }
+          else
+          {
+            // Membership expired
+            membershipFromDb.ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths);
+            membershipFromDb.RenewalStartDate = DateTime.UtcNow;
+          }
+          membershipFromDb.LastUpdatedDate = DateTime.UtcNow;
+
+          await _unitOfWork.MemberShip.UpdateAsync(membershipFromDb);
+          membershipToReturn = membershipFromDb; // Assign for return
+        }
+
+        await _unitOfWork.SaveAsync();
+
+        // Tạo một object ẩn danh chứa cả receipt và membership
+        var result = new
+        {
+          Receipt = _mapper.Map<ReceiptDto>(receipt),
+          Membership = _mapper.Map<MemberShipDto>(membershipToReturn)
+        };
+
+        _response.Result = result; // Gán object ẩn danh cho Result
+      }
+      else
+      {
+        // Nếu thanh toán không thành công
+        _response.IsSuccess = false;
+        _response.Message = "Payment failed. Please try again.";
+      }
 
       return Ok(_response);
     }
+
 
     [HttpDelete]
    // [Authorize]
@@ -220,8 +285,8 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         throw new NotFoundException($"Receipt with ID: {id} not found.");
       }
 
-      string? userId = User.Claims.Where(c => c.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
-      if(User.IsInRole("ADMIN") || (userId == receipt.UserId && receipt.Status == SD.Status_Pending))
+      string? userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+      if (User.IsInRole("ADMIN") || (userId == receipt.UserId && receipt.Status == SD.Status_Pending))
       {
         await _unitOfWork.Receipt.RemoveAsync(receipt);
         await _unitOfWork.SaveAsync();

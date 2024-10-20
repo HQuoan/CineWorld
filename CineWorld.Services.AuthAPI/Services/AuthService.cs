@@ -43,7 +43,7 @@ namespace CineWorld.Services.AuthAPI.Services
 
     public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
     {
-      var user = _db.ApplicationUsers.FirstOrDefault(c => c.UserName.ToLower() == loginRequestDto.UserName.ToLower());
+      var user = _db.ApplicationUsers.FirstOrDefault(c => c.Email.ToLower() == loginRequestDto.Email.ToLower());
 
       bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
 
@@ -58,9 +58,12 @@ namespace CineWorld.Services.AuthAPI.Services
 
       UserDto userDto = new()
       {
+        Id = user.Id,
         Email = user.Email,
-        ID = user.Id,
-        Name = user.Name,
+        UserName = user.UserName,
+        Gender = user.Gender,
+        DateOfBirth = user.DateOfBirth,
+        Role = string.Join(", ", roles),
       };
 
       LoginResponseDto loginResponseDto = new LoginResponseDto()
@@ -76,13 +79,11 @@ namespace CineWorld.Services.AuthAPI.Services
     {
       ApplicationUser user = new()
       {
-        UserName = registrationRequestDto.Email,
+        UserName = registrationRequestDto.UserName,
         Email = registrationRequestDto.Email,
         NormalizedEmail = registrationRequestDto.Email.ToUpper(),
-        Name = registrationRequestDto.Name,
         Gender = registrationRequestDto.Gender,
         DateOfBirth = registrationRequestDto.DateOfBirth,
-        MembershipEndDate = DateTime.UtcNow
       };
 
       try
@@ -94,7 +95,7 @@ namespace CineWorld.Services.AuthAPI.Services
           await _userManager.AddToRoleAsync(user, SD.RoleCustomer);
 
           var userToReturn = await _db.ApplicationUsers
-                                      .FirstOrDefaultAsync(c => c.UserName == registrationRequestDto.Email);
+                                      .FirstOrDefaultAsync(c => c.Email == registrationRequestDto.Email);
 
           if (userToReturn == null)
           {
@@ -103,12 +104,11 @@ namespace CineWorld.Services.AuthAPI.Services
 
           UserDto userDto = new()
           {
-            ID = userToReturn.Id,
+            Id = userToReturn.Id,
             Email = userToReturn.Email,
-            Name = userToReturn.Name,
+            UserName = userToReturn.UserName,
             Gender = userToReturn.Gender,
             DateOfBirth = userToReturn.DateOfBirth,
-            MembershipEndDate = userToReturn.MembershipEndDate,
             Role = SD.RoleCustomer
           };
 

@@ -33,10 +33,10 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
               filters.Add(m => m.Country.Name == (string)value);
               break;
             case nameof(MovieQueryParameters.Name):
-              filters.Add(m => m.Name.Contains((string)value) || (m.EnglishName != null && m.EnglishName.Contains((string)value)));
+              filters.Add(m => m.Name.Contains((string)value) || (m.OriginName != null && m.OriginName.Contains((string)value)));
               break;
             case nameof(MovieQueryParameters.Year):
-              filters.Add(m => m.Year == (string)value);
+              filters.Add(m => m.Year == (int)value);
               break;
             case nameof(MovieQueryParameters.IsHot):
               filters.Add(m => m.IsHot == (bool)value);

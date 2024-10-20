@@ -1,0 +1,134 @@
+[
+  {
+    "GenreId": 1,
+    "Name": "Hành Động",
+    "Slug": "hanh-dong",
+    "Status": true
+  },
+  {
+    "GenreId": 2,
+    "Name": "Tình Cảm",
+    "Slug": "tinh-cam",
+    "Status": true
+  },
+  {
+    "GenreId": 3,
+    "Name": "Hài Hước",
+    "Slug": "hai-huoc",
+    "Status": true
+  },
+  {
+    "GenreId": 4,
+    "Name": "Cổ Trang",
+    "Slug": "co-trang",
+    "Status": true
+  },
+  {
+    "GenreId": 5,
+    "Name": "Tâm Lý",
+    "Slug": "tam-ly",
+    "Status": true
+  },
+  {
+    "GenreId": 6,
+    "Name": "Hình Sự",
+    "Slug": "hinh-su",
+    "Status": true
+  },
+  {
+    "GenreId": 7,
+    "Name": "Chiến Tranh",
+    "Slug": "chien-tranh",
+    "Status": true
+  },
+  {
+    "GenreId": 8,
+    "Name": "Thể Thao",
+    "Slug": "the-thao",
+    "Status": true
+  },
+  {
+    "GenreId": 9,
+    "Name": "Võ Thuật",
+    "Slug": "vo-thuat",
+    "Status": true
+  },
+  {
+    "GenreId": 10,
+    "Name": "Viễn Tưởng",
+    "Slug": "vien-tuong",
+    "Status": true
+  },
+  {
+    "GenreId": 11,
+    "Name": "Phiêu Lưu",
+    "Slug": "phieu-luu",
+    "Status": true
+  },
+  {
+    "GenreId": 12,
+    "Name": "Khoa Học",
+    "Slug": "khoa-hoc",
+    "Status": true
+  },
+  {
+    "GenreId": 13,
+    "Name": "Kinh Dị",
+    "Slug": "kinh-di",
+    "Status": true
+  },
+  {
+    "GenreId": 14,
+    "Name": "Âm Nhạc",
+    "Slug": "am-nhac",
+    "Status": true
+  },
+  {
+    "GenreId": 15,
+    "Name": "Thần Thoại",
+    "Slug": "than-thoai",
+    "Status": true
+  },
+  {
+    "GenreId": 16,
+    "Name": "Tài Liệu",
+    "Slug": "tai-lieu",
+    "Status": true
+  },
+  {
+    "GenreId": 17,
+    "Name": "Gia Đình",
+    "Slug": "gia-dinh",
+    "Status": true
+  },
+  {
+    "GenreId": 18,
+    "Name": "Chính kịch",
+    "Slug": "chinh-kich",
+    "Status": true
+  },
+  {
+    "GenreId": 19,
+    "Name": "Bí ẩn",
+    "Slug": "bi-an",
+    "Status": true
+  },
+  {
+    "GenreId": 20,
+    "Name": "Học Đường",
+    "Slug": "hoc-duong",
+    "Status": true
+  },
+  {
+    "GenreId": 21,
+    "Name": "Kinh Điển",
+    "Slug": "kinh-dien",
+    "Status": true
+  },
+  {
+    "GenreId": 22,
+    "Name": "Phim 18+",
+    "Slug": "phim-18",
+    "Status": true
+  }
+]

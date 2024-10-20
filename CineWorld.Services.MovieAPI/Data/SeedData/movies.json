@@ -1,0 +1,42 @@
+[
+  {
+    "MovieId": 1,
+    "CategoryId": 4,
+    "CountryId": 1,
+    "SeriesId": null,
+    "Name": "Vﾄｩnh Sinh (Ph蘯ｧn 3)",
+    "Slug": "vinh-sinh-phan-3",
+    "OriginName": "Immortality (Season 3)",
+    "EpisodeCurrent": 28,
+    "EpisodeTotal": null,
+    "Duration": "25 phﾃｺt/t蘯ｭp",
+    "Description": "Phﾆｰﾆ｡ng Hﾃ�n, thﾃ｢n sinh ra lﾃ� nﾃｴ b盻冂 c盻ｧa m盻冲 ﾄ黛ｺ｡i gia t盻冂. Khﾃｴng ch蘯･p nh蘯ｭn s盻� ph蘯ｭn c盻ｧa mﾃｬnh, h蘯ｯn h盻皇 lﾃｩn vﾃｵ cﾃｴng, sau ﾄ妥ｳ nh盻� m盻冲 ﾄ黛ｺ｡i k盻ｳ ng盻� mﾃ� d蘯･n thﾃ｢n vﾃ�o con ﾄ柁ｰ盻拵g tu tiﾃｪn ﾄ黛ｺｧy tr蘯ｯc tr盻�.",
+    "ImageUrl": "https://img.ophim.live/uploads/movies/vinh-sinh-phan-3-thumb.jpg",
+    "Trailer": "https://www.youtube.com/watch?v=DjylTsonlSw",
+    "Year": 2024,
+    "IsHot": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:42:00.869Z",
+    "UpdatedDate": "2024-10-20T17:42:00.869Z"
+  },
+  {
+    "MovieId": 2,
+    "CategoryId": 1,
+    "CountryId": 5,
+    "SeriesId": null,
+    "Name": "Vﾃｴ ﾄ黛ｻ� (Ph蘯ｧn 2)",
+    "Slug": "vo-do-phan-2",
+    "OriginName": "Insatiable (Season 2)",
+    "EpisodeCurrent": 10,
+    "EpisodeTotal": 10,
+    "Duration": "42phﾃｺt/t蘯ｭp",
+    "Description": "<p>M盻冲 thi蘯ｿu niﾃｪn b盻� b蘯ｯt n蘯｡t tham gia cﾃ｡c cu盻冂 thi s蘯ｯc ﾄ黛ｺｹp nhﾆｰ m盻冲 cﾃ｡ch ﾄ黛ｻ� tr蘯｣ thﾃｹ. Cﾃｴ ﾄ柁ｰ盻｣c m盻冲 hu蘯･n luy盻㌻ viﾃｪn tai ti蘯ｿng giﾃｺp ﾄ黛ｻ｡, ngﾆｰ盻拱 s盻嬶 nh蘯ｭn ra mﾃｬnh ﾄ疎ng sa l蘯ｧy.</p>",
+    "ImageUrl": "https://img.ophim.live/uploads/movies/vo-do-phan-2-thumb.jpg",
+    "Trailer": "",
+    "Year": 2018,
+    "IsHot": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:42:00.869Z",
+    "UpdatedDate": "2024-10-20T17:42:00.869Z"
+  }
+]

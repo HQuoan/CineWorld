@@ -22,7 +22,7 @@ namespace CineWorld.Services.MovieAPI.Models
 
     [Required]
     public string Name { get; set; }
-    public string? EnglishName { get; set; }
+    public string? OriginName { get; set; }
     [Required]
     public string Slug { get; set; }
     public int? EpisodeCurrent { get; set; }
@@ -31,7 +31,7 @@ namespace CineWorld.Services.MovieAPI.Models
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public string? Trailer { get; set; }
-    public string? Year { get; set; }
+    public int? Year { get; set; }
     public bool IsHot { get; set; }
     public bool Status { get; set; } = true;
     public DateTime CreatedDate { get; set; }

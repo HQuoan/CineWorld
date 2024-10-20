@@ -1,0 +1,382 @@
+[
+  {
+    "EpisodeId": 1,
+    "MovieId": 1,
+    "Name": "1",
+    "EpisodeNumber": 1,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 2,
+    "MovieId": 1,
+    "Name": "2",
+    "EpisodeNumber": 2,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 3,
+    "MovieId": 1,
+    "Name": "3",
+    "EpisodeNumber": 3,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 4,
+    "MovieId": 1,
+    "Name": "4",
+    "EpisodeNumber": 4,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 5,
+    "MovieId": 1,
+    "Name": "5",
+    "EpisodeNumber": 5,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 6,
+    "MovieId": 1,
+    "Name": "6",
+    "EpisodeNumber": 6,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 7,
+    "MovieId": 1,
+    "Name": "7",
+    "EpisodeNumber": 7,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 8,
+    "MovieId": 1,
+    "Name": "8",
+    "EpisodeNumber": 8,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 9,
+    "MovieId": 1,
+    "Name": "9",
+    "EpisodeNumber": 9,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 10,
+    "MovieId": 1,
+    "Name": "10",
+    "EpisodeNumber": 10,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 11,
+    "MovieId": 1,
+    "Name": "11",
+    "EpisodeNumber": 11,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 12,
+    "MovieId": 1,
+    "Name": "12",
+    "EpisodeNumber": 12,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 13,
+    "MovieId": 1,
+    "Name": "13",
+    "EpisodeNumber": 13,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 14,
+    "MovieId": 1,
+    "Name": "14",
+    "EpisodeNumber": 14,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 15,
+    "MovieId": 1,
+    "Name": "15",
+    "EpisodeNumber": 15,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 16,
+    "MovieId": 1,
+    "Name": "16",
+    "EpisodeNumber": 16,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 17,
+    "MovieId": 1,
+    "Name": "17",
+    "EpisodeNumber": 17,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 18,
+    "MovieId": 1,
+    "Name": "18",
+    "EpisodeNumber": 18,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 19,
+    "MovieId": 1,
+    "Name": "19",
+    "EpisodeNumber": 19,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 20,
+    "MovieId": 1,
+    "Name": "20",
+    "EpisodeNumber": 20,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 21,
+    "MovieId": 1,
+    "Name": "21",
+    "EpisodeNumber": 21,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 22,
+    "MovieId": 1,
+    "Name": "22",
+    "EpisodeNumber": 22,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 23,
+    "MovieId": 1,
+    "Name": "23",
+    "EpisodeNumber": 23,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 24,
+    "MovieId": 1,
+    "Name": "24",
+    "EpisodeNumber": 24,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 25,
+    "MovieId": 1,
+    "Name": "25",
+    "EpisodeNumber": 25,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 26,
+    "MovieId": 1,
+    "Name": "26",
+    "EpisodeNumber": 26,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 27,
+    "MovieId": 1,
+    "Name": "27",
+    "EpisodeNumber": 27,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 28,
+    "MovieId": 1,
+    "Name": "28",
+    "EpisodeNumber": 28,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 29,
+    "MovieId": 2,
+    "Name": "1",
+    "EpisodeNumber": 1,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 30,
+    "MovieId": 2,
+    "Name": "2",
+    "EpisodeNumber": 2,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 31,
+    "MovieId": 2,
+    "Name": "3",
+    "EpisodeNumber": 3,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 32,
+    "MovieId": 2,
+    "Name": "4",
+    "EpisodeNumber": 4,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 33,
+    "MovieId": 2,
+    "Name": "5",
+    "EpisodeNumber": 5,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 34,
+    "MovieId": 2,
+    "Name": "6",
+    "EpisodeNumber": 6,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 35,
+    "MovieId": 2,
+    "Name": "7",
+    "EpisodeNumber": 7,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 36,
+    "MovieId": 2,
+    "Name": "8",
+    "EpisodeNumber": 8,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 37,
+    "MovieId": 2,
+    "Name": "9",
+    "EpisodeNumber": 9,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  },
+  {
+    "EpisodeId": 38,
+    "MovieId": 2,
+    "Name": "10",
+    "EpisodeNumber": 10,
+    "IsFree": false,
+    "Status": true,
+    "CreatedDate": "2024-10-20T17:06:28.583Z",
+    "UpdatedDate": "2024-10-20T17:06:28.583Z"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "CategoryId": 1,
+    "Name": "Phim Bộ",
+    "Slug": "series",
+    "Status": true
+  },
+  {
+    "CategoryId": 2,
+    "Name": "Phim Lẻ",
+    "Slug": "single",
+    "Status": true
+  },
+  {
+    "CategoryId": 3,
+    "Name": "TV Shows",
+    "Slug": "tvshows",
+    "Status": true
+  },
+  {
+    "CategoryId": 4,
+    "Name": "Hoạt Hình",
+    "Slug": "hoathinh",
+    "Status": true
+  }
+]

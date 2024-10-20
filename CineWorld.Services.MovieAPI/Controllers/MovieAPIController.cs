@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Exceptions;
-using CineWorld.Services.MovieAPI.Migrations;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories;

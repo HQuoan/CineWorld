@@ -1,5 +1,4 @@
-﻿using CineWorld.Services.MovieAPI.Migrations;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CineWorld.Services.MovieAPI.Models

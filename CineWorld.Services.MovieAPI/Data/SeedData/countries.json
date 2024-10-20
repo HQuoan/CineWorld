@@ -1,0 +1,212 @@
+[
+  {
+    "CountryId": 1,
+    "Name": "Trung Quốc",
+    "Slug": "trung-quoc",
+    "Status": true
+  },
+  {
+    "CountryId": 2,
+    "Name": "Hàn Quốc",
+    "Slug": "han-quoc",
+    "Status": true
+  },
+  {
+    "CountryId": 3,
+    "Name": "Nhật Bản",
+    "Slug": "nhat-ban",
+    "Status": true
+  },
+  {
+    "CountryId": 4,
+    "Name": "Thái Lan",
+    "Slug": "thai-lan",
+    "Status": true
+  },
+  {
+    "CountryId": 5,
+    "Name": "Âu Mỹ",
+    "Slug": "au-my",
+    "Status": true
+  },
+  {
+    "CountryId": 6,
+    "Name": "Đài Loan",
+    "Slug": "dai-loan",
+    "Status": true
+  },
+  {
+    "CountryId": 7,
+    "Name": "Hồng Kông",
+    "Slug": "hong-kong",
+    "Status": true
+  },
+  {
+    "CountryId": 8,
+    "Name": "Ấn Độ",
+    "Slug": "an-do",
+    "Status": true
+  },
+  {
+    "CountryId": 9,
+    "Name": "Anh",
+    "Slug": "anh",
+    "Status": true
+  },
+  {
+    "CountryId": 10,
+    "Name": "Pháp",
+    "Slug": "phap",
+    "Status": true
+  },
+  {
+    "CountryId": 11,
+    "Name": "Canada",
+    "Slug": "canada",
+    "Status": true
+  },
+  {
+    "CountryId": 12,
+    "Name": "Quốc Gia Khác",
+    "Slug": "quoc-gia-khac",
+    "Status": true
+  },
+  {
+    "CountryId": 13,
+    "Name": "Đức",
+    "Slug": "duc",
+    "Status": true
+  },
+  {
+    "CountryId": 14,
+    "Name": "Tây Ban Nha",
+    "Slug": "tay-ban-nha",
+    "Status": true
+  },
+  {
+    "CountryId": 15,
+    "Name": "Thổ Nhĩ Kỳ",
+    "Slug": "tho-nhi-ky",
+    "Status": true
+  },
+  {
+    "CountryId": 16,
+    "Name": "Hà Lan",
+    "Slug": "ha-lan",
+    "Status": true
+  },
+  {
+    "CountryId": 17,
+    "Name": "Indonesia",
+    "Slug": "indonesia",
+    "Status": true
+  },
+  {
+    "CountryId": 18,
+    "Name": "Nga",
+    "Slug": "nga",
+    "Status": true
+  },
+  {
+    "CountryId": 19,
+    "Name": "Mexico",
+    "Slug": "mexico",
+    "Status": true
+  },
+  {
+    "CountryId": 20,
+    "Name": "Ba Lan",
+    "Slug": "ba-lan",
+    "Status": true
+  },
+  {
+    "CountryId": 21,
+    "Name": "Úc",
+    "Slug": "uc",
+    "Status": true
+  },
+  {
+    "CountryId": 22,
+    "Name": "Thụy Điển",
+    "Slug": "thuy-dien",
+    "Status": true
+  },
+  {
+    "CountryId": 23,
+    "Name": "Malaysia",
+    "Slug": "malaysia",
+    "Status": true
+  },
+  {
+    "CountryId": 24,
+    "Name": "Brazil",
+    "Slug": "brazil",
+    "Status": true
+  },
+  {
+    "CountryId": 25,
+    "Name": "Philippines",
+    "Slug": "philippines",
+    "Status": true
+  },
+  {
+    "CountryId": 26,
+    "Name": "Bồ Đào Nha",
+    "Slug": "bo-dao-nha",
+    "Status": true
+  },
+  {
+    "CountryId": 27,
+    "Name": "Ý",
+    "Slug": "y",
+    "Status": true
+  },
+  {
+    "CountryId": 28,
+    "Name": "Đan Mạch",
+    "Slug": "dan-mach",
+    "Status": true
+  },
+  {
+    "CountryId": 29,
+    "Name": "UAE",
+    "Slug": "uae",
+    "Status": true
+  },
+  {
+    "CountryId": 30,
+    "Name": "Na Uy",
+    "Slug": "na-uy",
+    "Status": true
+  },
+  {
+    "CountryId": 31,
+    "Name": "Thụy Sĩ",
+    "Slug": "thuy-si",
+    "Status": true
+  },
+  {
+    "CountryId": 32,
+    "Name": "Châu Phi",
+    "Slug": "chau-phi",
+    "Status": true
+  },
+  {
+    "CountryId": 33,
+    "Name": "Nam Phi",
+    "Slug": "nam-phi",
+    "Status": true
+  },
+  {
+    "CountryId": 34,
+    "Name": "Ukraina",
+    "Slug": "ukraina",
+    "Status": true
+  },
+  {
+    "CountryId": 35,
+    "Name": "Ả Rập Xê Út",
+    "Slug": "a-rap-xe-ut",
+    "Status": true
+  }
+]

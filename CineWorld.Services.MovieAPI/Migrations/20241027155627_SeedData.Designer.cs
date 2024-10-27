@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241020174836_SeedDataTets")]
-    partial class SeedDataTets
+    [Migration("20241027155627_SeedData")]
+    partial class SeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -352,6 +352,20 @@ namespace CineWorld.Services.MovieAPI.Migrations
                             CountryId = 35,
                             Name = "Ả Rập Xê Út",
                             Slug = "a-rap-xe-ut",
+                            Status = true
+                        },
+                        new
+                        {
+                            CountryId = 36,
+                            Name = "Singapore",
+                            Slug = "singapore",
+                            Status = true
+                        },
+                        new
+                        {
+                            CountryId = 37,
+                            Name = "Việt Nam",
+                            Slug = "viet-nam",
                             Status = true
                         });
                 });

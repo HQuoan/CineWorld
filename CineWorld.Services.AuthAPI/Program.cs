@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
@@ -59,6 +60,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
 {
+
+  option.SwaggerDoc("v1", new OpenApiInfo
+  {
+    Title = "Car Management API",
+    Version = "v1",
+    Description = "API for managing cars, including features to list, add, and delete cars."
+  });
+
   option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
   {
     Name = "Authorization",
@@ -80,6 +89,11 @@ builder.Services.AddSwaggerGen(option =>
       }, new string[]{ }
     }
   });
+
+  // Đường dẫn đến tệp XML
+  var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+  option.IncludeXmlComments(xmlPath);
 });
 
 builder.AddAppAuthentication();
@@ -89,6 +103,8 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+
+ApplyMigration();
 
 // Seed các role
 using (var scope = app.Services.CreateScope())
@@ -126,7 +142,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-ApplyMigration();
 
 app.Run();
 

@@ -208,5 +208,17 @@
     "Name": "Ả Rập Xê Út",
     "Slug": "a-rap-xe-ut",
     "Status": true
+  },
+  {
+    "CountryId": 36,
+    "Name": "Singapore",
+    "Slug": "singapore",
+    "Status": true
+  },
+  {
+    "CountryId": 37,
+    "Name": "Việt Nam",
+    "Slug": "viet-nam",
+    "Status": true
   }
 ]

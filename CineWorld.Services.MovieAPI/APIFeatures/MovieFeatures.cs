@@ -79,7 +79,7 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
                                   : q => q.OrderBy(m => m.IsHot),
           "status" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Status))
                                    : q => q.OrderBy(m => m.Status),
-          _ => q => q.OrderBy(m => m.CreatedDate) // Mặc định
+          _ => q => q.OrderBy(m => m.MovieId) // Mặc định
         };
       }
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class SeedDataTets : Migration
+    public partial class SeedData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -241,7 +241,9 @@ namespace CineWorld.Services.MovieAPI.Migrations
                     { 32, "Châu Phi", "chau-phi", true },
                     { 33, "Nam Phi", "nam-phi", true },
                     { 34, "Ukraina", "ukraina", true },
-                    { 35, "Ả Rập Xê Út", "a-rap-xe-ut", true }
+                    { 35, "Ả Rập Xê Út", "a-rap-xe-ut", true },
+                    { 36, "Singapore", "singapore", true },
+                    { 37, "Việt Nam", "viet-nam", true }
                 });
 
             migrationBuilder.InsertData(

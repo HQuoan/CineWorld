@@ -40,7 +40,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
 
       var query = MovieFeatures.Build(queryParameters);
-      query.IncludeProperties = "Category,Country,Series,MovieGenres.Genre";
+      //query.IncludeProperties = "Category,Country,Series,MovieGenres.Genre";
 
 
       IEnumerable<Movie> movies = await _unitOfWork.Movie.GetAllAsync(query);

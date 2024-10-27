@@ -1,5 +1,6 @@
 ﻿using CineWorld.Services.MovieAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace CineWorld.Services.MovieAPI.Data
 {
@@ -38,27 +39,27 @@ namespace CineWorld.Services.MovieAPI.Data
 
       modelBuilder.Entity<Genre>().HasData(genres.ToArray());
 
-      // Seed to Movies
-      string moviesJson = System.IO.File.ReadAllText("Data/SeedData/movies.json");
-      List<Movie> movies = System.Text.Json.JsonSerializer.Deserialize<List<Movie>>(moviesJson);
-      modelBuilder.Entity<Movie>().HasData(movies.ToArray());
+      //// Seed to Movies
+      //string moviesJson = System.IO.File.ReadAllText("Data/SeedData/movies.json");
+      //List<Movie> movies = System.Text.Json.JsonSerializer.Deserialize<List<Movie>>(moviesJson);
+      //modelBuilder.Entity<Movie>().HasData(movies.ToArray());
 
-      // Seed to MovieGenres (nhiều-nhiều)
-      string movieGenresJson = System.IO.File.ReadAllText("Data/SeedData/moviegenres.json");
-      List<MovieGenre> movieGenres = System.Text.Json.JsonSerializer.Deserialize<List<MovieGenre>>(movieGenresJson);
+      //// Seed to MovieGenres (nhiều-nhiều)
+      //string movieGenresJson = System.IO.File.ReadAllText("Data/SeedData/moviegenres.json");
+      //List<MovieGenre> movieGenres = System.Text.Json.JsonSerializer.Deserialize<List<MovieGenre>>(movieGenresJson);
 
-      // Chắc chắn rằng MovieId và GenreId được match đúng trong bảng MovieGenre
-      modelBuilder.Entity<MovieGenre>().HasData(movieGenres.ToArray());
+      //// Chắc chắn rằng MovieId và GenreId được match đúng trong bảng MovieGenre
+      //modelBuilder.Entity<MovieGenre>().HasData(movieGenres.ToArray());
 
-      // Seed to Episodes
-      string episodesJson = System.IO.File.ReadAllText("Data/SeedData/episodes.json");
-      List<Episode> episodes = System.Text.Json.JsonSerializer.Deserialize<List<Episode>>(episodesJson);
-      modelBuilder.Entity<Episode>().HasData(episodes.ToArray());
+      //// Seed to Episodes
+      //string episodesJson = System.IO.File.ReadAllText("Data/SeedData/episodes.json");
+      //List<Episode> episodes = System.Text.Json.JsonSerializer.Deserialize<List<Episode>>(episodesJson);
+      //modelBuilder.Entity<Episode>().HasData(episodes.ToArray());
 
-      // Seed to Servers
-      string serversJson = System.IO.File.ReadAllText("Data/SeedData/servers.json");
-      List<Server> servers = System.Text.Json.JsonSerializer.Deserialize<List<Server>>(serversJson);
-      modelBuilder.Entity<Server>().HasData(servers.ToArray());
+      //// Seed to Servers
+      //string serversJson = System.IO.File.ReadAllText("Data/SeedData/servers.json");
+      //List<Server> servers = System.Text.Json.JsonSerializer.Deserialize<List<Server>>(serversJson);
+      //modelBuilder.Entity<Server>().HasData(servers.ToArray());
 
 
       // mặc định tạo CreatedDate khi tạo và không update được 
@@ -105,6 +106,65 @@ namespace CineWorld.Services.MovieAPI.Data
           .IsUnique();
 
     }
+
+    public async Task SeedDataAsync()
+    {
+        await SeedEntityAsync<Movie>("Data/SeedData/movies.json", Movies);
+        await SeedEntityAsync<MovieGenre>("Data/SeedData/moviegenres.json", MovieGenres);
+        await SeedEntityAsync<Episode>("Data/SeedData/episodes.json", Episodes);
+        await SeedEntityAsync<Server>("Data/SeedData/servers.json", Servers);
+      
+    }
+
+    private async Task SeedEntityAsync<TEntity>(string filePath, DbSet<TEntity> dbSet) where TEntity : class
+    {
+      if (File.Exists(filePath))
+      {
+        string json = await File.ReadAllTextAsync(filePath);
+        List<TEntity> entities = JsonSerializer.Deserialize<List<TEntity>>(json);
+        if (entities != null && entities.Count > 0)
+        {
+          // Tạo dictionary để ánh xạ kiểu thực thể với tên bảng
+          var identityInsertTables = new Dictionary<Type, string>
+            {
+                { typeof(Movie), "[dbo].[Movies]" },
+                { typeof(MovieGenre), "[dbo].[MovieGenres]" },
+                { typeof(Episode), "[dbo].[Episodes]" },
+                { typeof(Server), "[dbo].[Servers]" }
+            };
+
+          // Bắt đầu transaction để chèn dữ liệu
+          using (var transaction = await Database.BeginTransactionAsync())
+          {
+            try
+            {
+              // Kiểm tra xem kiểu thực thể có trong dictionary không
+              if (identityInsertTables.TryGetValue(typeof(TEntity), out var tableName))
+              {
+                await Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT {tableName} ON");
+              }
+
+              await dbSet.AddRangeAsync(entities);
+              await SaveChangesAsync();
+
+              if (identityInsertTables.TryGetValue(typeof(TEntity), out var tableToTurnOff))
+              {
+                await Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT {tableToTurnOff} OFF");
+              }
+
+              await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+              await transaction.RollbackAsync();
+              throw new Exception($"Error seeding data: {ex.Message}", ex);
+            }
+          }
+        }
+      }
+    }
+
+
 
   }
 }

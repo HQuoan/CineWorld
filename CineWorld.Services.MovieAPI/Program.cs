@@ -116,5 +116,11 @@ void ApplyMigration()
     {
       _db.Database.Migrate();
     }
+
+    // Kiểm tra xem đã có dữ liệu trong bảng hay chưa
+    if (!_db.Movies.Any()) // Kiểm tra bảng Movies hoặc bảng phù hợp
+    {
+      _db.SeedDataAsync().Wait();
+    }
   }
 }

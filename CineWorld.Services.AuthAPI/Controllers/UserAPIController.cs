@@ -33,9 +33,22 @@ namespace Mango.Services.AuthAPI.Controllers
       _response = new();
       _mapper = mapper;
     }
-
-    [HttpGet]
     //[Authorize(Roles = SD.RoleAdmin)]
+
+    /// <summary>
+    /// Gets all the cars from the database.
+    /// </summary>
+    /// <param name="showDeleted">If true, include deleted records.</param>
+    /// <param name="pageNumber">The page number to retrieve (zero-based).</param>
+    /// <param name="pageSize">The number of records per page.</param>
+    /// <returns>A list of cars.</returns>
+    /// <response code="200">Returns the list of cars.</response>
+    /// <response code="404">No cars found.</response>
+    /// <response code="500">Internal server error.</response>
+    /// 
+
+    ///
+    [HttpGet]
     public async Task<IActionResult> Get()
     {
       var users = await _db.ApplicationUsers.ToListAsync();
@@ -52,17 +65,24 @@ namespace Mango.Services.AuthAPI.Controllers
       return Ok(_response);
     }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <exception cref="NotFoundException"></exception>
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(string id)
     {
 
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-      if (!User.IsInRole(SD.RoleAdmin) || (userId != null && userId != id))
+      if (!User.IsInRole(SD.RoleAdmin) && (userId != null && userId != id))
       {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
+
 
       var user = await _userManager.FindByIdAsync(id);
 
@@ -77,7 +97,7 @@ namespace Mango.Services.AuthAPI.Controllers
 
       _response.Result = _mapper.Map<UserDto>(user);
 
-      return Ok(_response);
+      return Ok(_response);   
     }
 
     [HttpGet("GetByEmail/{email}")]
@@ -85,7 +105,7 @@ namespace Mango.Services.AuthAPI.Controllers
     {
       string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-      if (!User.IsInRole(SD.RoleAdmin) ||(userEmail!= null && userEmail != email))
+      if (!User.IsInRole(SD.RoleAdmin) && (userEmail!= null && userEmail != email))
       {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }

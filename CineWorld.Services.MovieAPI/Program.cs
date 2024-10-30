@@ -42,7 +42,6 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHttpContextAccessor();
 
-
 builder.Services.AddControllers();
 
 
@@ -77,6 +76,7 @@ builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUtil, Util>();
 
 var app = builder.Build();

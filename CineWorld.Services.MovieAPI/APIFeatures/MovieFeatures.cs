@@ -67,6 +67,8 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
         {
           "name" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Name))
                                   : q => q.OrderBy(m => m.Name),
+          "updateddate" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.UpdatedDate))
+         : q => q.OrderBy(m => m.UpdatedDate),
           "movieid" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.MovieId))
                                   : q => q.OrderBy(m => m.MovieId),
           "year" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Year))

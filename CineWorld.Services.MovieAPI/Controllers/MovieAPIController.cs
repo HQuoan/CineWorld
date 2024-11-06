@@ -9,8 +9,6 @@ using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {

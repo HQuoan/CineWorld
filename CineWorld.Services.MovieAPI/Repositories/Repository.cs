@@ -18,12 +18,12 @@ namespace CineWorld.Services.MovieAPI.Repositories
       this.dbSet = _db.Set<T>();
     }
 
-    public async Task AddAsync(T entity)
+    public async Task AddAsync(T entity)  
     {
       await dbSet.AddAsync(entity);
     }
 
-    public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
+    public async Task<T> GetAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, bool tracked = false)
     {
       IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
 
@@ -44,13 +44,13 @@ namespace CineWorld.Services.MovieAPI.Repositories
     }
 
 
-    public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters = null)
+    public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters)
     {
       IQueryable<T> query = dbSet;
 
       if (queryParameters == null)
       {
-        return await query.ToListAsync();
+        queryParameters  = new QueryParameters<T>();
       }
 
       // Filtering
@@ -76,6 +76,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
       {
         query = queryParameters.OrderBy(query);
       }
+      
 
       // Pagination
       if (queryParameters.PageNumber.HasValue && queryParameters.PageSize.HasValue)

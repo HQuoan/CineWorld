@@ -4,6 +4,8 @@ using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Extensions;
 using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
+using CineWorld.Services.MembershipAPI.Services;
+using CineWorld.Services.MembershipAPI.Services.IService;
 using CineWorld.Services.MembershipAPI.Utilities;
 using CineWorld.Services.MovieAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,6 +78,9 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddHttpClient("Email", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:EmailAPI"]));
 
 var app = builder.Build();
 

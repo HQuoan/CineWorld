@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
+﻿using CineWorld.Services.MovieAPI.Models;
+using System.ComponentModel;
 
 namespace CineWorld.Services.MovieAPI.APIFeatures
 {
-  public class MovieQueryParameters
+  public class MovieQueryParameters : BaseQueryParameters
   {
     // Filtering
     public string? Genre { get; set; }
@@ -14,28 +15,7 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     public string? Year { get; set; }
     public bool? IsHot { get; set; }
     public bool? Status { get; set; }
-
-    public string? IncludeProperties {  get; set; }
-
-    // Sorting
-    public string? OrderBy { get; set; } = "CreatedDate"; // Giá trị mặc định
-
-    // Pagination
-    [DefaultValue(1)]
-    private int _pageNumber = 1;
-    public int PageNumber
-    {
-      get => _pageNumber;
-      set => _pageNumber = (value < 1) ? 1 : value;
-    }
-    [DefaultValue(10)]
-    private int _pageSize = 20;
-    private const int MaxPageSize = 100;
-    public int PageSize
-    {
-      get => _pageSize;
-      set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
-    }
+   
   }
 
 }

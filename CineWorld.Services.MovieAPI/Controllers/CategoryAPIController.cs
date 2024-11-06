@@ -1,25 +1,19 @@
 ﻿using AutoMapper;
 using CineWorld.Services.MovieAPI.APIFeatures;
-using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
-using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
-  [Authorize]
+  //[Authorize]
   public class CategoryAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
@@ -91,7 +85,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
         query.Filters.Add(c => c.Status == true);
       }
 
-      category.Movies = await _unitOfWork.Movie.GetAllAsync(query);
+      category.Movies = await _unitOfWork.Movie.GetAllAsync();
 
       _response.TotalItems = category.Movies.Count();
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
@@ -157,7 +151,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-    [Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CategoryDto categoryDto)
     {
       Category category = _mapper.Map<Category>(categoryDto);
@@ -197,7 +191,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
     [HttpDelete]
     [Authorize(Roles = "ADMIN")]
-    public async Task<ActionResult<ResponseDto>> Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);
       if (category == null)

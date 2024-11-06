@@ -1,6 +1,5 @@
 ﻿using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Repositories;
-using System.Drawing.Printing;
 using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.APIFeatures

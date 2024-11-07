@@ -49,10 +49,18 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
+      bool isAdmin = User.IsInRole(SD.AdminRole);
 
-      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      string? expirationString = User.Claims.FirstOrDefault(c => c.Type == "MembershipExpiration")?.Value;
+      DateTime? membershipExpiration = null;
+
+      if (!string.IsNullOrEmpty(expirationString) && DateTime.TryParse(expirationString, null, System.Globalization.DateTimeStyles.RoundtripKind, out var parsedDate))
+      {
+        membershipExpiration = parsedDate;
+      }
+
       Episode episode;
-      if (isAdmin)
+      if (isAdmin || (membershipExpiration ?? DateTime.MinValue) > DateTime.UtcNow)
       {
         episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id, includeProperties: "Servers");
       }

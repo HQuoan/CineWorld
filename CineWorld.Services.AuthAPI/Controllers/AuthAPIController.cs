@@ -12,14 +12,16 @@ namespace CineWorld.Services.AuthAPI.Controllers
     private readonly IAuthService _authService;
     private readonly IMessageBus _messageBus;
     private readonly IConfiguration _configuration;
+    private readonly IMembershipService _membershipService;
     protected ResponseDto _response;
 
-    public AuthAPIController(IAuthService authService, IMessageBus messageBus, IConfiguration configuration)
+    public AuthAPIController(IAuthService authService, IMessageBus messageBus, IConfiguration configuration, IMembershipService membershipService)
     {
       _authService = authService;
       _response = new();
       _messageBus = messageBus;
       _configuration = configuration;
+      _membershipService = membershipService;
     }
 
 
@@ -39,6 +41,7 @@ namespace CineWorld.Services.AuthAPI.Controllers
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
     {
+
       var loginResponse = await _authService.Login(model);
 
       if(loginResponse.User == null)

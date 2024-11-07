@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using CineWorld.Services.MovieAPI.Attributes;
 
 namespace CineWorld.Services.MovieAPI.Models.Dtos
 {
@@ -25,6 +25,14 @@ namespace CineWorld.Services.MovieAPI.Models.Dtos
     public string? ImageUrl { get; set; }
     public string? Trailer { get; set; }
     public int? Year { get; set; }
+    public int View { get; set; } = 0;
+    [DefaultValue(null)]
+    public string? ShowTimes { get; set; }
+    [DayOfWeekValidation]
+    [DefaultValue(null)]
+    public string? ShowTimesDetails { get; set; }
+    [DefaultValue(null)]
+    public string? Actors { get; set; }
     public bool? IsHot { get; set; }
     public bool? Status { get; set; } = true;
     public DateTime? CreatedDate { get; set; } 

@@ -60,7 +60,6 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
 {
-
   option.SwaggerDoc("v1", new OpenApiInfo
   {
     Title = "Car Management API",
@@ -100,7 +99,9 @@ builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
+builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
 
 var app = builder.Build();
 

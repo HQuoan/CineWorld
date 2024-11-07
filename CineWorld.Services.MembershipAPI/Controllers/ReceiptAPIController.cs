@@ -16,6 +16,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 {
   [Route("api/receipts")]
   [ApiController]
+  [Authorize]
   public class ReceiptAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
@@ -23,14 +24,16 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     private readonly IMapper _mapper;
     private ResponseDto _response;
     private readonly IUtil _util;
+    private readonly IUserService _userService;
 
-    public ReceiptAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IEmailService emailService)
+    public ReceiptAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IEmailService emailService, IUserService userService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
       _emailService = emailService;
+      _userService = userService;
     }
 
     [HttpGet]
@@ -93,9 +96,29 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
 
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ReceiptDto receiptDto)
     {
+
+      bool isExistUser = await _userService.IsExistUser(receiptDto.UserId);
+      if (!isExistUser)
+      {
+        throw new NotFoundException($"User with ID: {receiptDto.UserId} not found.");
+      }
+
+      if (!User.IsInRole(SD.AdminRole))
+      {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim != null)
+        {
+          receiptDto.UserId = userIdClaim.Value;
+        }
+        else
+        {
+          throw new InvalidOperationException("UserId not found in claims.");
+        }
+      }
+
+
       Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receiptDto.PackageId);
       if (package == null)
       {
@@ -113,10 +136,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         }
       }
 
-      //if (!User.IsInRole("ADMIN"))
-      //{
-      //  receiptDto.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-      //}
+      
 
       Receipt receipt = _mapper.Map<Receipt>(receiptDto);
       receipt.PackagePrice = package.Price;
@@ -135,6 +155,14 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     [HttpPost("CreateStripeSession")]
     public async Task<ActionResult<ResponseDto>> CreateStripeSession([FromBody] StripeRequestDto stripeRequestDto)
     {
+      Receipt receiptFromDb = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == stripeRequestDto.ReceiptId, tracked: true);
+
+      if (receiptFromDb == null)
+      {
+        throw new NotFoundException($"Receipt with ID: {stripeRequestDto.ReceiptId} not found.");
+      }
+      
+
       var options = new SessionCreateOptions
       {
         SuccessUrl = stripeRequestDto.ApprovedUrl,
@@ -142,12 +170,11 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         LineItems = new List<SessionLineItemOptions>(),
         Mode = "payment",
       };
-
    
-      Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == stripeRequestDto.Receipt.PackageId);
+      Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receiptFromDb.PackageId);
       if (package == null)
       {
-        throw new NotFoundException($"Package with ID: {stripeRequestDto.Receipt.PackageId} not found.");
+        throw new NotFoundException($"Package with ID: {receiptFromDb.PackageId} not found.");
       }
 
       var sessionLineItem = new SessionLineItemOptions
@@ -166,13 +193,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       options.LineItems.Add(sessionLineItem);
 
-      if (!string.IsNullOrEmpty(stripeRequestDto.Receipt.CouponCode))
+      if (!string.IsNullOrEmpty(receiptFromDb.CouponCode))
       {
         var discountsObj = new List<SessionDiscountOptions>
         {
             new SessionDiscountOptions
             {
-                Coupon = stripeRequestDto.Receipt.CouponCode
+                Coupon = receiptFromDb.CouponCode
             }
         };
         options.Discounts = discountsObj;
@@ -181,11 +208,10 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       var service = new SessionService();
       Session session = await service.CreateAsync(options);
       stripeRequestDto.StripeSessionUrl = session.Url;
-      stripeRequestDto.Receipt.StripeSessionId = session.Id;
+      receiptFromDb.StripeSessionId = session.Id;
 
-      Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == stripeRequestDto.Receipt.ReceiptId, tracked: true);
-
-      receipt.StripeSessionId = session.Id;
+      // Cap nhat 
+      receiptFromDb.StripeSessionId = session.Id;
 
       await _unitOfWork.SaveAsync();
       _response.Result = stripeRequestDto;
@@ -205,7 +231,8 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         _response.Message = "The membership subscription invoice has been paid.";
 
         return Ok(_response);
-      }else if(receipt.Status == SD.Status_Pending)
+      }
+      else if(receipt.Status == SD.Status_Pending)
       {
         var service = new SessionService();
         Session session = service.Get(receipt.StripeSessionId);

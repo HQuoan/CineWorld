@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
-  [Route("api/memberShips")]
+  [Route("api/memberships")]
   [ApiController]
   public class MemberShipAPIController : ControllerBase
   {

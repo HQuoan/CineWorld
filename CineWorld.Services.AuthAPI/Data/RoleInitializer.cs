@@ -12,7 +12,7 @@ namespace CineWorld.Services.AuthAPI.Data
       var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
       var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-      string[] roles = { SD.RoleCustomer, SD.RoleAdmin};
+      string[] roles = { SD.CustomerRole, SD.AdminRole};
 
       foreach (var role in roles)
       {
@@ -44,7 +44,7 @@ namespace CineWorld.Services.AuthAPI.Data
         var result = await userManager.CreateAsync(adminUser, "Admin@123");
         if (result.Succeeded)
         {
-          await userManager.AddToRoleAsync(adminUser, SD.RoleAdmin);
+          await userManager.AddToRoleAsync(adminUser, SD.AdminRole);
         }
         else
         {

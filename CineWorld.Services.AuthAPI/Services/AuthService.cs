@@ -14,12 +14,14 @@ namespace CineWorld.Services.AuthAPI.Services
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator)
+    private readonly IMembershipService _membershipService;
+    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator, IMembershipService membershipService)
     {
       _db = db;
       _userManager = userManager;
       _roleManager = roleManager;
       _jwtTokenGenerator = jwtTokenGenerator;
+      _membershipService = membershipService;
     }
 
     public async Task<bool> AssignRole(string email, string roleName)
@@ -52,9 +54,17 @@ namespace CineWorld.Services.AuthAPI.Services
         return new LoginResponseDto() { User = null, Token = "" };
       }
 
+      var membership = await _membershipService.GetMembership("huy");
+
+      var membershipExpiration = DateTime.UtcNow;
+      if(membership != null)
+      {
+        membershipExpiration = membership.ExpirationDate;
+      }
+
       // if user was found, Generate JWT Token
       var roles = await _userManager.GetRolesAsync(user);
-      var token = _jwtTokenGenerator.GenerateToken(user, roles);
+      var token = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
 
       UserDto userDto = new()
       {
@@ -92,7 +102,7 @@ namespace CineWorld.Services.AuthAPI.Services
         if (result.Succeeded)
         {
           // Gán role mặc định là CUSTOMER
-          await _userManager.AddToRoleAsync(user, SD.RoleCustomer);
+          await _userManager.AddToRoleAsync(user, SD.CustomerRole);
 
           var userToReturn = await _db.ApplicationUsers
                                       .FirstOrDefaultAsync(c => c.Email == registrationRequestDto.Email);
@@ -109,7 +119,7 @@ namespace CineWorld.Services.AuthAPI.Services
             UserName = userToReturn.UserName,
             Gender = userToReturn.Gender,
             DateOfBirth = userToReturn.DateOfBirth,
-            Role = SD.RoleCustomer
+            Role = SD.CustomerRole
           };
 
           return userDto;

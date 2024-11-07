@@ -22,29 +22,42 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
             case nameof(MovieQueryParameters.CategoryId):
               filters.Add(m => m.CategoryId == (int)value);
               break;
+
             case nameof(MovieQueryParameters.Category):
-              filters.Add(m => m.Category.Name == (string)value);
+              filters.Add(m => m.Category.Name.ToLower() == ((string)value).ToLower());
               break;
+
             case nameof(MovieQueryParameters.CountryId):
               filters.Add(m => m.CountryId == (int)value);
               break;
+
             case nameof(MovieQueryParameters.Country):
-              filters.Add(m => m.Country.Name == (string)value);
+              filters.Add(m => m.Country.Name.ToLower() == ((string)value).ToLower());
               break;
+
             case nameof(MovieQueryParameters.Name):
-              filters.Add(m => m.Name.Contains((string)value) || (m.OriginName != null && m.OriginName.Contains((string)value)));
+              filters.Add(m => m.Name.ToLower().Contains(((string)value).ToLower())
+                           || (m.OriginName != null && m.OriginName.ToLower().Contains(((string)value).ToLower())));
               break;
+
+            case nameof(MovieQueryParameters.ShowTimes):
+              filters.Add(m => m.ShowTimes.ToLower().Contains(((string)value).ToLower()));
+              break;
+
             case nameof(MovieQueryParameters.Year):
               filters.Add(m => m.Year == (int)value);
               break;
+
             case nameof(MovieQueryParameters.IsHot):
               filters.Add(m => m.IsHot == (bool)value);
               break;
+
             case nameof(MovieQueryParameters.Status):
               filters.Add(m => m.Status == (bool)value);
               break;
+
             case nameof(MovieQueryParameters.Genre):
-              filters.Add(m => m.MovieGenres.Any(mg => mg.Genre.Name == (string)value));
+              filters.Add(m => m.MovieGenres.Any(mg => mg.Genre.Name.ToLower() == ((string)value).ToLower()));
               break;
           }
         }
@@ -52,6 +65,7 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
 
       return filters;
     }
+
 
     public static Func<IQueryable<Movie>, IOrderedQueryable<Movie>>? Sorting(MovieQueryParameters queryParameters)
     {
@@ -64,28 +78,45 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
 
         orderByFunc = property.ToLower() switch
         {
-          "name" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Name))
-                                  : q => q.OrderBy(m => m.Name),
-          "updateddate" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.UpdatedDate))
-         : q => q.OrderBy(m => m.UpdatedDate),
-          "movieid" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.MovieId))
-                                  : q => q.OrderBy(m => m.MovieId),
-          "year" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Year))
-                                  : q => q.OrderBy(m => m.Year),
-          "category" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Category))
-                                     : q => q.OrderBy(m => m.Category.Name),
-          "country" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Country))
-                                    : q => q.OrderBy(m => m.Country.Name),
-          "isHot" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.IsHot))
-                                  : q => q.OrderBy(m => m.IsHot),
-          "status" => isDescending ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Status))
-                                   : q => q.OrderBy(m => m.Status),
-          _ => q => q.OrderBy(m => m.MovieId) // Mặc định
+          "name" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Name))
+              : q => q.OrderBy(m => m.Name),
+
+          "year" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Year))
+              : q => q.OrderBy(m => m.Year),
+
+          "view" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.View))
+              : q => q.OrderBy(m => m.View),
+
+          "createddate" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.CreatedDate))
+              : q => q.OrderBy(m => m.CreatedDate),
+
+          "updateddate" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.UpdatedDate))
+              : q => q.OrderBy(m => m.UpdatedDate),
+
+          "ishot" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.IsHot))
+              : q => q.OrderBy(m => m.IsHot),
+
+          "status" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.Status))
+              : q => q.OrderBy(m => m.Status),
+
+          "movieid" => isDescending
+              ? (Func<IQueryable<Movie>, IOrderedQueryable<Movie>>)(q => q.OrderByDescending(m => m.MovieId))
+              : q => q.OrderBy(m => m.MovieId),
+
+          _ => q => q.OrderByDescending(m => m.UpdatedDate) // Mặc định sắp xếp theo UpdatedDate giảm dần
         };
       }
 
       return orderByFunc;
     }
+
 
 
 

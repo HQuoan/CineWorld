@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241027155627_SeedData")]
+    [Migration("20241107103438_SeedData")]
     partial class SeedData
     {
         /// <inheritdoc />
@@ -602,6 +602,9 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MovieId"));
 
+                    b.Property<string>("Actors")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -641,6 +644,12 @@ namespace CineWorld.Services.MovieAPI.Migrations
                     b.Property<int?>("SeriesId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ShowTimes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShowTimesDetails")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -653,6 +662,9 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("View")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Year")
                         .HasColumnType("int");

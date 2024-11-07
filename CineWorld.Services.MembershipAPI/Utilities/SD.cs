@@ -2,6 +2,10 @@
 {
   public static class SD
   {
+    public const string AdminRole = "ADMIN";
+    public const string CustomerRole = "CUSTOMER";
+
+
     public const string Status_Pending = "Pending";
     public const string Status_Approved = "Approved";
     public const string Status_MembershipRenewed = "MembershipRenewed";

@@ -220,8 +220,8 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
 
-    [HttpPost("ValidateStripeSession")]
-    public async Task<ActionResult<ResponseDto>> ValidateStripeSession([FromBody] int receiptId)
+    [HttpPost("ValidateStripeSession/{receiptId:int}")]
+    public async Task<ActionResult<ResponseDto>> ValidateStripeSession(int receiptId)
     {
       Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == receiptId);
 

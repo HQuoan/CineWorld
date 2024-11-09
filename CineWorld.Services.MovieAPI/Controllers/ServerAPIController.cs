@@ -34,7 +34,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get()
     {
       IEnumerable<Server> servers = await _unitOfWork.Server.GetAllAsync();
-      _response.TotalItems = servers.Count();
+      //_response.TotalItems = servers.Count();
       _response.Result = _mapper.Map<IEnumerable<ServerDto>>(servers);
 
       return Ok(_response);

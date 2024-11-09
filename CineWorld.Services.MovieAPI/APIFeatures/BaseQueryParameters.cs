@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel;
+using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.APIFeatures
 {
@@ -27,6 +28,8 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     /// The page number for pagination. Defaults to 1. 
     /// Values less than 1 will be set to 1.
     /// </summary>
+    /// 
+    [DefaultValue(1)]
     public int PageNumber
     {
       get => _pageNumber;
@@ -40,6 +43,8 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     /// The number of items per page for pagination. 
     /// Default is 25, with a maximum of 100 items per page.
     /// </summary>
+    /// 
+    [DefaultValue(25)]
     public int PageSize
     {
       get => _pageSize;

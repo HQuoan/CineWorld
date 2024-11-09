@@ -40,7 +40,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
 
       IEnumerable<Episode> episodes = await _unitOfWork.Episode.GetAllAsync(query);
-      _response.TotalItems = episodes.Count();
+      //_response.TotalItems = episodes.Count();
       _response.Result = _mapper.Map<IEnumerable<EpisodeDto>>(episodes);
 
       return Ok(_response);

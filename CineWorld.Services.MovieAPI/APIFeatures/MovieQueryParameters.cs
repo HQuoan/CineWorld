@@ -59,7 +59,7 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
 
     /// <summary>
     /// Specifies the property name for sorting. 
-    /// Valid values: "Name, Year, View, CreatedDate, UpdatedDate, IsHot, Status".
+    /// Valid values: "MovieId, Name, Year, View, CreatedDate, UpdatedDate, IsHot, Status".
     /// Use "-" prefix for descending order (e.g., "-Name" for descending by Name).
     /// </summary>
     public new string? OrderBy { get; set; }

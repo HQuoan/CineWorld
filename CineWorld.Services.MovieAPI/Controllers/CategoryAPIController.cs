@@ -33,7 +33,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get()
     {
       IEnumerable<Category> categories = await _unitOfWork.Category.GetAllAsync();
-      _response.TotalItems = categories.Count();
+      //_response.TotalItems = categories.Count();
       _response.Result = _mapper.Map<IEnumerable<CategoryDto>>(categories);
 
       return Ok(_response);
@@ -87,7 +87,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       category.Movies = await _unitOfWork.Movie.GetAllAsync();
 
-      _response.TotalItems = category.Movies.Count();
+      //_response.TotalItems = category.Movies.Count();
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
 
       return Ok(_response);
@@ -113,7 +113,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       category.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      _response.TotalItems = category.Movies.Count();
+      //_response.TotalItems = category.Movies.Count();
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
 
       return Ok(_response);

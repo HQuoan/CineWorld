@@ -49,7 +49,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
       IEnumerable<Movie> movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.Result = _mapper.Map<IEnumerable<MovieDetailsDto>>(movies);
-      _response.TotalItems = movies.Count();
+
+      int totalItems = await _unitOfWork.Movie.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
+
 
       return Ok(_response);
     }

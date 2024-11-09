@@ -89,19 +89,9 @@ namespace CineWorld.Services.MovieAPI.Repositories
     }
 
 
-    public async Task<int> CountAsync(List<Expression<Func<T, bool>>>? filters = null)
+    public async Task<int> CountAsync()
     {
-      IQueryable<T> query = dbSet;
-
-      if (filters != null && filters.Any())
-      {
-        foreach (var filter in filters)
-        {
-          query = query.Where(filter);
-        }
-      }
-
-      return await query.CountAsync();
+      return await dbSet.CountAsync();
     }
 
     public async Task RemoveAsync(T entity)

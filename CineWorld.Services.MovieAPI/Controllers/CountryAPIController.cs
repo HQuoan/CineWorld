@@ -31,11 +31,22 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] CountryQueryParameters queryParameters)
     {
-      IEnumerable<Country> countries = await _unitOfWork.Country.GetAllAsync();
-      _response.TotalItems = countries.Count();
+
+      var query = CountryFeatures.Build(queryParameters);
+      IEnumerable<Country> countries = await _unitOfWork.Country.GetAllAsync(query);
+
       _response.Result = _mapper.Map<IEnumerable<CountryDto>>(countries);
+
+      int totalItems = await _unitOfWork.Country.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -87,7 +98,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       country.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      _response.TotalItems = country.Movies.Count();
+      //_response.TotalItems = country.Movies.Count();
       _response.Result = _mapper.Map<CountryMovieDto>(country);
 
       return Ok(_response);
@@ -113,7 +124,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       country.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      _response.TotalItems = country.Movies.Count();
+      //_response.TotalItems = country.Movies.Count();
       _response.Result = _mapper.Map<CountryMovieDto>(country);
 
       return Ok(_response);

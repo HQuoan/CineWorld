@@ -84,7 +84,22 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpClient("Email", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:EmailAPI"]));
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+      });
+});
+
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 if (app.Environment.IsDevelopment())
 {

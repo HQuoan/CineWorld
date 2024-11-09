@@ -91,7 +91,22 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
 
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+      });
+});
+
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,4 +1,4 @@
-using CineWorld.Services.EmailAPI.Services;
+﻿using CineWorld.Services.EmailAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +12,22 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+      });
+});
+
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

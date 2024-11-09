@@ -103,7 +103,22 @@ builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
 
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+      });
+});
+
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 ApplyMigration();
 

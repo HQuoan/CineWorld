@@ -54,7 +54,16 @@ namespace CineWorld.Services.AuthAPI.Services
         return new LoginResponseDto() { User = null, Token = "" };
       }
 
-      var membership = await _membershipService.GetMembership("huy");
+      LoginResponseDto loginResponseDto = new LoginResponseDto();
+      MemberShipDto membership = new MemberShipDto();
+      try
+      {
+        membership = await _membershipService.GetMembership(user.Id);
+      }
+      catch (Exception)
+      {
+        loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
+      }
 
       var membershipExpiration = DateTime.UtcNow;
       if(membership != null)
@@ -76,11 +85,10 @@ namespace CineWorld.Services.AuthAPI.Services
         Role = string.Join(", ", roles),
       };
 
-      LoginResponseDto loginResponseDto = new LoginResponseDto()
-      {
-        User = userDto,
-        Token = token,
-      };
+
+      loginResponseDto.User = userDto;
+      loginResponseDto.Token = token;
+
 
       return loginResponseDto;
     }

@@ -66,7 +66,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
       else
       {
-        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id && c.Status == true);
+        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id && c.Status == true, includeProperties: "Servers");
       }
 
       if (episode == null)

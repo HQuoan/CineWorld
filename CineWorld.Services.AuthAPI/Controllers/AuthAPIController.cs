@@ -1,5 +1,4 @@
-﻿using CineWorld.MessageBus;
-using CineWorld.Services.AuthAPI.Models.Dto;
+﻿using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,16 +9,14 @@ namespace CineWorld.Services.AuthAPI.Controllers
   public class AuthAPIController : ControllerBase
   {
     private readonly IAuthService _authService;
-    private readonly IMessageBus _messageBus;
     private readonly IConfiguration _configuration;
     private readonly IMembershipService _membershipService;
     protected ResponseDto _response;
 
-    public AuthAPIController(IAuthService authService, IMessageBus messageBus, IConfiguration configuration, IMembershipService membershipService)
+    public AuthAPIController(IAuthService authService, IConfiguration configuration, IMembershipService membershipService)
     {
       _authService = authService;
       _response = new();
-      _messageBus = messageBus;
       _configuration = configuration;
       _membershipService = membershipService;
     }
@@ -52,6 +49,7 @@ namespace CineWorld.Services.AuthAPI.Controllers
         return BadRequest(_response);
       }
       _response.Result = loginResponse;
+      _response.Message = loginResponse.Message ?? "";
 
       return Ok(_response);
     }

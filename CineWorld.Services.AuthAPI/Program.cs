@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CineWorld.MessageBus;
 using CineWorld.Services.AuthAPI;
 using CineWorld.Services.AuthAPI.Attributes;
 using CineWorld.Services.AuthAPI.Data;
@@ -16,12 +15,12 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
-builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
+//builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
 
-  loggerConfiguration
-  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
-  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
-});
+//  loggerConfiguration
+//  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
+//  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
+//});
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -53,7 +52,6 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IMessageBus, MessageBus>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -149,7 +147,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Đăng ký middleware Serilog để ghi log các request
-app.UseSerilogRequestLogging();
+//app.UseSerilogRequestLogging();
 
 // Đăng ký middleware xử lý ngoại lệ toàn cục ngay sau logging
 app.UseMiddleware<GlobalExceptionMiddleware>();

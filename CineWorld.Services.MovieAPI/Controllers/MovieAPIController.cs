@@ -89,6 +89,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         query.Filters.Add(c => c.Status == true);
       }
+      query.PageSize = null;
 
       movie.Episodes = await _unitOfWork.Episode.GetAllAsync(query);
 

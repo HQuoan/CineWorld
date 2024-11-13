@@ -20,6 +20,11 @@ namespace CineWorld.Services.AuthAPI.Services
       var apiContent = await response.Content.ReadAsStringAsync();
       var resp = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
 
+      if (resp != null )
+      {
+        return null;
+      }
+
       if (resp.IsSuccess)
       {
         return JsonConvert.DeserializeObject<MemberShipDto>(Convert.ToString(resp.Result));

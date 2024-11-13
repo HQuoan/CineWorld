@@ -56,7 +56,8 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       var memberShip = await _unitOfWork.MemberShip.GetAsync(c => c.UserId == userId);
       if (memberShip == null)
       {
-        throw new NotFoundException($"MemberShip with UserId: {userId} not found.");
+        //throw new NotFoundException($"MemberShip with UserId: {userId} not found.");
+        return null;
       }
 
       _response.Result = _mapper.Map<MemberShipDto>(memberShip);

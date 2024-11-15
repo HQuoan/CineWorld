@@ -20,7 +20,7 @@ namespace CineWorld.Services.AuthAPI.Services
       var apiContent = await response.Content.ReadAsStringAsync();
       var resp = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
 
-      if (resp != null )
+      if (resp == null )
       {
         return null;
       }

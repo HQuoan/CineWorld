@@ -108,13 +108,17 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       if (!User.IsInRole(SD.AdminRole))
       {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-        if (userIdClaim != null)
+        if (userIdClaim != null && userIdClaim.Value == receiptDto.UserId)
         {
           receiptDto.UserId = userIdClaim.Value;
         }
+        else if (userIdClaim == null) 
+        {
+          return BadRequest(new { Message = "UserId not found in claims." });
+        }
         else
         {
-          throw new InvalidOperationException("UserId not found in claims.");
+          return BadRequest(new { Message = "You're not allowed to create a receipt for someone else." });
         }
       }
 
@@ -143,6 +147,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       receipt.TermInMonths = package.TermInMonths;
       receipt.Status = SD.Status_Pending;
       receipt.DiscountAmount = coupon != null ? coupon.DiscountAmount : 0;
+      receipt.Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
 
       await _unitOfWork.Receipt.AddAsync(receipt);
       await _unitOfWork.SaveAsync();
@@ -161,7 +166,15 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       {
         throw new NotFoundException($"Receipt with ID: {stripeRequestDto.ReceiptId} not found.");
       }
-      
+
+      if (receiptFromDb.Status == SD.Status_Approved)
+      {
+        _response.IsSuccess = true;
+        _response.Message = "The membership subscription invoice has been paid.";
+
+        return Ok(_response);
+      }
+
 
       var options = new SessionCreateOptions
       {
@@ -169,6 +182,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         CancelUrl = stripeRequestDto.CancelUrl,
         LineItems = new List<SessionLineItemOptions>(),
         Mode = "payment",
+        CustomerEmail = receiptFromDb.Email
       };
    
       Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receiptFromDb.PackageId);
@@ -238,7 +252,16 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         Session session = service.Get(receipt.StripeSessionId);
 
         var paymentIntentService = new Stripe.PaymentIntentService();
-        Stripe.PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+
+        Stripe.PaymentIntent paymentIntent;
+        try
+        {
+          paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+        }
+        catch (Exception)
+        {
+          return BadRequest(new { Message = "You have not completed the invoice payment." });
+        }
 
         if (paymentIntent.Status == "succeeded")
         {

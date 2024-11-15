@@ -10,6 +10,8 @@ namespace CineWorld.Services.MembershipAPI.Models
     [Required]
     public string UserId { get; set; }
     [Required]
+    public string Email { get; set; }
+    [Required]
     public int PackageId { get; set; }
     [ForeignKey("PackageId")]
     public Package Package { get; set; }

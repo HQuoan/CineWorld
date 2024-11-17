@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
@@ -27,11 +28,20 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] MemberShipQueryParameters queryParameters)
     {
-      IEnumerable<MemberShip> memberShips = await _unitOfWork.MemberShip.GetAllAsync();
-      _response.TotalItems = memberShips.Count();
+      var query = MemberShipFeatures.Build(queryParameters);
+      IEnumerable<MemberShip> memberShips = await _unitOfWork.MemberShip.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<MemberShipDto>>(memberShips);
+
+      int totalItems = await _unitOfWork.MemberShip.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -56,7 +66,6 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       var memberShip = await _unitOfWork.MemberShip.GetAsync(c => c.UserId == userId);
       if (memberShip == null)
       {
-        //throw new NotFoundException($"MemberShip with UserId: {userId} not found.");
         return null;
       }
 

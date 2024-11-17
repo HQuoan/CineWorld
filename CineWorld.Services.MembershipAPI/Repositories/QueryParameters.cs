@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CineWorld.Services.MembershipAPI.Repositories
 {
@@ -11,13 +12,21 @@ namespace CineWorld.Services.MembershipAPI.Repositories
     public string? IncludeProperties { get; set; }
 
     // Sorting
-    public Func<IQueryable<T>, IOrderedQueryable<T>>? OrderBy { get; set; }
+    public Func<IQueryable<T>, IOrderedQueryable<T>>? OrderBy { get; set; } = query =>
+    {
+      var primaryKey = typeof(T).GetProperties()
+                                .FirstOrDefault(p => p.Name.EndsWith("Id"))?.Name;
+
+      return (IOrderedQueryable<T>)(primaryKey != null
+          ? query.OrderByDescending(e => EF.Property<object>(e, primaryKey))
+          : query);
+    };
+
 
     // Pagination
     public int? PageNumber { get; set; } = 1;
-    public int? PageSize { get; set; } = 20;
+    public int? PageSize { get; set; } = 25;
 
-    public QueryParameters() { }
   }
 
 }

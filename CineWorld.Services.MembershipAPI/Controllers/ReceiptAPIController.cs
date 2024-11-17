@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CineWorld.EmailService;
+using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dto;
@@ -39,11 +40,21 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
     [HttpGet]
     [Authorize()]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] ReceiptQueryParameters queryParameters)
     {
+      var query = ReceiptFeatures.Build(queryParameters);
       IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync();
-      _response.TotalItems = receipts.Count();
       _response.Result = _mapper.Map<IEnumerable<ReceiptDto>>(receipts);
+
+      int totalItems = await _unitOfWork.Receipt.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
+
 
       return Ok(_response);
     }

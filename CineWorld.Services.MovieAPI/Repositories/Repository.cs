@@ -1,13 +1,11 @@
 ﻿using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace CineWorld.Services.MovieAPI.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class
+  public class Repository<T> : IRepository<T> where T : class
   {
     private readonly AppDbContext _db;
     internal DbSet<T> dbSet;
@@ -18,7 +16,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
       this.dbSet = _db.Set<T>();
     }
 
-    public async Task AddAsync(T entity)  
+    public async Task AddAsync(T entity)
     {
       await dbSet.AddAsync(entity);
     }
@@ -36,21 +34,19 @@ namespace CineWorld.Services.MovieAPI.Repositories
       {
         foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
         {
-            query = query.Include(includeProp);
+          query = query.Include(includeProp);
         }
       }
 
       return await query.FirstOrDefaultAsync();
     }
-
-
     public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters)
     {
       IQueryable<T> query = dbSet;
 
       if (queryParameters == null)
       {
-        queryParameters  = new QueryParameters<T>();
+        queryParameters = new QueryParameters<T>();
       }
 
       // Filtering
@@ -76,7 +72,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
       {
         query = queryParameters.OrderBy(query);
       }
-      
+
 
       // Pagination
       if (queryParameters.PageNumber.HasValue && queryParameters.PageSize.HasValue)

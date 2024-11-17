@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.EmailService;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dto;
@@ -322,15 +323,19 @@ namespace CineWorld.Services.MembershipAPI.Controllers
           };
 
           // Gửi email gia hạn gói thành công 
-          var responeSendMail = await _emailService.SendEmail(new EmailRequest
+          var responeSendMail = await _emailService.SendEmailAsync(new EmailRequest
           {
             //To = membershipToReturn.UserEmail,
-            To = "huyvodtan@gmail.com",
+            To = receipt.Email,
             Subject = "Payment Successful",
             Message = "Payment Successful"
           });
 
-          _response.Result = result;
+          _response.Result = new
+          {
+            result,
+            responeSendMail
+          };
         }
         else
         {

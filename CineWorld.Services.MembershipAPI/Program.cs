@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.EmailService;
 using CineWorld.Services.MembershipAPI.Attributes;
 using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Extensions;
@@ -78,10 +79,9 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
-builder.Services.AddHttpClient("Email", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:EmailAPI"]));
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 
 // Thêm CORS

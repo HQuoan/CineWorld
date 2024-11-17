@@ -1,41 +1,57 @@
-﻿using CineWorld.Services.EmailAPI.Models;
+﻿using CineWorld.EmailService;
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace CineWorld.Services.EmailAPI.Services
+namespace CineWorld.EmailService
 {
   public class EmailService : IEmailService
   {
-    private readonly IConfiguration _configuration;
-
-    public EmailService(IConfiguration configuration)
+    public async Task<ResponseEmailDto> SendEmailAsync(EmailRequest emailRequest)
     {
-      _configuration = configuration;
-    }
-
-    public async Task SendEmailAsync(EmailRequest emailRequest)
-    {
-      var email = new MimeMessage();
-      var x = _configuration["Smtp:Username"];
-      email.From.Add(MailboxAddress.Parse(_configuration["Smtp:Username"]));
-      email.To.Add(MailboxAddress.Parse(emailRequest.To));
-      email.Subject = emailRequest.Subject;
-
-
-      var bodyBuilder = new BodyBuilder
+      try
       {
-        HtmlBody = GenMessage()
-      };
-      email.Body = bodyBuilder.ToMessageBody();
+        var email = new MimeMessage();
+        email.From.Add(MailboxAddress.Parse(EmailConfig.USERNAME));
+        email.To.Add(MailboxAddress.Parse(emailRequest.To));
+        email.Subject = emailRequest.Subject;
 
-      using (var smtp = new SmtpClient())
+        var bodyBuilder = new BodyBuilder
+        {
+          HtmlBody = GenMessage()
+        };
+        email.Body = bodyBuilder.ToMessageBody();
+
+        using (var smtp = new SmtpClient())
+        {
+          await smtp.ConnectAsync(EmailConfig.SERVER, EmailConfig.PORT, MailKit.Security.SecureSocketOptions.StartTls);
+          await smtp.AuthenticateAsync(EmailConfig.USERNAME, EmailConfig.PASSWORD);
+          await smtp.SendAsync(email);
+          await smtp.DisconnectAsync(true);
+        }
+
+        return new ResponseEmailDto() { 
+          Message = "Email sent successfully!"
+        };
+      }
+      catch (SmtpCommandException ex)
       {
-        smtp.Connect(_configuration["Smtp:Server"], int.Parse(_configuration["Smtp:Port"]), MailKit.Security.SecureSocketOptions.StartTls);
-        smtp.Authenticate(_configuration["Smtp:Username"], _configuration["Smtp:Password"]);
-        await smtp.SendAsync(email);
-        smtp.Disconnect(true);
+
+        return new ResponseEmailDto()
+        {
+          IsSuccess = false,
+          Message = $"Failed to send email: {ex.Message} (SMTP Code: {ex.StatusCode})"
+        };
+      }
+      catch (Exception ex)
+      {
+        return new ResponseEmailDto()
+        {
+          IsSuccess = false,
+          Message = $"An error occurred while sending email: {ex.Message}"
+        };
       }
     }
+
     private string GenMessage()
     {
       var currentDate = DateTime.Now.ToString("MM/dd/yyyy");

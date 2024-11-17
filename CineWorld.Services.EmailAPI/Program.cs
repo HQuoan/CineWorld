@@ -1,4 +1,4 @@
-﻿using CineWorld.Services.EmailAPI.Services;
+﻿using CineWorld.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 

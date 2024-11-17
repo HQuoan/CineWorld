@@ -1,6 +1,4 @@
-﻿using CineWorld.Services.EmailAPI.Models;
-using CineWorld.Services.EmailAPI.Services;
-using Microsoft.AspNetCore.Http;
+﻿using CineWorld.EmailService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.EmailAPI.Controllers

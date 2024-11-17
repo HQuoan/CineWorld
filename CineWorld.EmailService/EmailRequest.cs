@@ -1,4 +1,4 @@
-﻿namespace CineWorld.Services.EmailAPI.Models
+﻿namespace CineWorld.EmailService
 {
   public class EmailRequest
   {

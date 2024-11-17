@@ -3,8 +3,10 @@ using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
 using CineWorld.Services.AuthAPI.Utilities;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CineWorld.Services.AuthAPI.Services
 {
@@ -66,7 +68,7 @@ namespace CineWorld.Services.AuthAPI.Services
       }
 
       var membershipExpiration = DateTime.UtcNow;
-      if(membership != null)
+      if (membership != null)
       {
         membershipExpiration = membership.ExpirationDate;
       }
@@ -144,6 +146,57 @@ namespace CineWorld.Services.AuthAPI.Services
         throw new Exception($"An error occurred during registration. {ex.Message}");
       }
     }
+    public async Task<LoginResponseDto> SignInWithGoogle(AuthenticateResult authenticateResult)
+    {
+      
 
+      var claims = authenticateResult.Principal?.Identities.FirstOrDefault()?.Claims;
+      var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+      var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+      if (string.IsNullOrEmpty(email))
+      {
+        throw new ApplicationException("Unable to retrieve user email.");
+      }
+
+      // Kiểm tra nếu user đã tồn tại trong database, nếu không, tạo mới
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        user = new ApplicationUser
+        {
+          Email = email,
+          UserName = name ?? email.Split('@')[0],
+          NormalizedEmail = email.ToUpper()
+        };
+
+        var result = await _userManager.CreateAsync(user);
+        if (!result.Succeeded)
+        {
+          throw new ApplicationException($"Failed to register Google user: {string.Join("; ", result.Errors.Select(e => e.Description))}");
+        }
+
+        await _userManager.AddToRoleAsync(user, SD.CustomerRole);
+      }
+
+      // Lấy các vai trò của user
+      var roles = await _userManager.GetRolesAsync(user);
+
+      // Tạo token JWT
+      var membershipExpiration = DateTime.UtcNow; // Lấy membership nếu cần
+      var token = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
+
+      return new LoginResponseDto
+      {
+        Token = token,
+        User = new UserDto
+        {
+          Id = user.Id,
+          Email = user.Email,
+          UserName = user.UserName,
+          Role = string.Join(", ", roles)
+        }
+      };
+    }
   }
 }

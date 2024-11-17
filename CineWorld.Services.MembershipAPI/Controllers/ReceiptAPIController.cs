@@ -38,6 +38,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpGet]
+    [Authorize()]
     public async Task<ActionResult<ResponseDto>> Get()
     {
       IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync();

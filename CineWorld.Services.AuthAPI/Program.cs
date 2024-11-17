@@ -6,6 +6,7 @@ using CineWorld.Services.AuthAPI.Extensions;
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Services;
 using CineWorld.Services.AuthAPI.Services.IService;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -94,7 +95,14 @@ builder.Services.AddSwaggerGen(option =>
 });
 
 builder.AddAppAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+  options.AddPolicy("GoogleAuth", policy =>
+  {
+    policy.AuthenticationSchemes.Add(GoogleDefaults.AuthenticationScheme);
+    policy.RequireAuthenticatedUser();
+  });
+});
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IMembershipService, MembershipService>();
@@ -107,7 +115,7 @@ builder.Services.AddCors(options =>
   options.AddPolicy("AllowAllOrigins",
       policy =>
       {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "https://localhost:7000")
                        .AllowAnyHeader()
                        .AllowAnyMethod()
                        .AllowCredentials();
@@ -154,6 +162,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

@@ -1,6 +1,12 @@
 ﻿using CineWorld.Services.AuthAPI.Models.Dto;
+using CineWorld.Services.AuthAPI.Services;
 using CineWorld.Services.AuthAPI.Services.IService;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineWorld.Services.AuthAPI.Controllers
 {
@@ -9,16 +15,12 @@ namespace CineWorld.Services.AuthAPI.Controllers
   public class AuthAPIController : ControllerBase
   {
     private readonly IAuthService _authService;
-    private readonly IConfiguration _configuration;
-    private readonly IMembershipService _membershipService;
     protected ResponseDto _response;
 
-    public AuthAPIController(IAuthService authService, IConfiguration configuration, IMembershipService membershipService)
+    public AuthAPIController(IAuthService authService)
     {
       _authService = authService;
       _response = new();
-      _configuration = configuration;
-      _membershipService = membershipService;
     }
 
 
@@ -27,9 +29,6 @@ namespace CineWorld.Services.AuthAPI.Controllers
     {
       var userDto = await _authService.Register(model);
       _response.Result = userDto;
-   
-
-     // await _messageBus.PublishMessage(model.Email, _configuration.GetValue<string>("TopicAndQueueNames:RegisterUserQueue"));
 
       return Ok(_response);
     }
@@ -68,6 +67,27 @@ namespace CineWorld.Services.AuthAPI.Controllers
       }
 
       return Ok(_response);
+    }
+
+    [HttpGet("signin-google")]
+    [Authorize(Policy = "GoogleAuth")]
+    public async Task<IActionResult> SignInGoogle()
+    {
+      var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+      if (!authenticateResult.Succeeded)
+      {
+        return BadRequest(new { message = "Google authentication failed." });
+      }
+
+      try
+      {
+        var response = await _authService.SignInWithGoogle(authenticateResult);
+        return Ok(response);
+      }
+      catch (ApplicationException ex)
+      {
+        return BadRequest(new { message = ex.Message });
+      }
     }
   }
 }

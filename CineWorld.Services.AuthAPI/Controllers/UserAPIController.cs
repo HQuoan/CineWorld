@@ -49,6 +49,7 @@ namespace Mango.Services.AuthAPI.Controllers
 
     ///
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> Get()
     {
       var users = await _db.ApplicationUsers.ToListAsync();

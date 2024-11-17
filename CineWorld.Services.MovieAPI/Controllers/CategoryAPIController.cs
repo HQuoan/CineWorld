@@ -13,7 +13,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/categories")]
   [ApiController]
-  //[Authorize]
   public class CategoryAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
@@ -30,11 +29,21 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] CategoryQueryParameters queryParameters)
     {
-      IEnumerable<Category> categories = await _unitOfWork.Category.GetAllAsync();
-      //_response.TotalItems = categories.Count();
+      var query = CategoryFeatures.Build(queryParameters);
+      IEnumerable<Category> categories = await _unitOfWork.Category.GetAllAsync(query);
+
       _response.Result = _mapper.Map<IEnumerable<CategoryDto>>(categories);
+
+      int totalItems = await _unitOfWork.Category.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -80,14 +89,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       query.Filters.Add(c => c.CategoryId == id);
       
 
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       category.Movies = await _unitOfWork.Movie.GetAllAsync();
 
-      //_response.TotalItems = category.Movies.Count();
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
 
       return Ok(_response);
@@ -106,14 +114,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.Slug == slug);
 
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       category.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      //_response.TotalItems = category.Movies.Count();
       _response.Result = _mapper.Map<CategoryMovieDto>(category);
 
       return Ok(_response);
@@ -121,7 +128,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
 
     [HttpPost]
-    [Authorize(Roles ="ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CategoryDto categoryDto)
     {
 
@@ -151,7 +158,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-    //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CategoryDto categoryDto)
     {
       Category category = _mapper.Map<Category>(categoryDto);
@@ -190,7 +197,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult> Delete(int id)
     {
       var category = await _unitOfWork.Category.GetAsync(c => c.CategoryId == id);

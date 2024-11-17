@@ -50,7 +50,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] PackageDto packageDto)
     {
 
@@ -65,7 +65,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPut]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] PackageDto packageDto)
     {
       Package package = _mapper.Map<Package>(packageDto);
@@ -88,7 +88,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpDelete]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var package = await _unitOfWork.Package.GetAsync(c => c.PackageId == id);

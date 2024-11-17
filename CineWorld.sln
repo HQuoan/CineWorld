@@ -13,8 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{63
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.AuthAPI", "CineWorld.Services.AuthAPI\CineWorld.Services.AuthAPI.csproj", "{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.MessageBus", "CineWorld.MessageBus\CineWorld.MessageBus.csproj", "{D62E65F6-A249-438A-B4DB-1F57BBE07E04}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.MovieAPI", "CineWorld.Services.MovieAPI\CineWorld.Services.MovieAPI.csproj", "{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.MembershipAPI", "CineWorld.Services.MembershipAPI\CineWorld.Services.MembershipAPI.csproj", "{035B85EF-7EC9-4299-AD33-37B5ADD6E59C}"
@@ -25,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{522A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.Services.MovieAPI.Test", "CineWorld.Services.MovieAPI.Test\CineWorld.Services.MovieAPI.Test.csproj", "{C8FCEFB8-B842-41A5-9499-69A9368A1169}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineWorld.EmailService", "CineWorld.EmailService\CineWorld.EmailService.csproj", "{CB9A91B6-C64E-4699-A217-61E9D8D7FBE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.EmailService", "CineWorld.EmailService\CineWorld.EmailService.csproj", "{CB9A91B6-C64E-4699-A217-61E9D8D7FBE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +35,6 @@ Global
 		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D62E65F6-A249-438A-B4DB-1F57BBE07E04}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -67,7 +61,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2CC2F8C9-9678-4AF2-A115-4F45CF69D9B4} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
-		{D62E65F6-A249-438A-B4DB-1F57BBE07E04} = {30B28ACD-CA74-4945-847C-A1A396A45DC4}
 		{F863C0F9-1DAA-4AAD-9893-66E96AEA97D5} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
 		{035B85EF-7EC9-4299-AD33-37B5ADD6E59C} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
 		{8FD36595-4AC2-4F01-9184-BDA74F8B2520} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}

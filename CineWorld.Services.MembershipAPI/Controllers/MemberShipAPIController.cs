@@ -80,7 +80,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MemberShipDto memberShipDto)
     {
 
@@ -95,7 +95,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPut]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MemberShipDto memberShipDto)
     {
       MemberShip memberShip = _mapper.Map<MemberShip>(memberShipDto);
@@ -118,7 +118,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpDelete]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var memberShip = await _unitOfWork.MemberShip.GetAsync(c => c.MemberShipId == id);

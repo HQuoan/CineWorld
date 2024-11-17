@@ -61,7 +61,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     
 
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CouponDto couponDto)
     {
  
@@ -91,7 +91,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPut]
-    //[Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CouponDto couponDto)
     {
       Coupon coupon = _mapper.Map<Coupon>(couponDto);
@@ -105,7 +105,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpDelete]
-  //  [Authorize(Roles = "ADMIN")]
+  //  [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var coupon = await _unitOfWork.Coupon.GetAsync(c => c.CouponId == id);

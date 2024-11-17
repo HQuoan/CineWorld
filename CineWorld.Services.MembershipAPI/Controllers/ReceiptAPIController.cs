@@ -62,7 +62,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpGet("{userId}")]
-   // [Authorize(Roles = "ADMIN")]
+   // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Get(string userId)
     {
       var query = new QueryParameters<Receipt>();

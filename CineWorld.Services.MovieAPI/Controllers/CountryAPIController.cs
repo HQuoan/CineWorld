@@ -3,13 +3,11 @@ using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
-using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -91,14 +89,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.CountryId == id);
 
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       country.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      //_response.TotalItems = country.Movies.Count();
       _response.Result = _mapper.Map<CountryMovieDto>(country);
 
       return Ok(_response);
@@ -117,21 +114,20 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.Slug == slug);
 
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       country.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      //_response.TotalItems = country.Movies.Count();
       _response.Result = _mapper.Map<CountryMovieDto>(country);
 
       return Ok(_response);
     }
 
     [HttpPost]
-    [Authorize(Roles ="ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CountryDto countryDto)
     {
 
@@ -161,7 +157,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CountryDto countryDto)
     {
       Country country = _mapper.Map<Country>(countryDto);
@@ -200,7 +196,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var country = await _unitOfWork.Country.GetAsync(c => c.CountryId == id);

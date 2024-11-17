@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using CineWorld.Services.MovieAPI.APIFeatures;
-using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
-using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
@@ -15,27 +13,36 @@ namespace CineWorld.Services.MovieAPI.Controllers
 {
   [Route("api/servers")]
   [ApiController]
+  [Authorize(Roles = SD.AdminRole)]
   public class ServerAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
-    private readonly IUtil _util;
 
-    public ServerAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
+    public ServerAPIController(IUnitOfWork unitOfWork, IMapper mapper)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
-      _util = util;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] ServerQueryParameters queryParameters)
     {
-      IEnumerable<Server> servers = await _unitOfWork.Server.GetAllAsync();
-      //_response.TotalItems = servers.Count();
+      var query = ServerFeatures.Build(queryParameters);
+      IEnumerable<Server> servers = await _unitOfWork.Server.GetAllAsync(query);
+
       _response.Result = _mapper.Map<IEnumerable<ServerDto>>(servers);
+
+      int totalItems = await _unitOfWork.Server.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -54,7 +61,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ServerDto serverDto)
     {
 
@@ -69,7 +75,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-   // [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] ServerDto serverDto)
     {
       Server server = _mapper.Map<Server>(serverDto);
@@ -90,7 +95,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
-   // [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var server = await _unitOfWork.Server.GetAsync(c => c.ServerId == id);

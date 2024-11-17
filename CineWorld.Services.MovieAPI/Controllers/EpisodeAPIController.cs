@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
-using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MovieAPI.Controllers
@@ -28,19 +29,28 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] EpisodeQueryParameters queryParameters)
     {
 
-      var query = new QueryParameters<Episode>();
-      
-      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      var query = EpisodeFeatures.Build(queryParameters);
+
+      bool isAdmin = User.IsInRole(SD.AdminRole);
       if (!isAdmin)
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       IEnumerable<Episode> episodes = await _unitOfWork.Episode.GetAllAsync(query);
-      //_response.TotalItems = episodes.Count();
+
+      int totalItems = await _unitOfWork.Episode.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
+
       _response.Result = _mapper.Map<IEnumerable<EpisodeDto>>(episodes);
 
       return Ok(_response);
@@ -79,7 +89,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPost]
-    // [Authorize(Roles ="ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] EpisodeDto episodeDto)
     {
       if (!ModelState.IsValid)
@@ -107,7 +117,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-    //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] EpisodeDto episodeDto)
     {
       if (!ModelState.IsValid)
@@ -140,7 +150,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
-    // [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id);

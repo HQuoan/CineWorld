@@ -49,7 +49,7 @@ namespace Mango.Services.AuthAPI.Controllers
 
     ///
     [HttpGet]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> Get()
     {
       var users = await _db.ApplicationUsers.ToListAsync();
@@ -147,7 +147,7 @@ namespace Mango.Services.AuthAPI.Controllers
         throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
       }
      
-      user.UserName = userInformation.UserName;
+      user.FullName = userInformation.FullName;
       user.Avatar = userInformation.Avatar;
       user.Gender = userInformation.Gender;
       user.DateOfBirth = userInformation.DateOfBirth;
@@ -164,7 +164,7 @@ namespace Mango.Services.AuthAPI.Controllers
     
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = SD.AdminRole)]
+    //[Authorize(Roles = SD.AdminRole)]
     public async Task<IActionResult> Delete(string id)
     {
       var user = await _userManager.FindByIdAsync(id);

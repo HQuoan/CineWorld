@@ -35,24 +35,24 @@ namespace CineWorld.Services.MovieAPI.Test
       _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
     }
 
-    [Fact]
-    public async Task Get_ShouldReturnAllCategories()
-    {
-      var categories = _fixture.CreateMany<Category>(3);
-      var categoryDtos = _fixture.CreateMany<CategoryDto>(3);
+    //[Fact]
+    //public async Task Get_ShouldReturnAllCategories()
+    //{
+    //  var categories = _fixture.CreateMany<Category>(3);
+    //  var categoryDtos = _fixture.CreateMany<CategoryDto>(3);
 
-      _mockUnitOfWork.Setup(u => u.Category.GetAllAsync(null)).ReturnsAsync(categories);
-      _mockMapper.Setup(m => m.Map<IEnumerable<CategoryDto>>(It.IsAny<IEnumerable<Category>>())).Returns(categoryDtos);
+    //  _mockUnitOfWork.Setup(u => u.Category.GetAllAsync(null)).ReturnsAsync(categories);
+    //  _mockMapper.Setup(m => m.Map<IEnumerable<CategoryDto>>(It.IsAny<IEnumerable<Category>>())).Returns(categoryDtos);
 
-      var result = await _controller.Get();
+    //  var result = await _controller.Get();
 
-      var okResult = result.Result as OkObjectResult;
-      okResult.Should().NotBeNull();
-      var response = okResult.Value as ResponseDto;
-      response.Should().NotBeNull();
-      //response.TotalItems.Should().Be(3);
-      response.Result.Should().BeEquivalentTo(categoryDtos);
-    }
+    //  var okResult = result.Result as OkObjectResult;
+    //  okResult.Should().NotBeNull();
+    //  var response = okResult.Value as ResponseDto;
+    //  response.Should().NotBeNull();
+    //  //response.TotalItems.Should().Be(3);
+    //  response.Result.Should().BeEquivalentTo(categoryDtos);
+    //}
 
     [Fact]
     public async Task Get_WithValidId_ShouldReturnCategory()

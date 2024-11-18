@@ -33,12 +33,14 @@ namespace CineWorld.Services.AuthAPI.Data
       {
         ApplicationUser adminUser = new()
         {
-          UserName = "Admin",
+          UserName = adminEmail,
+          FullName = "Admin",
           Email = adminEmail,
           Avatar = null,
           NormalizedEmail = adminEmail.ToUpper(),
           Gender = "Male",
           DateOfBirth = DateTime.UtcNow,
+          EmailConfirmed = true,
         };
 
         var result = await userManager.CreateAsync(adminUser, "Admin@123");

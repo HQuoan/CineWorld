@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.EmailService;
 using CineWorld.Services.AuthAPI;
 using CineWorld.Services.AuthAPI.Attributes;
 using CineWorld.Services.AuthAPI.Data;
@@ -45,6 +46,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
   options.Password.RequireLowercase = true;
   options.Password.RequiredUniqueChars = 1; 
   options.User.RequireUniqueEmail = true; // Yêu cầu email duy nhất cho mỗi người dùng
+  options.SignIn.RequireConfirmedEmail = true; // Bắt buộc xác nhận email
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -106,6 +108,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IMembershipService, MembershipService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
 

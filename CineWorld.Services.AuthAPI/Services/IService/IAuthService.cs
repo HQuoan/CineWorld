@@ -9,6 +9,8 @@ namespace CineWorld.Services.AuthAPI.Services.IService
     Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto);
     Task<bool> AssignRole(string email, string roleName);
     Task<LoginResponseDto> SignInWithGoogle(AuthenticateResult authenticateResult);
-
+    Task<bool> ChangePassword(string userId, ChangePasswordDto changePasswordDto);
+    Task<bool> ForgotPassword(string email);
+    Task<bool> ResetPassword(ResetPasswordDto resetPasswordDto);
   }
 }

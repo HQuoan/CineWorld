@@ -17,7 +17,7 @@ namespace CineWorld.EmailService
 
         var bodyBuilder = new BodyBuilder
         {
-          HtmlBody = GenMessage()
+          HtmlBody = emailRequest.Message
         };
         email.Body = bodyBuilder.ToMessageBody();
 

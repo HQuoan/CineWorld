@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using CineWorld.EmailService;
 using CineWorld.Services.MembershipAPI.Attributes;
 using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Extensions;
 using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
+using CineWorld.Services.MembershipAPI.Services;
+using CineWorld.Services.MembershipAPI.Services.IService;
 using CineWorld.Services.MembershipAPI.Utilities;
 using CineWorld.Services.MovieAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,8 +79,28 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
+
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+      });
+});
 
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 if (app.Environment.IsDevelopment())
 {

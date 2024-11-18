@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CineWorld.MessageBus;
+using CineWorld.EmailService;
 using CineWorld.Services.AuthAPI;
 using CineWorld.Services.AuthAPI.Attributes;
 using CineWorld.Services.AuthAPI.Data;
@@ -7,6 +7,7 @@ using CineWorld.Services.AuthAPI.Extensions;
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Services;
 using CineWorld.Services.AuthAPI.Services.IService;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,12 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
-builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
+//builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
 
-  loggerConfiguration
-  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
-  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
-});
+//  loggerConfiguration
+//  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
+//  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
+//});
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -45,6 +46,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
   options.Password.RequireLowercase = true;
   options.Password.RequiredUniqueChars = 1; 
   options.User.RequireUniqueEmail = true; // Yêu cầu email duy nhất cho mỗi người dùng
+  options.SignIn.RequireConfirmedEmail = true; // Bắt buộc xác nhận email
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -53,14 +55,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IMessageBus, MessageBus>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
 {
-
   option.SwaggerDoc("v1", new OpenApiInfo
   {
     Title = "Car Management API",
@@ -97,12 +97,38 @@ builder.Services.AddSwaggerGen(option =>
 });
 
 builder.AddAppAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+  options.AddPolicy("GoogleAuth", policy =>
+  {
+    policy.AuthenticationSchemes.Add(GoogleDefaults.AuthenticationScheme);
+    policy.RequireAuthenticatedUser();
+  });
+});
 
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
+
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:7000")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials();
+      });
+});
 
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 ApplyMigration();
 
@@ -132,13 +158,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Đăng ký middleware Serilog để ghi log các request
-app.UseSerilogRequestLogging();
+//app.UseSerilogRequestLogging();
 
 // Đăng ký middleware xử lý ngoại lệ toàn cục ngay sau logging
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

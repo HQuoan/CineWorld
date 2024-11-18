@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
@@ -27,11 +28,20 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] PackageQueryParameters queryParameters)
     {
-      IEnumerable<Package> packages = await _unitOfWork.Package.GetAllAsync();
-      _response.TotalItems = packages.Count();
+      var query = PackageFeatures.Build(queryParameters);
+      IEnumerable<Package> packages = await _unitOfWork.Package.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<PackageDto>>(packages);
+
+      int totalItems = await _unitOfWork.Package.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -50,7 +60,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] PackageDto packageDto)
     {
 
@@ -65,7 +75,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPut]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] PackageDto packageDto)
     {
       Package package = _mapper.Map<Package>(packageDto);
@@ -88,7 +98,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpDelete]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var package = await _unitOfWork.Package.GetAsync(c => c.PackageId == id);

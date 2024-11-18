@@ -9,6 +9,7 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     public int ReceiptId { get; set; }
     [Required]
     public string UserId { get; set; }
+    public string Email { get; set; }
     [Required]
     public int PackageId { get; set; }
     // public Package? Package { get; set; }

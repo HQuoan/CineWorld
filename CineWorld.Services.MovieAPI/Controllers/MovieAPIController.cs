@@ -9,8 +9,6 @@ using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using System.Linq.Expressions;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -31,22 +29,36 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _util = util;
     }
 
+    /// <summary>
+    /// Get all movies with optional filtering and pagination. Defaults to 25 movies per page, sorted by UpdateDate in descending order.
+    /// </summary>
+    /// <param name="queryParameters">The filtering and pagination parameters for the movie query.</param>
+    /// <returns>A ResponseDto containing the list of movies and relevant metadata.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] MovieQueryParameters? queryParameters)
     {
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         queryParameters.Status = true;
       }
 
       var query = MovieFeatures.Build(queryParameters);
-      //query.IncludeProperties = "Category,Country,Series,MovieGenres.Genre";
+      query.IncludeProperties = "Category,Country,Series,MovieGenres.Genre";
 
 
       IEnumerable<Movie> movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.Result = _mapper.Map<IEnumerable<MovieDetailsDto>>(movies);
-      _response.TotalItems = movies.Count();
+
+      int totalItems = await _unitOfWork.Movie.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
+
 
       return Ok(_response);
     }
@@ -55,7 +67,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get(int id)
     {
       Movie movie;
-      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      bool isAdmin = User.IsInRole(SD.AdminRole);
       if (isAdmin)
       {
         movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id, includeProperties: "Category,Country,Series,MovieGenres.Genre");
@@ -77,6 +89,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         query.Filters.Add(c => c.Status == true);
       }
+      query.PageSize = null;
 
       movie.Episodes = await _unitOfWork.Episode.GetAllAsync(query);
 
@@ -89,7 +102,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     public async Task<ActionResult<ResponseDto>> Get(string slug)
     {
       Movie movie;
-      bool isAdmin = _util.IsInRoles(new string[] { "ADMIN" });
+      bool isAdmin = User.IsInRole(SD.AdminRole);
       if (isAdmin)
       {
         movie = await _unitOfWork.Movie.GetAsync(c => c.Slug == slug, includeProperties: "Category,Country,Series,MovieGenres.Genre");
@@ -118,9 +131,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
-
+    /// <summary>
+    /// Adds a new movie. Only accessible by users with the Admin role.
+    /// </summary>
+    /// <param name="movieDto">The movie data transfer object containing the details of the movie to be added.</param>
+    /// <returns>A response containing the created movie data.</returns>
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MovieDto movieDto)
     {
 
@@ -157,8 +174,27 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    [HttpPost("IncreaseMovieView/{id}")]
+    public async Task<ActionResult<ResponseDto>> IncreaseMovieView(int id)
+    {
+      Movie movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id);
+
+      if(movie == null)
+      {
+        throw new NotFoundException($"Movie with ID: {id} not found.");
+      }
+
+      movie.View++;
+      await _unitOfWork.Movie.UpdateAsync(movie);
+      await _unitOfWork.SaveAsync();
+
+      _response.Message = $"Successfully added one view to the movie with ID: {id}.";
+
+      return Ok(_response);
+    }
+
     [HttpPut]
-    //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MovieDto movieDto)
     {
       var movieFromDb = await _unitOfWork.Movie.GetAsync(m => m.MovieId == movieDto.MovieId, includeProperties: "MovieGenres", tracked: true);
@@ -211,7 +247,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id);

@@ -1,0 +1,6 @@
+@CineWorld.Services.EmailAPI_HostAddress = http://localhost:5250
+
+GET {{CineWorld.Services.EmailAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

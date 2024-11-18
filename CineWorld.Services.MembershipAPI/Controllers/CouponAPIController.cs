@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
+using CineWorld.Services.MembershipAPI.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
@@ -22,11 +25,22 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       _response = new ResponseDto();
     }
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] CouponQueryParameters queryParameters)
     {
-      IEnumerable<Coupon> coupons = await _unitOfWork.Coupon.GetAllAsync();
-      _response.TotalItems = coupons.Count();
+      var query = CouponFeatures.Build(queryParameters);
+      IEnumerable<Coupon> coupons = await _unitOfWork.Coupon.GetAllAsync(query);
+
+
       _response.Result = _mapper.Map<IEnumerable<CouponDto>>(coupons);
+
+      int totalItems = await _unitOfWork.Coupon.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -58,10 +72,8 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
-    
-
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CouponDto couponDto)
     {
  
@@ -91,7 +103,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPut]
-    //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CouponDto couponDto)
     {
       Coupon coupon = _mapper.Map<Coupon>(couponDto);
@@ -105,7 +117,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpDelete]
-  //  [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var coupon = await _unitOfWork.Coupon.GetAsync(c => c.CouponId == id);
@@ -123,6 +135,5 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return NoContent();
     }
-
   }
 }

@@ -1,43 +1,60 @@
 ﻿using AutoMapper;
+using CineWorld.EmailService;
+using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dto;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
 using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
+using CineWorld.Services.MembershipAPI.Services.IService;
 using CineWorld.Services.MembershipAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography.Xml;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
   [Route("api/receipts")]
   [ApiController]
+  [Authorize]
   public class ReceiptAPIController : ControllerBase
   {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
     private readonly IMapper _mapper;
     private ResponseDto _response;
     private readonly IUtil _util;
+    private readonly IUserService _userService;
 
-    public ReceiptAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
+    public ReceiptAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IEmailService emailService, IUserService userService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
+      _emailService = emailService;
+      _userService = userService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    [Authorize()]
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] ReceiptQueryParameters queryParameters)
     {
+      var query = ReceiptFeatures.Build(queryParameters);
       IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync();
-      _response.TotalItems = receipts.Count();
       _response.Result = _mapper.Map<IEnumerable<ReceiptDto>>(receipts);
+
+      int totalItems = await _unitOfWork.Receipt.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
+
 
       return Ok(_response);
     }
@@ -56,7 +73,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpGet("{userId}")]
-   // [Authorize(Roles = "ADMIN")]
+   // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Get(string userId)
     {
       var query = new QueryParameters<Receipt>();
@@ -92,9 +109,33 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
 
     [HttpPost]
-    //[Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ReceiptDto receiptDto)
     {
+
+      bool isExistUser = await _userService.IsExistUser(receiptDto.UserId);
+      if (!isExistUser)
+      {
+        throw new NotFoundException($"User with ID: {receiptDto.UserId} not found.");
+      }
+
+      if (!User.IsInRole(SD.AdminRole))
+      {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim != null && userIdClaim.Value == receiptDto.UserId)
+        {
+          receiptDto.UserId = userIdClaim.Value;
+        }
+        else if (userIdClaim == null) 
+        {
+          return BadRequest(new { Message = "UserId not found in claims." });
+        }
+        else
+        {
+          return BadRequest(new { Message = "You're not allowed to create a receipt for someone else." });
+        }
+      }
+
+
       Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receiptDto.PackageId);
       if (package == null)
       {
@@ -112,16 +153,14 @@ namespace CineWorld.Services.MembershipAPI.Controllers
         }
       }
 
-      //if (!User.IsInRole("ADMIN"))
-      //{
-      //  receiptDto.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-      //}
+      
 
       Receipt receipt = _mapper.Map<Receipt>(receiptDto);
       receipt.PackagePrice = package.Price;
       receipt.TermInMonths = package.TermInMonths;
       receipt.Status = SD.Status_Pending;
       receipt.DiscountAmount = coupon != null ? coupon.DiscountAmount : 0;
+      receipt.Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
 
       await _unitOfWork.Receipt.AddAsync(receipt);
       await _unitOfWork.SaveAsync();
@@ -134,19 +173,35 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     [HttpPost("CreateStripeSession")]
     public async Task<ActionResult<ResponseDto>> CreateStripeSession([FromBody] StripeRequestDto stripeRequestDto)
     {
+      Receipt receiptFromDb = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == stripeRequestDto.ReceiptId, tracked: true);
+
+      if (receiptFromDb == null)
+      {
+        throw new NotFoundException($"Receipt with ID: {stripeRequestDto.ReceiptId} not found.");
+      }
+
+      if (receiptFromDb.Status == SD.Status_Approved)
+      {
+        _response.IsSuccess = true;
+        _response.Message = "The membership subscription invoice has been paid.";
+
+        return Ok(_response);
+      }
+
+
       var options = new SessionCreateOptions
       {
         SuccessUrl = stripeRequestDto.ApprovedUrl,
         CancelUrl = stripeRequestDto.CancelUrl,
         LineItems = new List<SessionLineItemOptions>(),
         Mode = "payment",
+        CustomerEmail = receiptFromDb.Email
       };
-
    
-      Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == stripeRequestDto.Receipt.PackageId);
+      Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receiptFromDb.PackageId);
       if (package == null)
       {
-        throw new NotFoundException($"Package with ID: {stripeRequestDto.Receipt.PackageId} not found.");
+        throw new NotFoundException($"Package with ID: {receiptFromDb.PackageId} not found.");
       }
 
       var sessionLineItem = new SessionLineItemOptions
@@ -165,13 +220,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       options.LineItems.Add(sessionLineItem);
 
-      if (!string.IsNullOrEmpty(stripeRequestDto.Receipt.CouponCode))
+      if (!string.IsNullOrEmpty(receiptFromDb.CouponCode))
       {
         var discountsObj = new List<SessionDiscountOptions>
         {
             new SessionDiscountOptions
             {
-                Coupon = stripeRequestDto.Receipt.CouponCode
+                Coupon = receiptFromDb.CouponCode
             }
         };
         options.Discounts = discountsObj;
@@ -180,11 +235,10 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       var service = new SessionService();
       Session session = await service.CreateAsync(options);
       stripeRequestDto.StripeSessionUrl = session.Url;
-      stripeRequestDto.Receipt.StripeSessionId = session.Id;
+      receiptFromDb.StripeSessionId = session.Id;
 
-      Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == stripeRequestDto.Receipt.ReceiptId, tracked: true);
-
-      receipt.StripeSessionId = session.Id;
+      // Cap nhat 
+      receiptFromDb.StripeSessionId = session.Id;
 
       await _unitOfWork.SaveAsync();
       _response.Result = stripeRequestDto;
@@ -193,82 +247,114 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
 
-    [HttpPost("ValidateStripeSession")]
-    public async Task<ActionResult<ResponseDto>> ValidateStripeSession([FromBody] int receiptId)
+    [HttpPost("ValidateStripeSession/{receiptId:int}")]
+    public async Task<ActionResult<ResponseDto>> ValidateStripeSession(int receiptId)
     {
       Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == receiptId);
 
-      var service = new SessionService();
-      Session session = service.Get(receipt.StripeSessionId);
-
-      var paymentIntentService = new Stripe.PaymentIntentService();
-      Stripe.PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
-
-      if (paymentIntent.Status == "succeeded")
+      if (receipt.Status == SD.Status_Approved)
       {
-        // Payment successful
-        receipt.PaymentIntentId = paymentIntent.Id;
-        receipt.Status = SD.Status_Approved;
+        _response.IsSuccess = true;
+        _response.Message = "The membership subscription invoice has been paid.";
 
-        await _unitOfWork.Receipt.UpdateAsync(receipt);
-        await _unitOfWork.SaveAsync();
+        return Ok(_response);
+      }
+      else if(receipt.Status == SD.Status_Pending)
+      {
+        var service = new SessionService();
+        Session session = service.Get(receipt.StripeSessionId);
 
-        // Create or update Membership
-        MemberShip membershipFromDb = await _unitOfWork.MemberShip.GetAsync(c => c.UserId == receipt.UserId);
-        MemberShip membershipToReturn;
+        var paymentIntentService = new Stripe.PaymentIntentService();
 
-        if (membershipFromDb == null)
+        Stripe.PaymentIntent paymentIntent;
+        try
         {
-          // Create new membership
-          var newMemberShip = new MemberShip
-          {
-            UserId = receipt.UserId,
-            UserEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value,
-            FirstSubscriptionDate = DateTime.UtcNow,
-            RenewalStartDate = DateTime.UtcNow,
-            LastUpdatedDate = DateTime.UtcNow,
-            ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths),
-          };
-
-          await _unitOfWork.MemberShip.AddAsync(newMemberShip);
-          membershipToReturn = newMemberShip; // Assign for return
+          paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
         }
-        else
+        catch (Exception)
         {
-          // Update existing membership
-          if (membershipFromDb.ExpirationDate > DateTime.UtcNow)
+          return BadRequest(new { Message = "You have not completed the invoice payment." });
+        }
+
+        if (paymentIntent.Status == "succeeded")
+        {
+          // Payment successful
+          receipt.PaymentIntentId = paymentIntent.Id;
+          receipt.Status = SD.Status_Approved;
+
+          await _unitOfWork.Receipt.UpdateAsync(receipt);
+          await _unitOfWork.SaveAsync();
+
+          // Create or update Membership
+          MemberShip membershipFromDb = await _unitOfWork.MemberShip.GetAsync(c => c.UserId == receipt.UserId);
+          MemberShip membershipToReturn;
+
+          if (membershipFromDb == null)
           {
-            // Membership still active
-            membershipFromDb.ExpirationDate = membershipFromDb.ExpirationDate.AddMonths(receipt.TermInMonths);
+            // Create new membership
+            var newMemberShip = new MemberShip
+            {
+              UserId = receipt.UserId,
+              UserEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value,
+              FirstSubscriptionDate = DateTime.UtcNow,
+              RenewalStartDate = DateTime.UtcNow,
+              LastUpdatedDate = DateTime.UtcNow,
+              ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths),
+            };
+
+            await _unitOfWork.MemberShip.AddAsync(newMemberShip);
+            membershipToReturn = newMemberShip; // Assign for return
           }
           else
           {
-            // Membership expired
-            membershipFromDb.ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths);
-            membershipFromDb.RenewalStartDate = DateTime.UtcNow;
+            // Update existing membership
+            if (membershipFromDb.ExpirationDate > DateTime.UtcNow)
+            {
+              // Membership still active
+              membershipFromDb.ExpirationDate = membershipFromDb.ExpirationDate.AddMonths(receipt.TermInMonths);
+            }
+            else
+            {
+              // Membership expired
+              membershipFromDb.ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths);
+              membershipFromDb.RenewalStartDate = DateTime.UtcNow;
+            }
+            membershipFromDb.LastUpdatedDate = DateTime.UtcNow;
+
+            await _unitOfWork.MemberShip.UpdateAsync(membershipFromDb);
+            membershipToReturn = membershipFromDb; // Assign for return
           }
-          membershipFromDb.LastUpdatedDate = DateTime.UtcNow;
 
-          await _unitOfWork.MemberShip.UpdateAsync(membershipFromDb);
-          membershipToReturn = membershipFromDb; // Assign for return
+          await _unitOfWork.SaveAsync();
+
+          // Tạo một object ẩn danh chứa cả receipt và membership
+          var result = new
+          {
+            Receipt = _mapper.Map<ReceiptDto>(receipt),
+            Membership = _mapper.Map<MemberShipDto>(membershipToReturn)
+          };
+
+          // Gửi email gia hạn gói thành công 
+          var responeSendMail = await _emailService.SendEmailAsync(new EmailRequest
+          {
+            //To = membershipToReturn.UserEmail,
+            To = receipt.Email,
+            Subject = "Payment Successful",
+            Message = "Payment Successful"
+          });
+
+          _response.Result = new
+          {
+            result,
+            responeSendMail
+          };
         }
-
-        await _unitOfWork.SaveAsync();
-
-        // Tạo một object ẩn danh chứa cả receipt và membership
-        var result = new
+        else
         {
-          Receipt = _mapper.Map<ReceiptDto>(receipt),
-          Membership = _mapper.Map<MemberShipDto>(membershipToReturn)
-        };
-
-        _response.Result = result; // Gán object ẩn danh cho Result
-      }
-      else
-      {
-        // Nếu thanh toán không thành công
-        _response.IsSuccess = false;
-        _response.Message = "Payment failed. Please try again.";
+          // Nếu thanh toán không thành công
+          _response.IsSuccess = false;
+          _response.Message = "Payment failed. Please try again.";
+        }
       }
 
       return Ok(_response);

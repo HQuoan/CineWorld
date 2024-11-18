@@ -11,7 +11,7 @@ namespace CineWorld.Services.AuthAPI.Models
     [EmailAddress]
     public override string Email { get; set; }
     [Required]
-    public override string UserName { get; set; }
+    public string FullName { get; set; }
     public string? Avatar { get; set; }
     [Required]
     [RegularExpression("^(Male|Female|Other)$", ErrorMessage = "Gender must be Male, Female, or Other.")]

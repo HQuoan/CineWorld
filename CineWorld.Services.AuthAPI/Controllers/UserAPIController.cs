@@ -17,7 +17,7 @@ namespace Mango.Services.AuthAPI.Controllers
 {
   [Route("api/users")]
   [ApiController]
-  [Authorize]
+  //[Authorize]
   public class UserAPIController : ControllerBase
   {
     protected ResponseDto _response;
@@ -33,7 +33,7 @@ namespace Mango.Services.AuthAPI.Controllers
       _response = new();
       _mapper = mapper;
     }
-    //[Authorize(Roles = SD.RoleAdmin)]
+    //[Authorize(Roles = SD.AdminRole)]
 
     /// <summary>
     /// Gets all the cars from the database.
@@ -49,6 +49,7 @@ namespace Mango.Services.AuthAPI.Controllers
 
     ///
     [HttpGet]
+    //[Authorize]
     public async Task<IActionResult> Get()
     {
       var users = await _db.ApplicationUsers.ToListAsync();
@@ -78,7 +79,7 @@ namespace Mango.Services.AuthAPI.Controllers
 
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-      if (!User.IsInRole(SD.RoleAdmin) && (userId != null && userId != id))
+      if (!User.IsInRole(SD.AdminRole) && (userId != null && userId != id))
       {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
@@ -86,7 +87,7 @@ namespace Mango.Services.AuthAPI.Controllers
 
       var user = await _userManager.FindByIdAsync(id);
 
-    
+
       if (user == null)
       {
         throw new NotFoundException($"User with ID: {id} not found.");
@@ -97,7 +98,15 @@ namespace Mango.Services.AuthAPI.Controllers
 
       _response.Result = _mapper.Map<UserDto>(user);
 
-      return Ok(_response);   
+      return Ok(_response);
+    }
+
+    [HttpGet("IsExistUser/{id}")]
+    public async Task<bool> IsExistUser(string id)
+    {
+      var user = await _userManager.FindByIdAsync(id);
+
+      return user != null;
     }
 
     [HttpGet("GetByEmail/{email}")]
@@ -105,7 +114,7 @@ namespace Mango.Services.AuthAPI.Controllers
     {
       string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-      if (!User.IsInRole(SD.RoleAdmin) && (userEmail!= null && userEmail != email))
+      if (!User.IsInRole(SD.AdminRole) && (userEmail!= null && userEmail != email))
       {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
@@ -128,7 +137,7 @@ namespace Mango.Services.AuthAPI.Controllers
     public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
     {
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-      if (!User.IsInRole(SD.RoleAdmin) ||(userId != null && userId != userInformation.Id)) { 
+      if (!User.IsInRole(SD.AdminRole) ||(userId != null && userId != userInformation.Id)) { 
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
 
@@ -138,7 +147,7 @@ namespace Mango.Services.AuthAPI.Controllers
         throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
       }
      
-      user.UserName = userInformation.UserName;
+      user.FullName = userInformation.FullName;
       user.Avatar = userInformation.Avatar;
       user.Gender = userInformation.Gender;
       user.DateOfBirth = userInformation.DateOfBirth;
@@ -153,30 +162,9 @@ namespace Mango.Services.AuthAPI.Controllers
       return Ok(_response);
     }
     
-    //[HttpPut("ExtendMembershipEndDate")]
-    //[Authorize(Roles = SD.RoleAdmin)]
-    //public async Task<IActionResult> ExtendMembershipEndDate(ExtendMembershipRequestDto obj)
-    //{
-    //  var user = await _userManager.FindByIdAsync(obj.UserId);
-    //  if (user == null)
-    //  {
-    //    throw new NotFoundException($"User with ID: {obj.UserId} not found.");
-    //  }
-
-    //  user.MembershipEndDate = obj.NewMembershipEndDate;
-
-    //  var result = await _userManager.UpdateAsync(user);
-    //  if (!result.Succeeded)
-    //  {
-    //    return BadRequest(result.Errors);
-    //  }
-
-    //  _response.Result = obj;
-    //  return Ok(_response);
-    //}
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = SD.RoleAdmin)]
+    //[Authorize(Roles = SD.AdminRole)]
     public async Task<IActionResult> Delete(string id)
     {
       var user = await _userManager.FindByIdAsync(id);

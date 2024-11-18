@@ -1,0 +1,46 @@
+[
+  {
+    "PackageId": 1,
+    "Name": "Basic",
+    "Description": "Access to basic features",
+    "Price": 10.00,
+    "TermInMonths": 1,
+    "Currency": "USD",
+    "Status": true,
+    "CreatedDate": "2024-01-01T00:00:00Z",
+    "UpdatedDate": "2024-11-17T00:00:00Z"
+  },
+  {
+    "PackageId": 2,
+    "Name": "Standard",
+    "Description": "Access to standard features with no ads",
+    "Price": 25.00,
+    "TermInMonths": 3,
+    "Currency": "USD",
+    "Status": true,
+    "CreatedDate": "2024-01-01T00:00:00Z",
+    "UpdatedDate": "2024-11-17T00:00:00Z"
+  },
+  {
+    "PackageId": 3,
+    "Name": "Premium",
+    "Description": "All features unlocked, including exclusive content",
+    "Price": 50.00,
+    "TermInMonths": 6,
+    "Currency": "USD",
+    "Status": true,
+    "CreatedDate": "2024-01-01T00:00:00Z",
+    "UpdatedDate": "2024-11-17T00:00:00Z"
+  },
+  {
+    "PackageId": 4,
+    "Name": "Yearly Pro",
+    "Description": "Best value yearly subscription for professionals",
+    "Price": 100.00,
+    "TermInMonths": 12,
+    "Currency": "USD",
+    "Status": true,
+    "CreatedDate": "2024-01-01T00:00:00Z",
+    "UpdatedDate": "2024-11-17T00:00:00Z"
+  }
+]

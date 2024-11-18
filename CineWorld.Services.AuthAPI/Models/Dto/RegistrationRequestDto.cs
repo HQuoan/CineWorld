@@ -10,7 +10,7 @@ namespace CineWorld.Services.AuthAPI.Models.Dto
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     public string Email { get; set; }
     [Required]
-    public string UserName { get; set; }
+    public string FullName { get; set; }
     [Required(ErrorMessage = "Password is required.")]
     [RegularExpression(
         @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$",

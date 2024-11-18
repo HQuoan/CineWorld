@@ -1,13 +1,11 @@
 ﻿using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace CineWorld.Services.MovieAPI.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class
+  public class Repository<T> : IRepository<T> where T : class
   {
     private readonly AppDbContext _db;
     internal DbSet<T> dbSet;
@@ -23,7 +21,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
       await dbSet.AddAsync(entity);
     }
 
-    public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
+    public async Task<T> GetAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, bool tracked = false)
     {
       IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
 
@@ -36,21 +34,19 @@ namespace CineWorld.Services.MovieAPI.Repositories
       {
         foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
         {
-            query = query.Include(includeProp);
+          query = query.Include(includeProp);
         }
       }
 
       return await query.FirstOrDefaultAsync();
     }
-
-
-    public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters = null)
+    public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters)
     {
       IQueryable<T> query = dbSet;
 
       if (queryParameters == null)
       {
-        return await query.ToListAsync();
+        queryParameters = new QueryParameters<T>();
       }
 
       // Filtering
@@ -77,6 +73,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
         query = queryParameters.OrderBy(query);
       }
 
+
       // Pagination
       if (queryParameters.PageNumber.HasValue && queryParameters.PageSize.HasValue)
       {
@@ -88,19 +85,9 @@ namespace CineWorld.Services.MovieAPI.Repositories
     }
 
 
-    public async Task<int> CountAsync(List<Expression<Func<T, bool>>>? filters = null)
+    public async Task<int> CountAsync()
     {
-      IQueryable<T> query = dbSet;
-
-      if (filters != null && filters.Any())
-      {
-        foreach (var filter in filters)
-        {
-          query = query.Where(filter);
-        }
-      }
-
-      return await query.CountAsync();
+      return await dbSet.CountAsync();
     }
 
     public async Task RemoveAsync(T entity)

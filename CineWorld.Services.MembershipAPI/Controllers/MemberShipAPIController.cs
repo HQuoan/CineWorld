@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
-  [Route("api/memberShips")]
+  [Route("api/memberships")]
   [ApiController]
   public class MemberShipAPIController : ControllerBase
   {
@@ -27,11 +28,20 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] MemberShipQueryParameters queryParameters)
     {
-      IEnumerable<MemberShip> memberShips = await _unitOfWork.MemberShip.GetAllAsync();
-      _response.TotalItems = memberShips.Count();
+      var query = MemberShipFeatures.Build(queryParameters);
+      IEnumerable<MemberShip> memberShips = await _unitOfWork.MemberShip.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<MemberShipDto>>(memberShips);
+
+      int totalItems = await _unitOfWork.MemberShip.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -56,7 +66,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       var memberShip = await _unitOfWork.MemberShip.GetAsync(c => c.UserId == userId);
       if (memberShip == null)
       {
-        throw new NotFoundException($"MemberShip with UserId: {userId} not found.");
+        return null;
       }
 
       _response.Result = _mapper.Map<MemberShipDto>(memberShip);
@@ -79,7 +89,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MemberShipDto memberShipDto)
     {
 
@@ -94,7 +104,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpPut]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MemberShipDto memberShipDto)
     {
       MemberShip memberShip = _mapper.Map<MemberShip>(memberShipDto);
@@ -117,7 +127,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
     [HttpDelete]
-    // [Authorize(Roles = "ADMIN")]
+    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var memberShip = await _unitOfWork.MemberShip.GetAsync(c => c.MemberShipId == id);

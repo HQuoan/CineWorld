@@ -19,6 +19,11 @@ namespace CineWorld.Services.MembershipAPI.Data
     {
       base.OnModelCreating(modelBuilder);
 
+      // Seed to Packages 
+      string packagesJson = System.IO.File.ReadAllText("Data/SeedData/packages.json");
+      List<Package> packages = System.Text.Json.JsonSerializer.Deserialize<List<Package>>(packagesJson);
+      modelBuilder.Entity<Package>().HasData(packages.ToArray());
+
       modelBuilder.Entity<Coupon>()
           .HasIndex(c => c.CouponCode)
           .IsUnique();

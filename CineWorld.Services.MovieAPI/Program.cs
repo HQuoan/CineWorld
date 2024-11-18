@@ -9,9 +9,9 @@ using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +49,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
+  option.SwaggerDoc("v1", new OpenApiInfo
+  {
+    Title = "Car Management API",
+    Version = "v1",
+    Description = "API for managing cars, including features to list, add, and delete cars."
+  });
+
   option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
   {
     Name = "Authorization",
@@ -70,16 +77,37 @@ builder.Services.AddSwaggerGen(option =>
       }, new string[]{ }
     }
   });
+
+  // Đường dẫn đến tệp XML
+  var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+  option.IncludeXmlComments(xmlPath);
 });
+
 
 builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUtil, Util>();
 
+// Thêm CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+      });
+});
+
 var app = builder.Build();
+
+// Áp dụng CORS
+app.UseCors("AllowAllOrigins");
 
 if (app.Environment.IsDevelopment())
 {

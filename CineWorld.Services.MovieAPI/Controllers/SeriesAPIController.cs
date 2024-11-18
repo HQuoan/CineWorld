@@ -1,19 +1,13 @@
 ﻿using AutoMapper;
 using CineWorld.Services.MovieAPI.APIFeatures;
-using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
-using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -35,11 +29,21 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseDto>> Get()
+    public async Task<ActionResult<ResponseDto>> Get([FromQuery] SeriesQueryParameters queryParameters)
     {
-      IEnumerable<Series> series = await _unitOfWork.Series.GetAllAsync();
-      _response.TotalItems = series.Count();
+      var query = SeriesFeatures.Build(queryParameters);
+      IEnumerable<Series> series = await _unitOfWork.Series.GetAllAsync(query);
+
       _response.Result = _mapper.Map<IEnumerable<SeriesDto>>(series);
+
+      int totalItems = await _unitOfWork.Series.CountAsync();
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
@@ -84,14 +88,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.SeriesId == id);
 
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       series.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      _response.TotalItems = series.Movies.Count();
       _response.Result = _mapper.Map<SeriesMovieDto>(series);
 
       return Ok(_response);
@@ -110,20 +113,19 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.Slug == slug);
 
-      if (!_util.IsInRoles(new string[] { "ADMIN" }))
+      if (!User.IsInRole(SD.AdminRole))
       {
         query.Filters.Add(c => c.Status == true);
       }
 
       series.Movies = await _unitOfWork.Movie.GetAllAsync(query);
 
-      _response.TotalItems = series.Movies.Count();
       _response.Result = _mapper.Map<SeriesMovieDto>(series);
 
       return Ok(_response);
     }
     [HttpPost]
-    [Authorize(Roles ="ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] SeriesDto seriesDto)
     {
 
@@ -153,7 +155,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpPut]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] SeriesDto seriesDto)
     {
       Series series = _mapper.Map<Series>(seriesDto);
@@ -192,7 +194,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     }
 
     [HttpDelete]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var series = await _unitOfWork.Series.GetAsync(c => c.SeriesId == id);

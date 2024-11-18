@@ -2,8 +2,7 @@
 {
   public static class SD
   {
-
-    public const string RoleAdmin = "ADMIN";
-    public const string RoleCustomer = "CUSTOMER";
+    public const string AdminRole = "ADMIN";
+    public const string CustomerRole = "CUSTOMER";
   }
 }

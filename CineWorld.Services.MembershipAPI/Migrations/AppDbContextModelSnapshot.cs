@@ -138,6 +138,56 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                     b.HasKey("PackageId");
 
                     b.ToTable("Packages");
+
+                    b.HasData(
+                        new
+                        {
+                            PackageId = 1,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "Access to basic features",
+                            Name = "Basic",
+                            Price = 10.00m,
+                            Status = true,
+                            TermInMonths = 1,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            PackageId = 2,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "Access to standard features with no ads",
+                            Name = "Standard",
+                            Price = 25.00m,
+                            Status = true,
+                            TermInMonths = 3,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            PackageId = 3,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "All features unlocked, including exclusive content",
+                            Name = "Premium",
+                            Price = 50.00m,
+                            Status = true,
+                            TermInMonths = 6,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            PackageId = 4,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "Best value yearly subscription for professionals",
+                            Name = "Yearly Pro",
+                            Price = 100.00m,
+                            Status = true,
+                            TermInMonths = 12,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("CineWorld.Services.MembershipAPI.Models.Receipt", b =>
@@ -158,6 +208,10 @@ namespace CineWorld.Services.MembershipAPI.Migrations
 
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PackageId")
                         .HasColumnType("int");

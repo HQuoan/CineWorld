@@ -16,12 +16,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
-builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
+//builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
 
-  loggerConfiguration
-  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
-  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
-});
+//  loggerConfiguration
+//  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
+//  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
+//});
 
 builder.Services.AddHttpLogging(options =>
 {
@@ -118,7 +118,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Đăng ký middleware Serilog để ghi log các request
-app.UseSerilogRequestLogging();
+//app.UseSerilogRequestLogging();
 
 // Đăng ký middleware xử lý ngoại lệ toàn cục ngay sau logging
 app.UseMiddleware<GlobalExceptionMiddleware>();

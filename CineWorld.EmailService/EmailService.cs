@@ -11,8 +11,8 @@ namespace CineWorld.EmailService
       try
       {
         var email = new MimeMessage();
-        email.From.Add(MailboxAddress.Parse(EmailConfig.USERNAME));
-        email.To.Add(MailboxAddress.Parse(emailRequest.To));
+        email.From.Add(new MailboxAddress("CineWorld", EmailConfig.USERNAME));
+        email.To.Add(new MailboxAddress("Customer", emailRequest.To));
         email.Subject = emailRequest.Subject;
 
         var bodyBuilder = new BodyBuilder

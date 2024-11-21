@@ -1,21 +1,21 @@
-version: '3.4'
+# version: '3.4'
 
-services:
-  cineworld.services.authapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-  cineworld.services.movieapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-  cineworld.services.membershipapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+# services:
+#   cineworld.services.authapi:
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Development
+#     volumes:
+#       - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
+#       - ./HttpsCerf:/home/app/.aspnet/https:ro
+#   cineworld.services.movieapi:
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Development
+#     volumes:
+#       - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
+#       - ./HttpsCerf:/home/app/.aspnet/https:ro
+#   cineworld.services.membershipapi:
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Development
+#     volumes:
+#       - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
+#       - ./HttpsCerf:/home/app/.aspnet/https:ro

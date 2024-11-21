@@ -1,61 +1,73 @@
 version: '3.4'
 
 services:
-
   sqlserver:
     image: mcr.microsoft.com/mssql/server
     environment:
       SA_PASSWORD: "123qwe!@#"
       ACCEPT_EULA: "Y"
     ports:
-    - "1400:1433"
+      - "1400:1433"
     networks:
-    - productnetwork
+      - productnetwork
   
   cineworld.services.authapi:
     build:
       context: .
       dockerfile: CineWorld.Services.AuthAPI/Dockerfile
     ports:
-    - "7000:7000"
+      - "7000:7000"
     depends_on:
-    - sqlserver
+      - sqlserver
     environment:
-    - ASPNETCORE_ENVIRONMENT=Development
-    - ASPNETCORE_URLS=https://+:7000
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:7000
+    volumes:
+      - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ./HttpsCerf:/home/app/.aspnet/https:ro
     networks:
-    - productnetwork
-    # restart: on-failure
+      - productnetwork
+    restart: on-failure
 
   cineworld.services.movieapi:
     build:
       context: .
       dockerfile: CineWorld.Services.MovieAPI/Dockerfile
     ports:
-    - "7001:7001"
+      - "7001:7001"
     depends_on:
-    - sqlserver
+      - sqlserver
     environment:
-    - ASPNETCORE_ENVIRONMENT=Development
-    - ASPNETCORE_URLS=https://+:7001
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:7001
+    volumes:
+      - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ./HttpsCerf:/home/app/.aspnet/https:ro
     networks:
-    - productnetwork
-    # restart: on-failure
+      - productnetwork
+    restart: on-failure
 
   cineworld.services.membershipapi:
     build:
       context: .
       dockerfile: CineWorld.Services.MembershipAPI/Dockerfile
     ports:
-    - "7002:7002"
+      - "7002:7002"
     depends_on:
-    - sqlserver
+      - sqlserver
     environment:
-    - ASPNETCORE_ENVIRONMENT=Development
-    - ASPNETCORE_URLS=https://+:7002
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:7002
+    volumes:
+      - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ./HttpsCerf:/home/app/.aspnet/https:ro
     networks:
-    - productnetwork
-    # restart: on-failure
+      - productnetwork
+    restart: on-failure
 
 networks:
   productnetwork:
+
+volumes:
+  UserSecrets:
+  HttpsCerf:

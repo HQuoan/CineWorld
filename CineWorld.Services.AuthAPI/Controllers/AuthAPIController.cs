@@ -16,13 +16,11 @@ namespace CineWorld.Services.AuthAPI.Controllers
   {
     private readonly IAuthService _authService;
     protected ResponseDto _response;
-    private readonly UserManager<ApplicationUser> _userManager;
 
-    public AuthAPIController(IAuthService authService, UserManager<ApplicationUser> userManager)
+    public AuthAPIController(IAuthService authService)
     {
       _authService = authService;
       _response = new();
-      _userManager = userManager;
     }
 
 
@@ -38,29 +36,16 @@ namespace CineWorld.Services.AuthAPI.Controllers
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {
-      if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+      try
       {
-        return BadRequest(new { message = "Invalid email confirmation request." });
-      }
-
-      var user = await _userManager.FindByIdAsync(userId);
-      if (user == null)
-      {
-        return NotFound(new { message = "User not found." });
-      }
-
-      var result = await _userManager.ConfirmEmailAsync(user, token);
-      if (result.Succeeded)
-      {
+        var result = await _authService.ConfirmEmail(userId, token);
         return Ok(new { message = "Email confirmed successfully." });
       }
-      else
+      catch (ApplicationException ex)
       {
-        var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-        return BadRequest(new { message = $"Email confirmation failed: {errors}" });
+        return BadRequest(new { message = ex.Message });
       }
     }
-
 
 
     [HttpPost("login")]

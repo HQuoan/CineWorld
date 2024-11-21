@@ -19,6 +19,22 @@ namespace CineWorld.Services.MembershipAPI.Data
     {
       base.OnModelCreating(modelBuilder);
 
+      modelBuilder.Entity<Coupon>()
+       .Property(c => c.DiscountAmount)
+       .HasPrecision(18, 2); 
+
+      modelBuilder.Entity<Package>()
+          .Property(p => p.Price)
+          .HasPrecision(18, 2);
+
+      modelBuilder.Entity<Receipt>()
+          .Property(r => r.DiscountAmount)
+          .HasPrecision(18, 2);
+
+      modelBuilder.Entity<Receipt>()
+          .Property(r => r.PackagePrice)
+          .HasPrecision(18, 2);
+
       // Seed to Packages 
       string packagesJson = System.IO.File.ReadAllText("Data/SeedData/packages.json");
       List<Package> packages = System.Text.Json.JsonSerializer.Deserialize<List<Package>>(packagesJson);

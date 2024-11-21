@@ -102,11 +102,11 @@ var app = builder.Build();
 // Áp dụng CORS
 app.UseCors("AllowAllOrigins");
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
-}
+  c.SwaggerEndpoint("/swagger/v1/swagger.json", "Membership API v1");
+});
 
 Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 

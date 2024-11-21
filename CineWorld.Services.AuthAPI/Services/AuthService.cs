@@ -74,7 +74,7 @@ namespace CineWorld.Services.AuthAPI.Services
         loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
       }
 
-      var membershipExpiration = DateTime.UtcNow;
+      var membershipExpiration = DateTime.UtcNow.AddDays(-1);
       if (membership != null)
       {
         membershipExpiration = membership.ExpirationDate;
@@ -170,6 +170,46 @@ namespace CineWorld.Services.AuthAPI.Services
       }
     }
 
+    public async Task<bool> ConfirmEmail(string userId, string token)
+    {
+      if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+      {
+        throw new ApplicationException("Invalid email confirmation request.");
+      }
+
+      var user = await _userManager.FindByIdAsync(userId);
+      if (user == null)
+      {
+        throw new ApplicationException("User not found.");
+      }
+
+      var result = await _userManager.ConfirmEmailAsync(user, token);
+      if (result.Succeeded)
+      {
+        // Gửi email thông báo xác nhận thành công
+        EmailRequest emailRequest = new EmailRequest
+        {
+          To = user.Email,
+          Subject = "Email Confirmed Successfully!",
+          Message = "Your email has been confirmed successfully. You can now log in to your account."
+        };
+
+        var emailResponse = await _emailService.SendEmailAsync(emailRequest);
+        if (!emailResponse.IsSuccess)
+        {
+          throw new ApplicationException($"Email confirmation succeeded, but failed to send notification email: {emailResponse.Message}");
+        }
+
+        return true;
+      }
+      else
+      {
+        var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+        throw new ApplicationException($"Email confirmation failed: {errors}");
+      }
+    }
+
+
     public async Task<LoginResponseDto> SignInWithGoogle(AuthenticateResult authenticateResult)
     {
 
@@ -204,26 +244,54 @@ namespace CineWorld.Services.AuthAPI.Services
         }
 
         await _userManager.AddToRoleAsync(user, SD.CustomerRole);
+
+        EmailRequest emailRequest = new EmailRequest()
+        {
+          To = user.Email,
+          Subject = "Register Successfully!",
+          Message = $"Register Successfully!"
+        };
+
+        var emailResponse = await _emailService.SendEmailAsync(emailRequest);
       }
 
       // Lấy các vai trò của user
       var roles = await _userManager.GetRolesAsync(user);
 
       // Tạo token JWT
-      var membershipExpiration = DateTime.UtcNow; // Lấy membership nếu cần
+      LoginResponseDto loginResponseDto = new LoginResponseDto();
+      MemberShipDto membership = new MemberShipDto();
+      try
+      {
+        membership = await _membershipService.GetMembership(user.Id);
+      }
+      catch (Exception)
+      {
+        loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
+      }
+
+      var membershipExpiration = DateTime.UtcNow.AddDays(-1);
+      if (membership != null)
+      {
+        membershipExpiration = membership.ExpirationDate;
+      }
       var token = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
 
-      return new LoginResponseDto
+
+      UserDto userDto = new()
       {
-        Token = token,
-        User = new UserDto
-        {
-          Id = user.Id,
-          Email = user.Email,
-          FullName = user.FullName,
-          Role = string.Join(", ", roles)
-        }
+        Id = user.Id,
+        Email = user.Email,
+        FullName = user.FullName,
+        Gender = "Male",
+        DateOfBirth = new DateTime(2000, 1, 1),
+        Role = string.Join(", ", roles),
       };
+
+      loginResponseDto.User = userDto;
+      loginResponseDto.Token = token;
+
+      return loginResponseDto;
     }
 
     public async Task<bool> ChangePassword(string userId, ChangePasswordDto changePasswordDto)

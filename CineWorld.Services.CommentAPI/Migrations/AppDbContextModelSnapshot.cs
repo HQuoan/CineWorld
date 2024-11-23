@@ -59,7 +59,7 @@ namespace CineWorld.Services.CommentAPI.Migrations
                         {
                             CommentId = 1,
                             CommentContent = "This movie is amazing! I loved the characters and the plot.",
-                            CreatedAt = new DateTime(2024, 10, 31, 22, 30, 37, 231, DateTimeKind.Local).AddTicks(4285),
+                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9391),
                             MovieId = 1,
                             UserId = "3a5a3321-ebbe-49ac-b3aa-0466a2072515"
                         },
@@ -68,7 +68,7 @@ namespace CineWorld.Services.CommentAPI.Migrations
                             CommentId = 2,
                             CommentContent = "I agree, the movie was fantastic, especially the special effects!",
                             CommentParentId = 1,
-                            CreatedAt = new DateTime(2024, 10, 31, 22, 30, 37, 231, DateTimeKind.Local).AddTicks(4301),
+                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9412),
                             MovieId = 1,
                             UserId = "af4f152c-5cdd-4027-8024-28919b019a2e"
                         },
@@ -76,7 +76,7 @@ namespace CineWorld.Services.CommentAPI.Migrations
                         {
                             CommentId = 3,
                             CommentContent = "Episode 1 had a slow start, but it picked up towards the end!",
-                            CreatedAt = new DateTime(2024, 10, 31, 22, 30, 37, 231, DateTimeKind.Local).AddTicks(4302),
+                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9415),
                             EpisodeId = 1,
                             MovieId = 2,
                             UserId = "3a5a3321-ebbe-49ac-b3aa-0466a2072515"
@@ -86,7 +86,7 @@ namespace CineWorld.Services.CommentAPI.Migrations
                             CommentId = 4,
                             CommentContent = "Totally agree, the ending was the best part!",
                             CommentParentId = 3,
-                            CreatedAt = new DateTime(2024, 10, 31, 22, 30, 37, 231, DateTimeKind.Local).AddTicks(4304),
+                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9418),
                             EpisodeId = 1,
                             MovieId = 2,
                             UserId = "af4f152c-5cdd-4027-8024-28919b019a2e"
@@ -95,7 +95,7 @@ namespace CineWorld.Services.CommentAPI.Migrations
                         {
                             CommentId = 5,
                             CommentContent = "I didn't enjoy this movie as much as the previous ones. The pacing was off.",
-                            CreatedAt = new DateTime(2024, 10, 31, 22, 30, 37, 231, DateTimeKind.Local).AddTicks(4305),
+                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9421),
                             MovieId = 3,
                             UserId = "b736c9ed-4b4f-4f75-be82-186c25a69e4e"
                         });

@@ -9,7 +9,7 @@
         public string UserId { get; set; }
 
         public int MovieId { get; set; }
-        public int? EpisodeId { get; set; }
+        
 
         public string CommentContent { get; set; }
 

@@ -6,12 +6,13 @@ using Mango.Services.CommentAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace CineWorld.Services.CommentAPI.Controllers
 {
     [Route("api/comment")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class CommentAPIController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -45,8 +46,8 @@ namespace CineWorld.Services.CommentAPI.Controllers
         {
             try
             {
-                Comment obj = _db.Comments.First(u => u.CommentId == id);
-                _response.Result = _mapper.Map<CommentDto>(obj);
+                IEnumerable<Comment> obj = _db.Comments.Where(u => u.MovieId == id).ToList();
+                _response.Result = _mapper.Map<IEnumerable<CommentDto>>(obj);
             }
             catch (Exception ex)
             {

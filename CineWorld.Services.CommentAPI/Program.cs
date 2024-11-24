@@ -2,6 +2,8 @@ using AutoMapper;
 using CineWorld.Services.CommentAPI;
 using CineWorld.Services.CommentAPI.Data;
 using CineWorld.Services.CommentAPI.Extensions;
+using CineWorld.Services.CommentAPI.Services;
+using CineWorld.Services.CommentAPI.Services.IService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -18,6 +20,8 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 builder.Services.AddControllers();
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -7,6 +7,7 @@
         public int? CommentParentId { get; set; }
 
         public string UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
 
         public int MovieId { get; set; }
         

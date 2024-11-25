@@ -2,6 +2,7 @@
 using CineWorld.Services.ReactionAPI.Data;
 using CineWorld.Services.ReactionAPI.Models;
 using CineWorld.Services.ReactionAPI.Models.Dtos;
+using CineWorld.Services.ReactionAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
         }
         [HttpGet]
         [Route("{movieId:int}/{userId}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto IsFavorited(int movieId, string userId)
         {
             try
@@ -40,7 +41,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
 
         }
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto Post([FromBody] UserFavoritesDto favoritesDto)
         {
             try
@@ -48,12 +49,6 @@ namespace CineWorld.Services.ReactionAPI.Controllers
                 UserFavorites obj = _mapper.Map<UserFavorites>(favoritesDto);
                 _db.UserFavorites.Add(obj);
                 _db.SaveChanges();
-
-
-
-
-
-
                 response.Result = favoritesDto;
             }
             catch (Exception ex)
@@ -65,7 +60,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
         }
         [HttpDelete]
         [Route("{movieId:int}/{userId}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto DeleteFavorite(int movieId, string userId)
         {
             try
@@ -77,10 +72,6 @@ namespace CineWorld.Services.ReactionAPI.Controllers
 
                 _db.UserFavorites.Remove(favorite);
                 _db.SaveChanges();
-
-
-
-
             }
             catch (Exception ex)
             {

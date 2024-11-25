@@ -2,6 +2,7 @@
 using CineWorld.Services.ReactionAPI.Data;
 using CineWorld.Services.ReactionAPI.Models;
 using CineWorld.Services.ReactionAPI.Models.Dtos;
+using CineWorld.Services.ReactionAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +24,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
 
         [HttpGet]
         [Route("{episodeId:int}/{userId}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto GetRate(int episodeId, string userId)
         {
             try
@@ -47,13 +48,13 @@ namespace CineWorld.Services.ReactionAPI.Controllers
 
         }
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto Post([FromBody] UserRatesDto rate)
         {
             try
             {
-                UserRates userRates = _mapper.Map<UserRates> (rate);
-                _db.UserRates.Add (userRates);
+                UserRates userRates = _mapper.Map<UserRates>(rate);
+                _db.UserRates.Add(userRates);
                 _db.SaveChanges();
                 _response.Result = rate;
 
@@ -67,7 +68,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
 
         }
         [HttpPut]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto Put([FromBody] UserRatesDto rate)
         {
             try

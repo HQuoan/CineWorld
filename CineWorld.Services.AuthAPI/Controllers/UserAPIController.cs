@@ -3,53 +3,43 @@ using CineWorld.Services.AuthAPI.Data;
 using CineWorld.Services.AuthAPI.Exceptions;
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
-using CineWorld.Services.AuthAPI.Services.IService;
 using CineWorld.Services.AuthAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Mango.Services.AuthAPI.Controllers
 {
+  /// <summary>
+  /// User management APIs for administrative and user-specific operations.
+  /// </summary>
   [Route("api/users")]
   [ApiController]
-  //[Authorize]
+  [Authorize]
   public class UserAPIController : ControllerBase
   {
     protected ResponseDto _response;
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    public UserAPIController(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IMapper mapper)
+    public UserAPIController(AppDbContext db, UserManager<ApplicationUser> userManager, IMapper mapper)
     {
       _db = db;
       _userManager = userManager;
-      _roleManager = roleManager;
       _response = new();
       _mapper = mapper;
     }
-    //[Authorize(Roles = SD.AdminRole)]
 
     /// <summary>
-    /// Gets all the cars from the database.
+    /// Retrieves a list of all users. Only accessible by administrators.
     /// </summary>
-    /// <param name="showDeleted">If true, include deleted records.</param>
-    /// <param name="pageNumber">The page number to retrieve (zero-based).</param>
-    /// <param name="pageSize">The number of records per page.</param>
-    /// <returns>A list of cars.</returns>
-    /// <response code="200">Returns the list of cars.</response>
-    /// <response code="404">No cars found.</response>
-    /// <response code="500">Internal server error.</response>
-    /// 
-
-    ///
+    /// <returns>A list of users with their roles.</returns>
+    /// <response code="200">Returns the list of users.</response>
+    /// <response code="403">If the user is not authorized.</response>
     [HttpGet]
-    //[Authorize]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<IActionResult> Get()
     {
       var users = await _db.ApplicationUsers.ToListAsync();
@@ -67,12 +57,13 @@ namespace Mango.Services.AuthAPI.Controllers
     }
 
     /// <summary>
-    /// 
+    /// Retrieves detailed information about a specific user by ID.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    /// <exception cref="UnauthorizedAccessException"></exception>
-    /// <exception cref="NotFoundException"></exception>
+    /// <param name="id">The ID of the user to retrieve.</param>
+    /// <returns>The user's details.</returns>
+    /// <response code="200">Returns the user information.</response>
+    /// <response code="403">If the user is not authorized to view the details.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(string id)
     {
@@ -101,6 +92,12 @@ namespace Mango.Services.AuthAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Checks if a user exists by ID.
+    /// </summary>
+    /// <param name="id">The ID of the user to check.</param>
+    /// <returns>A boolean indicating whether the user exists.</returns>
+    /// <response code="200">Returns true if the user exists, false otherwise.</response>
     [HttpGet("IsExistUser/{id}")]
     public async Task<bool> IsExistUser(string id)
     {
@@ -109,6 +106,14 @@ namespace Mango.Services.AuthAPI.Controllers
       return user != null;
     }
 
+    /// <summary>
+    /// Retrieves user details by email.
+    /// </summary>
+    /// <param name="email">The email of the user to retrieve.</param>
+    /// <returns>The user's details.</returns>
+    /// <response code="200">Returns the user information.</response>
+    /// <response code="403">If the user is not authorized to view the details.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpGet("GetByEmail/{email}")]
     public async Task<IActionResult> GetByEmail(string email)
     {
@@ -133,6 +138,14 @@ namespace Mango.Services.AuthAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Updates user information. Accessible by administrators or the user themselves.
+    /// </summary>
+    /// <param name="userInformation">The updated user information.</param>
+    /// <returns>The updated user information.</returns>
+    /// <response code="200">Returns the updated user information.</response>
+    /// <response code="403">If the user is not authorized to update the information.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpPut("UpdateInformation")]
     public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
     {
@@ -161,10 +174,17 @@ namespace Mango.Services.AuthAPI.Controllers
       _response.Result = userInformation;
       return Ok(_response);
     }
-    
 
+    /// <summary>
+    /// Deletes a user by ID. Only accessible by administrators.
+    /// </summary>
+    /// <param name="id">The ID of the user to delete.</param>
+    /// <returns>No content if the deletion is successful.</returns>
+    /// <response code="204">If the user is deleted successfully.</response>
+    /// <response code="403">If the user is not authorized.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpDelete("{id}")]
-    //[Authorize(Roles = SD.AdminRole)]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<IActionResult> Delete(string id)
     {
       var user = await _userManager.FindByIdAsync(id);

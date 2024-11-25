@@ -51,10 +51,17 @@ builder.Services.AddSwaggerGen(option =>
 {
   option.SwaggerDoc("v1", new OpenApiInfo
   {
-    Title = "Car Management API",
+    Title = "Movie Management API",
     Version = "v1",
-    Description = "API for managing cars, including features to list, add, and delete cars."
+    Description = "This API provides functionalities for managing movies, series, and related media. It includes features like adding, updating, deleting, and retrieving movie and series details, managing genres, categories, and user preferences.",
+    Contact = new OpenApiContact
+    {
+      Name = "Support Team",
+      Email = "vuongvodtan@gmail.com",
+      Url = new Uri("https://cineworld.io.vn/support")
+    },
   });
+
 
   option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
   {
@@ -81,7 +88,10 @@ builder.Services.AddSwaggerGen(option =>
   // Đường dẫn đến tệp XML
   var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
   var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-  option.IncludeXmlComments(xmlPath);
+  if (File.Exists(xmlPath))
+  {
+    option.IncludeXmlComments(xmlPath);
+  }
 });
 
 
@@ -103,6 +113,19 @@ builder.Services.AddCors(options =>
                         .AllowCredentials();
       });
 });
+
+// Configure Kestrel using Let's Encrypt certificate
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+  if (context.HostingEnvironment.IsProduction())
+  {
+    options.ListenAnyIP(7001, listenOptions =>
+    {
+      listenOptions.UseHttps("/app/HttpsCerf/certificate.pfx", "yourpassword");
+    });
+  }
+});
+
 
 var app = builder.Build();
 

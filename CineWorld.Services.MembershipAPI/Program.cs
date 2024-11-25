@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
@@ -51,6 +52,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
+  option.SwaggerDoc("v1", new OpenApiInfo
+  {
+    Title = "Membership Management API",
+    Version = "v1",
+    Description = "This API provides functionalities for managing memberships, user subscriptions, and related services. It includes features like creating, updating, and retrieving membership details, managing user packages, payments, and handling subscription renewals.",
+    Contact = new OpenApiContact
+    {
+      Name = "Support Team",
+      Email = "vuongvodtan@gmail.com",
+      Url = new Uri("https://cineworld.io.vn/support")
+    },
+  });
+
+
   option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
   {
     Name = "Authorization",
@@ -72,6 +87,14 @@ builder.Services.AddSwaggerGen(option =>
       }, new string[]{ }
     }
   });
+
+  // Đường dẫn đến tệp XML
+  var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+  if (File.Exists(xmlPath))
+  {
+    option.IncludeXmlComments(xmlPath);
+  }
 });
 
 builder.AddAppAuthentication();
@@ -95,6 +118,18 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod()
                         .AllowCredentials();
       });
+});
+
+// Configure Kestrel using Let's Encrypt certificate
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+  if (context.HostingEnvironment.IsProduction())
+  {
+    options.ListenAnyIP(7002, listenOptions =>
+    {
+      listenOptions.UseHttps("/app/HttpsCerf/certificate.pfx", "yourpassword");
+    });
+  }
 });
 
 var app = builder.Build();

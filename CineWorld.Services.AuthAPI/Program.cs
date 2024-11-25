@@ -15,14 +15,14 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
-//Serilog
-//builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
 
-//  loggerConfiguration
-//  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
-//  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
-//});
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog (if needed)
+// builder.Host.UseSerilog((context, services, configuration) => {
+//   configuration.ReadFrom.Configuration(context.Configuration)
+//   .ReadFrom.Services(services);
+// });
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -30,42 +30,52 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Configure AutoMapper
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+// Configure JWT
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 
+// Configure Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-  // Các tùy chỉnh về mật khẩu
-  options.Password.RequireDigit = true; 
-  options.Password.RequiredLength = 8; 
-  options.Password.RequireNonAlphanumeric = true; 
-  options.Password.RequireUppercase = true; 
+  options.Password.RequireDigit = true;
+  options.Password.RequiredLength = 8;
+  options.Password.RequireNonAlphanumeric = true;
+  options.Password.RequireUppercase = true;
   options.Password.RequireLowercase = true;
-  options.Password.RequiredUniqueChars = 1; 
-  options.User.RequireUniqueEmail = true; // Yêu cầu email duy nhất cho mỗi người dùng
-  options.SignIn.RequireConfirmedEmail = true; // Bắt buộc xác nhận email
+  options.Password.RequiredUniqueChars = 1;
+  options.User.RequireUniqueEmail = true;
+  options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
+// Add controllers
 builder.Services.AddControllers();
 
+// Add services
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
 {
   option.SwaggerDoc("v1", new OpenApiInfo
   {
-    Title = "Car Management API",
+    Title = "Authentication and User Management API",
     Version = "v1",
-    Description = "API for managing cars, including features to list, add, and delete cars."
+    Description = "This API provides authentication, authorization, and user management functionalities. It includes features like user registration, login, role assignment, password management, and user profile operations.",
+    Contact = new OpenApiContact
+    {
+      Name = "Support Team",
+      Email = "vuongvodtan@gmail.com",
+      Url = new Uri("https://cineworld.io.vn/support")
+    },
   });
 
   option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
@@ -77,26 +87,31 @@ builder.Services.AddSwaggerGen(option =>
     Scheme = JwtBearerDefaults.AuthenticationScheme
   });
   option.AddSecurityRequirement(new OpenApiSecurityRequirement
-  {
     {
-      new OpenApiSecurityScheme
-      {
-        Reference = new OpenApiReference
         {
-          Type = ReferenceType.SecurityScheme,
-          Id = JwtBearerDefaults.AuthenticationScheme
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme
+                }
+            }, new string[]{ }
         }
-      }, new string[]{ }
-    }
-  });
+    });
 
-  // Đường dẫn đến tệp XML
   var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
   var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-  option.IncludeXmlComments(xmlPath);
+  if (File.Exists(xmlPath))
+  {
+    option.IncludeXmlComments(xmlPath);
+  }
 });
 
+// Add Authentication
 builder.AddAppAuthentication();
+
+// Add Authorization Policies
 builder.Services.AddAuthorization(options =>
 {
   options.AddPolicy("GoogleAuth", policy =>
@@ -106,33 +121,47 @@ builder.Services.AddAuthorization(options =>
   });
 });
 
-builder.Services.AddSwaggerGen();
+// Register other services
 builder.Services.AddScoped<IMembershipService, MembershipService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
 
-// Thêm CORS
+// Add CORS
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowAllOrigins",
       policy =>
       {
         policy.WithOrigins("http://localhost:5173", "https://localhost:7000")
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .AllowCredentials();
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
       });
 });
 
+// Configure Kestrel using Let's Encrypt certificate
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+  if (context.HostingEnvironment.IsProduction())
+  {
+    options.ListenAnyIP(7000, listenOptions =>
+    {
+      listenOptions.UseHttps("/app/HttpsCerf/certificate.pfx", "yourpassword");
+    });
+  }
+});
+
+
 var app = builder.Build();
 
-// Áp dụng CORS
+// Apply CORS Policy
 app.UseCors("AllowAllOrigins");
 
+// Apply migrations
 ApplyMigration();
 
-// Seed các role
+// Seed roles
 using (var scope = app.Services.CreateScope())
 {
   var services = scope.ServiceProvider;
@@ -147,29 +176,22 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
   c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth API v1");
 });
 
-
-
 app.UseHttpsRedirection();
 
-// Đăng ký middleware Serilog để ghi log các request
-//app.UseSerilogRequestLogging();
-
-// Đăng ký middleware xử lý ngoại lệ toàn cục ngay sau logging
+// Register global exception middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-
 app.MapControllers();
-
 
 app.Run();
 

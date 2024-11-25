@@ -45,7 +45,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       var query = MovieFeatures.Build(queryParameters);
       query.IncludeProperties = "Category,Country,Series,MovieGenres.Genre";
 
-
       IEnumerable<Movie> movies = await _unitOfWork.Movie.GetAllAsync(query);
 
       _response.Result = _mapper.Map<IEnumerable<MovieDetailsDto>>(movies);
@@ -59,9 +58,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
         TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
       };
 
-
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Get a movie by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the movie to retrieve.</param>
+    /// <returns>A ResponseDto containing the movie details.</returns>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -97,40 +101,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
-    [HttpGet]
-    [Route("{slug}")]
-    public async Task<ActionResult<ResponseDto>> Get(string slug)
-    {
-      Movie movie;
-      bool isAdmin = User.IsInRole(SD.AdminRole);
-      if (isAdmin)
-      {
-        movie = await _unitOfWork.Movie.GetAsync(c => c.Slug == slug, includeProperties: "Category,Country,Series,MovieGenres.Genre");
-      }
-      else
-      {
-        movie = await _unitOfWork.Movie.GetAsync(c => c.Slug == slug && c.Status == true, includeProperties: "Category,Country,Series,MovieGenres.Genre");
-      }
-
-      if (movie == null)
-      {
-        throw new NotFoundException($"Movie with Slug: {slug} not found.");
-      }
-
-      var query = new QueryParameters<Episode>();
-      query.Filters.Add(c => c.MovieId == movie.MovieId);
-
-      if (!isAdmin)
-      {
-        query.Filters.Add(c => c.Status == true);
-      }
-
-      movie.Episodes = await _unitOfWork.Episode.GetAllAsync(query);
-
-      _response.Result = _mapper.Map<MovieDetailsDto>(movie);
-      return Ok(_response);
-    }
-
     /// <summary>
     /// Adds a new movie. Only accessible by users with the Admin role.
     /// </summary>
@@ -140,7 +110,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MovieDto movieDto)
     {
-
       Movie movie = _mapper.Map<Movie>(movieDto);
 
       foreach (var genreId in movieDto.GenreIds)
@@ -157,7 +126,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         await _unitOfWork.Movie.AddAsync(movie);
         await _unitOfWork.SaveAsync();
-
       }
       catch (DbUpdateException ex)
       {
@@ -170,16 +138,20 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
 
       _response.Result = _mapper.Map<MovieDto>(movie);
-
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Increases the view count of a movie by 1.
+    /// </summary>
+    /// <param name="id">The ID of the movie whose view count will be increased.</param>
+    /// <returns>A response confirming the success of the operation.</returns>
     [HttpPost("IncreaseMovieView/{id}")]
     public async Task<ActionResult<ResponseDto>> IncreaseMovieView(int id)
     {
       Movie movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id);
 
-      if(movie == null)
+      if (movie == null)
       {
         throw new NotFoundException($"Movie with ID: {id} not found.");
       }
@@ -189,10 +161,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
       await _unitOfWork.SaveAsync();
 
       _response.Message = $"Successfully added one view to the movie with ID: {id}.";
-
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Updates the details of an existing movie. Only accessible by users with the Admin role.
+    /// </summary>
+    /// <param name="movieDto">The updated movie data transfer object.</param>
+    /// <returns>A response containing the updated movie data.</returns>
     [HttpPut]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MovieDto movieDto)
@@ -242,10 +218,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
 
       _response.Result = _mapper.Map<MovieDto>(movieFromDb);
-
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a movie by its ID. Only accessible by users with the Admin role.
+    /// </summary>
+    /// <param name="id">The ID of the movie to delete.</param>
+    /// <returns>A response confirming the success of the delete operation.</returns>
     [HttpDelete]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
@@ -261,6 +241,5 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return NoContent();
     }
-
   }
 }

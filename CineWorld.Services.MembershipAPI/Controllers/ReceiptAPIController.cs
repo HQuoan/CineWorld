@@ -25,25 +25,28 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     private readonly IEmailService _emailService;
     private readonly IMapper _mapper;
     private ResponseDto _response;
-    private readonly IUtil _util;
     private readonly IUserService _userService;
 
-    public ReceiptAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IEmailService emailService, IUserService userService)
+    public ReceiptAPIController(IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService, IUserService userService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
-      _util = util;
       _emailService = emailService;
       _userService = userService;
     }
 
+    /// <summary>
+    /// Retrieves all receipts with pagination support.
+    /// </summary>
+    /// <param name="queryParameters">Query parameters for pagination and filtering.</param>
+    /// <returns>A list of receipts with pagination information.</returns>
     [HttpGet]
-    [Authorize()]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] ReceiptQueryParameters queryParameters)
     {
       var query = ReceiptFeatures.Build(queryParameters);
-      IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync();
+      IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<ReceiptDto>>(receipts);
 
       int totalItems = await _unitOfWork.Receipt.CountAsync();
@@ -58,6 +61,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Retrieves a specific receipt by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the receipt to retrieve.</param>
+    /// <returns>The details of the specified receipt.</returns>
+    /// <response code="404">If the receipt is not found.</response>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -72,8 +82,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Retrieves all receipts for a specific user by their user ID.
+    /// </summary>
+    /// <param name="userId">The ID of the user to retrieve receipts for.</param>
+    /// <returns>A list of receipts for the specified user.</returns>
+    /// <response code="404">If no receipts are found for the user.</response>
     [HttpGet("{userId}")]
-   // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Get(string userId)
     {
       var query = new QueryParameters<Receipt>();
@@ -86,6 +101,11 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Retrieves the receipts associated with the currently authenticated user.
+    /// </summary>
+    /// <returns>A list of receipts for the current user.</returns>
+    /// <response code="404">If no receipts are found for the user.</response>
     [HttpGet("me")]
     [Authorize]
     public async Task<ActionResult<ResponseDto>> GetOrdersByMe()
@@ -107,7 +127,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
-
+    /// <summary>
+    /// Creates a new receipt for a user, including package details and potential discounts.
+    /// </summary>
+    /// <param name="receiptDto">The details of the receipt to create.</param>
+    /// <returns>The created receipt with its details.</returns>
+    /// <response code="400">If the user does not exist or is not authorized to create a receipt.</response>
+    /// <response code="404">If the package or coupon does not exist.</response>
     [HttpPost]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ReceiptDto receiptDto)
     {
@@ -170,6 +196,12 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Creates a Stripe checkout session for a specific receipt.
+    /// </summary>
+    /// <param name="stripeRequestDto">The Stripe session request details.</param>
+    /// <returns>The Stripe session URL for the user to complete the payment.</returns>
+    /// <response code="404">If the receipt or associated package is not found.</response>
     [HttpPost("CreateStripeSession")]
     public async Task<ActionResult<ResponseDto>> CreateStripeSession([FromBody] StripeRequestDto stripeRequestDto)
     {
@@ -246,11 +278,21 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
-
+    /// <summary>
+    /// Validates the payment status of a Stripe session and updates the receipt accordingly.
+    /// </summary>
+    /// <param name="receiptId">The ID of the receipt to validate.</param>
+    /// <returns>The updated receipt and membership details, if payment is successful.</returns>
+    /// <response code="404">If the receipt is not found.</response>
+    /// <response code="400">If the payment has not been completed successfully.</response>
     [HttpPost("ValidateStripeSession/{receiptId:int}")]
     public async Task<ActionResult<ResponseDto>> ValidateStripeSession(int receiptId)
     {
       Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == receiptId);
+      if (receipt == null)
+      {
+        throw new NotFoundException($"Receipt with ID: {receiptId} not found.");
+      }
 
       if (receipt.Status == SD.Status_Approved)
       {
@@ -361,8 +403,14 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     }
 
 
+    /// <summary>
+    /// Deletes a receipt. Only authorized users can delete their own pending receipts, or admins can delete any receipt.
+    /// </summary>
+    /// <param name="id">The ID of the receipt to delete.</param>
+    /// <returns>No content if deletion is successful.</returns>
+    /// <response code="404">If the receipt is not found.</response>
     [HttpDelete]
-   // [Authorize]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       Receipt receipt = await _unitOfWork.Receipt.GetAsync(c => c.ReceiptId == id);

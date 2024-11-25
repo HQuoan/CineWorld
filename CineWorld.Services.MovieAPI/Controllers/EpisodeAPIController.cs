@@ -17,21 +17,22 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
-    private readonly IUtil _util;
 
-
-    public EpisodeAPIController(IMapper mapper, IUtil util, IUnitOfWork unitOfWork)
+    public EpisodeAPIController(IMapper mapper, IUnitOfWork unitOfWork)
     {
       _mapper = mapper;
       _response = new ResponseDto();
-      _util = util;
       _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Gets a list of episodes with optional filtering, sorting, and pagination.
+    /// </summary>
+    /// <param name="queryParameters">Query parameters for filtering, sorting, and pagination.</param>
+    /// <returns>A paginated list of episodes.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] EpisodeQueryParameters queryParameters)
     {
-
       var query = EpisodeFeatures.Build(queryParameters);
 
       bool isAdmin = User.IsInRole(SD.AdminRole);
@@ -55,6 +56,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Gets an episode by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the episode.</param>
+    /// <returns>An episode object with its details.</returns>
+    /// <response code="404">Episode not found or not accessible due to inactive membership.</response>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -76,18 +84,32 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
       else
       {
-        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id && c.Status == true, includeProperties: "Servers");
+        episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id && c.IsFree == true, includeProperties: "Servers");
       }
 
       if (episode == null)
       {
-        throw new NotFoundException($"Episode with ID: {id} not found.");
+        if (!isAdmin && (membershipExpiration ?? DateTime.MinValue) <= DateTime.UtcNow)
+        {
+          throw new NotFoundException($"Episode with ID: {id} not found or not accessible due to inactive membership.");
+        }
+        else
+        {
+          throw new NotFoundException($"Episode with ID: {id} not found.");
+        }
       }
 
       _response.Result = _mapper.Map<EpisodeDetailsDto>(episode);
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Creates a new episode associated with a movie.
+    /// </summary>
+    /// <param name="episodeDto">The data to create the episode.</param>
+    /// <returns>The created episode object.</returns>
+    /// <response code="201">Episode created successfully.</response>
+    /// <response code="404">Movie not found for the provided MovieId.</response>
     [HttpPost]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] EpisodeDto episodeDto)
@@ -116,6 +138,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing episode.
+    /// </summary>
+    /// <param name="episodeDto">The data to update the episode.</param>
+    /// <returns>The updated episode object.</returns>
+    /// <response code="200">Episode updated successfully.</response>
+    /// <response code="404">Episode or movie not found for the provided ID.</response>
     [HttpPut]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] EpisodeDto episodeDto)
@@ -149,6 +178,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes an episode by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the episode to be deleted.</param>
+    /// <returns>No content if deletion is successful.</returns>
+    /// <response code="404">Episode not found for the provided ID.</response>
     [HttpDelete]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
@@ -167,6 +202,5 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return NoContent();
     }
-
   }
 }

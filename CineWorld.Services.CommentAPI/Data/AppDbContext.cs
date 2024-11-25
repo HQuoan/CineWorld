@@ -18,9 +18,9 @@ namespace CineWorld.Services.CommentAPI.Data
         {
             CommentId = 1,
             CommentParentId = null, // Comment gốc
-            UserId = "3a5a3321-ebbe-49ac-b3aa-0466a2072515",
+            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a",
             MovieId = 1,
-            EpisodeId = null,       // Không có Episode, bình luận chung cho movie
+             
             CommentContent = "This movie is amazing! I loved the characters and the plot.",
 
         },
@@ -28,9 +28,9 @@ namespace CineWorld.Services.CommentAPI.Data
         {
             CommentId = 2,
             CommentParentId = 1,
-            UserId = "af4f152c-5cdd-4027-8024-28919b019a2e",
+            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a",
             MovieId = 1,
-            EpisodeId = null,
+           
             CommentContent = "I agree, the movie was fantastic, especially the special effects!",
 
         },
@@ -38,9 +38,9 @@ namespace CineWorld.Services.CommentAPI.Data
         {
             CommentId = 3,
             CommentParentId = null,
-            UserId = "3a5a3321-ebbe-49ac-b3aa-0466a2072515",
+            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a",
             MovieId = 2,
-            EpisodeId = 1,
+            
             CommentContent = "Episode 1 had a slow start, but it picked up towards the end!",
 
         },
@@ -48,9 +48,9 @@ namespace CineWorld.Services.CommentAPI.Data
         {
             CommentId = 4,
             CommentParentId = 3,
-            UserId = "af4f152c-5cdd-4027-8024-28919b019a2e",
+            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a",
             MovieId = 2,
-            EpisodeId = 1,
+           
             CommentContent = "Totally agree, the ending was the best part!",
 
         },
@@ -58,9 +58,9 @@ namespace CineWorld.Services.CommentAPI.Data
         {
             CommentId = 5,
             CommentParentId = null,
-            UserId = "b736c9ed-4b4f-4f75-be82-186c25a69e4e",
+            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a",
             MovieId = 3,
-            EpisodeId = null,
+           
             CommentContent = "I didn't enjoy this movie as much as the previous ones. The pacing was off.",
 
         });

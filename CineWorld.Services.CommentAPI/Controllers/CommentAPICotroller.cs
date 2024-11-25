@@ -1,27 +1,31 @@
 ﻿using AutoMapper;
 using CineWorld.Services.CommentAPI.Data;
 using CineWorld.Services.CommentAPI.Models;
+using CineWorld.Services.CommentAPI.Models.Dto;
 using CineWorld.Services.CommentAPI.Models.Dtos;
+using CineWorld.Services.CommentAPI.Services.IService;
+using CineWorld.Services.CommentAPI.Utilities;
 using Mango.Services.CommentAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.CommentAPI.Controllers
 {
     [Route("api/comment")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class CommentAPIController : ControllerBase
     {
         private readonly AppDbContext _db;
         private ResponseDto _response;
         private IMapper _mapper;
-        public CommentAPIController(AppDbContext db, IMapper mapper)
+        private ICommentService _commentService;
+        public CommentAPIController(AppDbContext db, IMapper mapper, ICommentService commentService)
         {
             _db = db;
             _response = new ResponseDto();
             _mapper = mapper;
+            _commentService = commentService;
         }
         [HttpGet]
         public ResponseDto Get()
@@ -39,14 +43,29 @@ namespace CineWorld.Services.CommentAPI.Controllers
             return _response;
         }
 
-        [HttpGet]
-        [Route("{id:int}")]
-        public ResponseDto Get(int id)
+        [HttpGet("GetCommentByFilm/{id:int}")]
+
+        public async Task<ResponseDto> GetCommentByFilm(int id)
         {
             try
             {
-                Comment obj = _db.Comments.First(u => u.CommentId == id);
-                _response.Result = _mapper.Map<CommentDto>(obj);
+                UserInformation user = new UserInformation();
+                IEnumerable<Comment> obj = _db.Comments.Where(u => u.MovieId == id).ToList();
+                //_response.Result = _mapper.Map<IEnumerable<CommentDto>>(obj);
+                List<CommentDto> result = new List<CommentDto>();
+                foreach (Comment cmt in obj)
+                {
+                    user = await _commentService.GetUserInformationAsync(cmt.UserId);
+                    if (user == null)
+                    {
+                        Console.WriteLine(user + "null rồi");
+                    }
+                    CommentDto dto = _mapper.Map<CommentDto>(cmt);
+                    dto.UserName = user.FullName;
+                    result.Add(dto);
+
+                }
+                _response.Result = result;
             }
             catch (Exception ex)
             {
@@ -57,7 +76,7 @@ namespace CineWorld.Services.CommentAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto Post([FromBody] CommentDto CommentDto)
         {
             try
@@ -65,12 +84,6 @@ namespace CineWorld.Services.CommentAPI.Controllers
                 Comment obj = _mapper.Map<Comment>(CommentDto);
                 _db.Comments.Add(obj);
                 _db.SaveChanges();
-
-
-
-
-
-
                 _response.Result = _mapper.Map<CommentDto>(obj);
             }
             catch (Exception ex)
@@ -83,7 +96,7 @@ namespace CineWorld.Services.CommentAPI.Controllers
 
 
         [HttpPut]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
 
         public ResponseDto Put([FromBody] CommentDto CommentDto)
         {
@@ -105,7 +118,7 @@ namespace CineWorld.Services.CommentAPI.Controllers
 
         [HttpDelete]
         [Route("{id:int}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
 
         public ResponseDto Delete(int id)
         {
@@ -114,11 +127,6 @@ namespace CineWorld.Services.CommentAPI.Controllers
                 Comment obj = _db.Comments.First(u => u.CommentId == id);
                 _db.Comments.Remove(obj);
                 _db.SaveChanges();
-
-
-
-
-
             }
             catch (Exception ex)
             {

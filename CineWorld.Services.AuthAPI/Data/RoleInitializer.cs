@@ -33,6 +33,7 @@ namespace CineWorld.Services.AuthAPI.Data
       {
         ApplicationUser adminUser = new()
         {
+          Id = "4986f53c-a2db-4b71-80df-404bcad5413a",
           UserName = adminEmail,
           FullName = "Admin",
           Email = adminEmail,

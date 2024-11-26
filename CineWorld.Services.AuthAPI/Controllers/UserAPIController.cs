@@ -4,6 +4,7 @@ using CineWorld.Services.AuthAPI.Exceptions;
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,17 +44,17 @@ namespace Mango.Services.AuthAPI.Controllers
     {
       var users = await _db.ApplicationUsers.ToListAsync();
 
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                user.Role = string.Join(", ", roles);
-            }
+      foreach (var user in users)
+      {
+        var roles = await _userManager.GetRolesAsync(user);
+        user.Role = string.Join(", ", roles);
+      }
 
-            _response.TotalItems = users.Count;
-            _response.Result = _mapper.Map<IEnumerable<UserDto>>(users);
+      _response.TotalItems = users.Count;
+      _response.Result = _mapper.Map<IEnumerable<UserDto>>(users);
 
-            return Ok(_response);
-        }
+      return Ok(_response);
+    }
 
     /// <summary>
     /// Retrieves detailed information about a specific user by ID.
@@ -67,44 +68,29 @@ namespace Mango.Services.AuthAPI.Controllers
     public async Task<IActionResult> Get(string id)
     {
 
-            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+      string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            if (!User.IsInRole(SD.AdminRole) && (userId != null && userId != id))
-            {
-                throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
-            }
-
-
-            var user = await _userManager.FindByIdAsync(id);
+      if (!User.IsInRole(SD.AdminRole) && (userId != null && userId != id))
+      {
+        throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+      }
 
 
-            if (user == null)
-            {
-                throw new NotFoundException($"User with ID: {id} not found.");
-            }
+      var user = await _userManager.FindByIdAsync(id);
 
-            var roles = await _userManager.GetRolesAsync(user);
-            user.Role = string.Join(", ", roles);
 
-            _response.Result = _mapper.Map<UserDto>(user);
+      if (user == null)
+      {
+        throw new NotFoundException($"User with ID: {id} not found.");
+      }
 
-            return Ok(_response);
-        }
-        [HttpGet("GetInfoById/{userId}")]
-        public async Task<IActionResult> GetInfoById(string userId)
-        {
-            try
-            {
-                if (userId == null)
-                {
-                    return BadRequest("User ID cannot be empty");
-                }
+      var roles = await _userManager.GetRolesAsync(user);
+      user.Role = string.Join(", ", roles);
 
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound($"User with ID {userId} not found.");
-                }
+      _response.Result = _mapper.Map<UserDto>(user);
+
+      return Ok(_response);
+    }
 
     /// <summary>
     /// Checks if a user exists by ID.
@@ -117,8 +103,79 @@ namespace Mango.Services.AuthAPI.Controllers
     {
       var user = await _userManager.FindByIdAsync(id);
 
-            return user != null;
+      return user != null;
+    }
+
+    [HttpGet("GetInfoById/{userId}")]
+    public async Task<IActionResult> GetInfoById(string userId)
+    {
+      try
+      {
+        if (userId == null)
+        {
+          return BadRequest("User ID cannot be empty");
         }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+          return NotFound($"User with ID {userId} not found.");
+        }
+
+        var userInfo = new UserInformation
+        {
+          Id = user.Id,
+          FullName = user.FullName,
+          Avatar = user.Avatar,
+          Gender = user.Gender,
+          DateOfBirth = user.DateOfBirth
+        };
+
+
+        return Ok(userInfo);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, new { Success = false, Message = ex.Message });
+      }
+    }
+
+    [HttpGet("GetInfoByIds/{id}")]
+    public async Task<IActionResult> GetInfoByIds(List<string> userIds)
+    {
+      try
+      {
+        if (userIds == null || userIds.Count == 0)
+        {
+          return BadRequest("User IDs cannot be empty");
+        }
+        var userInformations = new List<UserInformation>();
+        foreach (var userId in userIds)
+        {
+          var user = await _userManager.FindByIdAsync(userId);
+          if (user == null)
+          {
+            continue;
+          }
+          var userInfo = new UserInformation
+          {
+            Id = user.Id,
+            FullName = user.FullName,
+            Avatar = user.Avatar,
+            Gender = user.Gender,
+            DateOfBirth = user.DateOfBirth
+          };
+          userInformations.Add(userInfo);
+
+        }
+        return Ok(userInformations);
+
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, new { Success = false, Message = ex.Message });
+      }
+    }
 
     /// <summary>
     /// Retrieves user details by email.
@@ -133,24 +190,24 @@ namespace Mango.Services.AuthAPI.Controllers
     {
       string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
-            {
-                throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
-            }
+      if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
+      {
+        throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+      }
 
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                throw new NotFoundException($"User with Email: {email} not found.");
-            }
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        throw new NotFoundException($"User with Email: {email} not found.");
+      }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            user.Role = string.Join(", ", roles);
+      var roles = await _userManager.GetRolesAsync(user);
+      user.Role = string.Join(", ", roles);
 
-            _response.Result = _mapper.Map<UserDto>(user);
+      _response.Result = _mapper.Map<UserDto>(user);
 
-            return Ok(_response);
-        }
+      return Ok(_response);
+    }
 
     /// <summary>
     /// Updates user information. Accessible by administrators or the user themselves.
@@ -164,26 +221,27 @@ namespace Mango.Services.AuthAPI.Controllers
     public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
     {
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-      if (!User.IsInRole(SD.AdminRole) ||(userId != null && userId != userInformation.Id)) { 
+      if (!User.IsInRole(SD.AdminRole) || (userId != null && userId != userInformation.Id))
+      {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
 
-            var user = await _userManager.FindByIdAsync(userInformation.Id);
-            if (user == null)
-            {
-                throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
-            }
+      var user = await _userManager.FindByIdAsync(userInformation.Id);
+      if (user == null)
+      {
+        throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
+      }
 
-            user.FullName = userInformation.FullName;
-            user.Avatar = userInformation.Avatar;
-            user.Gender = userInformation.Gender;
-            user.DateOfBirth = userInformation.DateOfBirth;
+      user.FullName = userInformation.FullName;
+      user.Avatar = userInformation.Avatar;
+      user.Gender = userInformation.Gender;
+      user.DateOfBirth = userInformation.DateOfBirth;
 
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
+      var result = await _userManager.UpdateAsync(user);
+      if (!result.Succeeded)
+      {
+        return BadRequest(result.Errors);
+      }
 
       _response.Result = userInformation;
       return Ok(_response);
@@ -207,14 +265,13 @@ namespace Mango.Services.AuthAPI.Controllers
         throw new NotFoundException($"User with ID: {id} not found.");
       }
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
+      var result = await _userManager.DeleteAsync(user);
+      if (!result.Succeeded)
+      {
+        return BadRequest(result.Errors);
+      }
 
-            return NoContent();
-        }
-
+      return NoContent();
     }
+  }
 }

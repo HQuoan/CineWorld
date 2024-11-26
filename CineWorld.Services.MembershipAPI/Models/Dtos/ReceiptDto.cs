@@ -17,13 +17,14 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// <summary>
     /// Gets or sets the user identifier associated with the receipt.
     /// </summary>
-    [Required]
-    public string UserId { get; set; }
+    [DefaultValue(null)]
+    public string? UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the user's email address associated with the receipt.
     /// </summary>
-    public string Email { get; set; }
+    [DefaultValue(null)]
+    public string? Email { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier for the package purchased.

@@ -135,8 +135,14 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     /// <response code="400">If the user does not exist or is not authorized to create a receipt.</response>
     /// <response code="404">If the package or coupon does not exist.</response>
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ReceiptDto receiptDto)
     {
+      var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+      if (receiptDto.UserId == null)
+      {
+        receiptDto.UserId = userIdClaim.Value;
+      }
 
       bool isExistUser = await _userService.IsExistUser(receiptDto.UserId);
       if (!isExistUser)
@@ -146,7 +152,6 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       if (!User.IsInRole(SD.AdminRole))
       {
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
         if (userIdClaim != null && userIdClaim.Value == receiptDto.UserId)
         {
           receiptDto.UserId = userIdClaim.Value;

@@ -1,9 +1,12 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using AutoMapper;
 using CineWorld.Services.AuthAPI.Data;
 using CineWorld.Services.AuthAPI.Exceptions;
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +24,15 @@ namespace Mango.Services.AuthAPI.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UserAPIController(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IMapper mapper)
+        private readonly IAmazonS3 _s3Client;
+        public UserAPIController(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IMapper mapper, IAmazonS3 s3Client)
         {
             _db = db;
             _userManager = userManager;
             _roleManager = roleManager;
             _response = new();
             _mapper = mapper;
+            _s3Client = s3Client;
         }
         //[Authorize(Roles = SD.AdminRole)]
 
@@ -249,6 +254,78 @@ namespace Mango.Services.AuthAPI.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPost("updateAvatar")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
+        public async Task<IActionResult> UpdateAvatar(IFormFile file, string? prefix = null)
+        {
+            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userProfile = await _userManager.FindByIdAsync(userId);
+            const string bucketName = "cineworld-user-avatars"; // Bucket cố định
+            if (userProfile == null)
+            {
+                return NotFound("User profile not found.");
+            }
+            var oldAvatarUrl = userProfile.Avatar;
+            if (!string.IsNullOrEmpty(oldAvatarUrl))
+            {
+                
+                var oldAvatarKey = oldAvatarUrl.Replace($"https://{bucketName}.s3.amazonaws.com/", string.Empty);
+
+                try
+                {
+                    var deleteRequest = new DeleteObjectRequest
+                    {
+                        BucketName = bucketName,
+                        Key = oldAvatarKey
+                    };
+                    await _s3Client.DeleteObjectAsync(deleteRequest);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Error deleting old avatar: {ex.Message}");
+                }
+            }
+            
+            var bucketExists = await _s3Client.DoesS3BucketExistAsync(bucketName);
+            if (!bucketExists) return NotFound($"Bucket {bucketName} does not exist.");
+
+            // Tạo key cho file
+            var sanitizedPrefix = string.IsNullOrEmpty(prefix) ? $"users/{userId}" : $"{prefix.TrimEnd('/')}/users/{userId}";
+            var key = $"{sanitizedPrefix}/{Guid.NewGuid()}_{file.FileName}";
+
+            // Tạo request upload
+            var request = new PutObjectRequest()
+            {
+                BucketName = bucketName,
+                Key = key,
+                InputStream = file.OpenReadStream(),
+                ContentType = file.ContentType, // Gán Content-Type từ file
+                CannedACL = S3CannedACL.PublicRead
+            };
+            request.Metadata.Add("Content-Type", file.ContentType); // Thêm Metadata Content-Type
+
+            // Upload file lên S3
+            await _s3Client.PutObjectAsync(request);
+
+            var fileUrl = $"https://{bucketName}.s3.amazonaws.com/{key}";
+
+            // Cập nhật URL vào cơ sở dữ liệu
+            
+            if (userProfile != null)
+            {
+                userProfile.Avatar = fileUrl;  
+                var result = await _userManager.UpdateAsync(userProfile);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+                _response.Result = $"File uploaded successfully to S3 at URL: {fileUrl}";
+            }
+
+            return Ok(_response);
+
         }
 
     }

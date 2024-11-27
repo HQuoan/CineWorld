@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
+  /// <summary>
+  /// Handles API requests related to packages.
+  /// </summary>
   [Route("api/packages")]
   [ApiController]
   public class PackageAPIController : ControllerBase
@@ -17,16 +20,24 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private ResponseDto _response;
-    private readonly IUtil _util;
 
-    public PackageAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PackageAPIController"/> class.
+    /// </summary>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="mapper">The AutoMapper instance.</param>
+    public PackageAPIController(IUnitOfWork unitOfWork, IMapper mapper)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
-      _util = util;
     }
 
+    /// <summary>
+    /// Gets all packages with pagination and filtering.
+    /// </summary>
+    /// <param name="queryParameters">The query parameters for pagination and filtering.</param>
+    /// <returns>A list of packages along with pagination information.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] PackageQueryParameters queryParameters)
     {
@@ -45,6 +56,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Gets a package by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the package.</param>
+    /// <returns>The package details.</returns>
+    /// <exception cref="NotFoundException">Thrown if no package is found with the given ID.</exception>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -59,11 +77,15 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Creates a new package.
+    /// </summary>
+    /// <param name="packageDto">The package data transfer object.</param>
+    /// <returns>The created package details.</returns>
     [HttpPost]
     //[Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] PackageDto packageDto)
     {
-
       Package package = _mapper.Map<Package>(packageDto);
 
       await _unitOfWork.Package.AddAsync(package);
@@ -74,8 +96,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing package.
+    /// </summary>
+    /// <param name="packageDto">The package data transfer object with updated values.</param>
+    /// <returns>The updated package details.</returns>
+    /// <exception cref="NotFoundException">Thrown if the package to update does not exist.</exception>
     [HttpPut]
-    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] PackageDto packageDto)
     {
       Package package = _mapper.Map<Package>(packageDto);
@@ -91,14 +118,18 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       await _unitOfWork.Package.UpdateAsync(package);
       await _unitOfWork.SaveAsync();
 
-
       _response.Result = _mapper.Map<PackageDto>(package);
 
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a package by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the package to delete.</param>
+    /// <returns>A no content response if successful.</returns>
+    /// <exception cref="NotFoundException">Thrown if no package is found with the given ID.</exception>
     [HttpDelete]
-    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var package = await _unitOfWork.Package.GetAsync(c => c.PackageId == id);
@@ -112,6 +143,5 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return NoContent();
     }
-
   }
 }

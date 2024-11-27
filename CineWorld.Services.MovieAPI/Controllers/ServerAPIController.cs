@@ -8,9 +8,11 @@ using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace CineWorld.Services.MovieAPI.Controllers
 {
+  /// <summary>
+  /// Controller for managing servers. Only accessible by Admin role.
+  /// </summary>
   [Route("api/servers")]
   [ApiController]
   [Authorize(Roles = SD.AdminRole)]
@@ -20,6 +22,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IMapper _mapper;
     private ResponseDto _response;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerAPIController"/> class.
+    /// </summary>
+    /// <param name="unitOfWork">Unit of work to interact with the database.</param>
+    /// <param name="mapper">Mapper to map between entity and DTO.</param>
     public ServerAPIController(IUnitOfWork unitOfWork, IMapper mapper)
     {
       _unitOfWork = unitOfWork;
@@ -27,6 +34,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _response = new ResponseDto();
     }
 
+    /// <summary>
+    /// Gets a list of all servers with pagination and filtering options.
+    /// </summary>
+    /// <param name="queryParameters">The query parameters for filtering and pagination.</param>
+    /// <returns>A ResponseDto containing the list of servers with pagination details.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] ServerQueryParameters queryParameters)
     {
@@ -46,6 +58,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Gets a specific server by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the server to retrieve.</param>
+    /// <returns>A ResponseDto containing the server details.</returns>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -60,10 +78,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Creates a new server.
+    /// </summary>
+    /// <param name="serverDto">The data transfer object containing server information.</param>
+    /// <returns>A ResponseDto containing the newly created server.</returns>
     [HttpPost]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] ServerDto serverDto)
     {
-
       Server server = _mapper.Map<Server>(serverDto);
 
       await _unitOfWork.Server.AddAsync(server);
@@ -74,6 +96,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing server.
+    /// </summary>
+    /// <param name="serverDto">The data transfer object containing updated server information.</param>
+    /// <returns>A ResponseDto containing the updated server.</returns>
     [HttpPut]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] ServerDto serverDto)
     {
@@ -88,12 +115,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
       await _unitOfWork.Server.UpdateAsync(server);
       await _unitOfWork.SaveAsync();
 
-
       _response.Result = _mapper.Map<ServerDto>(server);
 
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a server by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the server to delete.</param>
+    /// <returns>A ResponseDto indicating the result of the deletion.</returns>
     [HttpDelete]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
@@ -108,6 +139,5 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return NoContent();
     }
-
   }
 }

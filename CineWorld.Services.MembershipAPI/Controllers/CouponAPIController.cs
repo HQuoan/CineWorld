@@ -10,6 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
+  /// <summary>
+  /// Controller for managing coupons. It provides endpoints for creating, retrieving, updating, and deleting coupons.
+  /// Coupons can be retrieved by ID or code, and can be listed with pagination.
+  /// Admin roles are required to create, update, or delete coupons.
+  /// </summary>
   [Route("api/coupons")]
   [ApiController]
   public class CouponAPIController : ControllerBase
@@ -18,18 +23,28 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     private readonly IMapper _mapper;
     private ResponseDto _response;
 
+    /// <summary>
+    /// Initializes a new instance of the CouponAPIController.
+    /// </summary>
+    /// <param name="unitOfWork">Unit of work for accessing repository services.</param>
+    /// <param name="mapper">AutoMapper instance for mapping DTOs.</param>
     public CouponAPIController(IUnitOfWork unitOfWork, IMapper mapper)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
     }
+
+    /// <summary>
+    /// Retrieves a paginated list of coupons based on query parameters.
+    /// </summary>
+    /// <param name="queryParameters">Query parameters for pagination and filtering.</param>
+    /// <returns>A paginated list of coupons.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] CouponQueryParameters queryParameters)
     {
       var query = CouponFeatures.Build(queryParameters);
       IEnumerable<Coupon> coupons = await _unitOfWork.Coupon.GetAllAsync(query);
-
 
       _response.Result = _mapper.Map<IEnumerable<CouponDto>>(coupons);
 
@@ -44,6 +59,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Retrieves a coupon by its unique ID.
+    /// </summary>
+    /// <param name="id">The unique identifier of the coupon.</param>
+    /// <returns>A single coupon matching the ID.</returns>
+    /// <exception cref="NotFoundException">Thrown if the coupon is not found.</exception>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -58,6 +80,12 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Retrieves a coupon by its unique code.
+    /// </summary>
+    /// <param name="code">The unique coupon code.</param>
+    /// <returns>A single coupon matching the code.</returns>
+    /// <exception cref="NotFoundException">Thrown if the coupon is not found.</exception>
     [HttpGet]
     [Route("{code}")]
     public async Task<ActionResult<ResponseDto>> Get(string code)
@@ -72,11 +100,15 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Creates a new coupon. Only accessible by users with Admin role.
+    /// </summary>
+    /// <param name="couponDto">The coupon data transfer object.</param>
+    /// <returns>The created coupon.</returns>
     [HttpPost]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CouponDto couponDto)
     {
- 
       Coupon coupon = _mapper.Map<Coupon>(couponDto);
 
       await _unitOfWork.Coupon.AddAsync(coupon);
@@ -102,6 +134,11 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing coupon. Only accessible by users with Admin role.
+    /// </summary>
+    /// <param name="couponDto">The coupon data transfer object to update.</param>
+    /// <returns>The updated coupon.</returns>
     [HttpPut]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CouponDto couponDto)
@@ -116,6 +153,12 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a coupon by its unique ID. Only accessible by users with Admin role.
+    /// </summary>
+    /// <param name="id">The unique identifier of the coupon to delete.</param>
+    /// <returns>No content if the coupon is successfully deleted.</returns>
+    /// <exception cref="NotFoundException">Thrown if the coupon is not found.</exception>
     [HttpDelete]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)

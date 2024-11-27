@@ -28,10 +28,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _util = util;
     }
 
+    /// <summary>
+    /// Gets a list of countries with optional filtering, sorting, and pagination.
+    /// </summary>
+    /// <param name="queryParameters">Query parameters for filtering, sorting, and pagination.</param>
+    /// <returns>A paginated list of countries.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] CountryQueryParameters queryParameters)
     {
-
       var query = CountryFeatures.Build(queryParameters);
       IEnumerable<Country> countries = await _unitOfWork.Country.GetAllAsync(query);
 
@@ -48,6 +52,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Gets a country by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the country.</param>
+    /// <returns>A single country.</returns>
+    /// <response code="404">Country not found.</response>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -62,6 +73,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Gets a country by its slug.
+    /// </summary>
+    /// <param name="slug">The slug of the country.</param>
+    /// <returns>A single country.</returns>
+    /// <response code="404">Country not found.</response>
     [HttpGet]
     [Route("{slug}")]
     public async Task<ActionResult<ResponseDto>> Get(string slug)
@@ -76,6 +93,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Gets movies related to a country by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the country.</param>
+    /// <param name="queryParameters">Query parameters for filtering, sorting, and pagination.</param>
+    /// <returns>A paginated list of movies related to the country.</returns>
+    /// <response code="404">Country not found.</response>
     [HttpGet]
     [Route("{id:int}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(int id, [FromQuery] MovieQueryParameters? queryParameters)
@@ -101,6 +125,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Gets movies related to a country by its slug.
+    /// </summary>
+    /// <param name="slug">The slug of the country.</param>
+    /// <param name="queryParameters">Query parameters for filtering, sorting, and pagination.</param>
+    /// <returns>A paginated list of movies related to the country.</returns>
+    /// <response code="404">Country not found.</response>
     [HttpGet]
     [Route("{slug}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug, [FromQuery] MovieQueryParameters? queryParameters)
@@ -126,11 +157,17 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Creates a new country.
+    /// </summary>
+    /// <param name="countryDto">The country data to be created.</param>
+    /// <returns>The created country.</returns>
+    /// <response code="201">Country created successfully.</response>
+    /// <response code="400">Bad request if the country already exists.</response>
     [HttpPost]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CountryDto countryDto)
     {
-
       Country country = _mapper.Map<Country>(countryDto);
       // Generate slug
       country.Slug = SlugGenerator.GenerateSlug(country.Name);
@@ -139,7 +176,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         await _unitOfWork.Country.AddAsync(country);
         await _unitOfWork.SaveAsync();
-
       }
       catch (DbUpdateException ex)
       {
@@ -156,6 +192,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing country.
+    /// </summary>
+    /// <param name="countryDto">The country data to be updated.</param>
+    /// <returns>The updated country.</returns>
+    /// <response code="200">Country updated successfully.</response>
+    /// <response code="404">Country not found.</response>
     [HttpPut]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CountryDto countryDto)
@@ -177,7 +220,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         await _unitOfWork.Country.UpdateAsync(country);
         await _unitOfWork.SaveAsync();
-
       }
       catch (DbUpdateException ex)
       {
@@ -189,12 +231,17 @@ namespace CineWorld.Services.MovieAPI.Controllers
         }
       }
 
-
       _response.Result = _mapper.Map<CountryDto>(country);
 
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a country by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the country to be deleted.</param>
+    /// <returns>No content if deletion is successful.</returns>
+    /// <response code="404">Country not found.</response>
     [HttpDelete]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
@@ -208,8 +255,9 @@ namespace CineWorld.Services.MovieAPI.Controllers
       await _unitOfWork.Country.RemoveAsync(country);
       await _unitOfWork.SaveAsync();
 
-      return NoContent();
-    }
+      _response.Result = true;
 
+      return Ok(_response);
+    }
   }
 }

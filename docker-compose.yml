@@ -21,10 +21,9 @@ services:
       - sqlserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:7000
+      - ASPNETCORE_URLS=https://+:7000
     volumes:
-      - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ./HttpsCerf:/home/app/.aspnet/https:ro
+      - ./HttpsCerf:/app/HttpsCerf
     networks:
       - productnetwork
     restart: on-failure
@@ -39,10 +38,9 @@ services:
       - sqlserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:7001
+      - ASPNETCORE_URLS=https://+:7001
     volumes:
-      - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ./HttpsCerf:/home/app/.aspnet/https:ro
+      - ./HttpsCerf:/app/HttpsCerf
     networks:
       - productnetwork
     restart: on-failure
@@ -57,17 +55,63 @@ services:
       - sqlserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:7002
+      - ASPNETCORE_URLS=https://+:7002
     volumes:
-      - ./UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ./HttpsCerf:/home/app/.aspnet/https:ro
+      - ./HttpsCerf:/app/HttpsCerf
+    networks:
+      - productnetwork
+    restart: on-failure
+
+  cineworld.services.commentapi:
+    build:
+      context: .
+      dockerfile: CineWorld.Services.CommentAPI/Dockerfile
+    ports:
+      - "7003:7003"
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:7003
+    volumes:
+      - ./HttpsCerf:/app/HttpsCerf
+    networks:
+      - productnetwork
+    restart: on-failure
+
+  cineworld.services.historyapi:
+    build:
+      context: .
+      dockerfile: CineWorld.Services.HistoryAPI/Dockerfile
+    ports:
+      - "7004:7004"
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:7004
+    volumes:
+      - ./HttpsCerf:/app/HttpsCerf
+    networks:
+      - productnetwork
+    restart: on-failure
+
+  cineworld.services.reactionapi:
+    build:
+      context: .
+      dockerfile: CineWorld.Services.ReactionAPI/Dockerfile
+    ports:
+      - "7005:7005"
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:7005
+    volumes:
+      - ./HttpsCerf:/app/HttpsCerf
     networks:
       - productnetwork
     restart: on-failure
 
 networks:
   productnetwork:
-
-volumes:
-  UserSecrets:
-  HttpsCerf:

@@ -11,6 +11,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
+  /// <summary>
+  /// Controller responsible for handling Category-related API requests.
+  /// Provides functionality for managing categories and their associated movies.
+  /// </summary>
   [Route("api/categories")]
   [ApiController]
   public class CategoryAPIController : ControllerBase
@@ -20,6 +24,9 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private ResponseDto _response;
     private readonly IUtil _util;
 
+    /// <summary>
+    /// Initializes a new instance of the CategoryAPIController class.
+    /// </summary>
     public CategoryAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
@@ -28,6 +35,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _util = util;
     }
 
+    /// <summary>
+    /// Retrieves a list of categories with optional filtering, sorting, and pagination.
+    /// </summary>
+    /// <param name="queryParameters">Optional query parameters for filtering and pagination.</param>
+    /// <returns>A response containing the list of categories with pagination data.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] CategoryQueryParameters queryParameters)
     {
@@ -47,6 +59,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Retrieves a category by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the category.</param>
+    /// <returns>A response containing the category data.</returns>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -61,6 +79,11 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Retrieves a category by its slug.
+    /// </summary>
+    /// <param name="slug">The slug of the category.</param>
+    /// <returns>A response containing the category data.</returns>
     [HttpGet]
     [Route("{slug}")]
     public async Task<ActionResult<ResponseDto>> Get(string slug)
@@ -75,6 +98,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Retrieves movies associated with a category by its ID with optional filtering.
+    /// </summary>
+    /// <param name="id">The ID of the category.</param>
+    /// <param name="queryParameters">Optional query parameters for filtering movies.</param>
+    /// <returns>A response containing the category and its associated movies.</returns>
     [HttpGet]
     [Route("{id:int}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(int id, [FromQuery] MovieQueryParameters? queryParameters)
@@ -87,7 +116,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       var query = MovieFeatures.Build(queryParameters);
       query.Filters.Add(c => c.CategoryId == id);
-      
 
       if (!User.IsInRole(SD.AdminRole))
       {
@@ -101,6 +129,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Retrieves movies associated with a category by its slug with optional filtering.
+    /// </summary>
+    /// <param name="slug">The slug of the category.</param>
+    /// <param name="queryParameters">Optional query parameters for filtering movies.</param>
+    /// <returns>A response containing the category and its associated movies.</returns>
     [HttpGet]
     [Route("{slug}/movies")]
     public async Task<ActionResult<ResponseDto>> GetWithMovies(string slug, [FromQuery] MovieQueryParameters? queryParameters)
@@ -126,12 +160,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
-
+    /// <summary>
+    /// Creates a new category.
+    /// Only accessible to users with admin role.
+    /// </summary>
+    /// <param name="categoryDto">The category data to be created.</param>
+    /// <returns>A response containing the created category data.</returns>
     [HttpPost]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] CategoryDto categoryDto)
     {
-
       Category category = _mapper.Map<Category>(categoryDto);
       // Generate slug
       category.Slug = SlugGenerator.GenerateSlug(category.Name);
@@ -140,7 +178,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         await _unitOfWork.Category.AddAsync(category);
         await _unitOfWork.SaveAsync();
-
       }
       catch (DbUpdateException ex)
       {
@@ -157,6 +194,12 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing category.
+    /// Only accessible to users with admin role.
+    /// </summary>
+    /// <param name="categoryDto">The category data to be updated.</param>
+    /// <returns>A response containing the updated category data.</returns>
     [HttpPut]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] CategoryDto categoryDto)
@@ -178,7 +221,6 @@ namespace CineWorld.Services.MovieAPI.Controllers
       {
         await _unitOfWork.Category.UpdateAsync(category);
         await _unitOfWork.SaveAsync();
-
       }
       catch (DbUpdateException ex)
       {
@@ -190,12 +232,17 @@ namespace CineWorld.Services.MovieAPI.Controllers
         }
       }
 
-
       _response.Result = _mapper.Map<CategoryDto>(category);
 
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a category by its ID.
+    /// Only accessible to users with admin role.
+    /// </summary>
+    /// <param name="id">The ID of the category to be deleted.</param>
+    /// <returns>A NoContent response indicating successful deletion.</returns>
     [HttpDelete]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult> Delete(int id)
@@ -211,6 +258,5 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return NoContent();
     }
-
   }
 }

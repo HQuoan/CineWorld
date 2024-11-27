@@ -4,8 +4,6 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "cineworld.services.authapi": "StartDebugging",
-        "cineworld.services.authapi": "StartDebugging",
         "cineworld.services.authapi": "StartDebugging"
       }
     }

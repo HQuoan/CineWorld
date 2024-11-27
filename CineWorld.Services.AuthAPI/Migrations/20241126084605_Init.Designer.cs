@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.AuthAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241118092549_Init")]
+    [Migration("20241126084605_Init")]
     partial class Init
     {
         /// <inheritdoc />

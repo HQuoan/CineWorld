@@ -52,14 +52,41 @@ builder.Services.AddSwaggerGen(option =>
 });
 
 builder.AddAppAuthentication();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAllOrigins",
+      policy =>
+      {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:7000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+      });
+});
+
+// Configure Kestrel using Let's Encrypt certificate
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+  if (context.HostingEnvironment.IsProduction())
+  {
+    options.ListenAnyIP(7003, listenOptions =>
+    {
+      listenOptions.UseHttps("/app/HttpsCerf/certificate.pfx", "yourpassword");
+    });
+  }
+});
 var app = builder.Build();
 
+app.UseCors("AllowAllOrigins");
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+  c.SwaggerEndpoint("/swagger/v1/swagger.json", "Comment API v1");
+});
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {
+  /// <summary>
+  /// Handles API requests related to memberships.
+  /// </summary>
   [Route("api/memberships")]
   [ApiController]
   public class MemberShipAPIController : ControllerBase
@@ -19,6 +22,12 @@ namespace CineWorld.Services.MembershipAPI.Controllers
     private ResponseDto _response;
     private readonly IUtil _util;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MemberShipAPIController"/> class.
+    /// </summary>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="mapper">The AutoMapper instance.</param>
+    /// <param name="util">The utility service.</param>
     public MemberShipAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
     {
       _unitOfWork = unitOfWork;
@@ -27,6 +36,11 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       _util = util;
     }
 
+    /// <summary>
+    /// Gets all memberships with pagination and filtering.
+    /// </summary>
+    /// <param name="queryParameters">The query parameters for pagination and filtering.</param>
+    /// <returns>A list of memberships along with pagination information.</returns>
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] MemberShipQueryParameters queryParameters)
     {
@@ -45,6 +59,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return Ok(_response);
     }
+
+    /// <summary>
+    /// Gets a membership by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the membership.</param>
+    /// <returns>The membership details.</returns>
+    /// <exception cref="NotFoundException">Thrown if no membership is found with the given ID.</exception>
     [HttpGet]
     [Route("{id:int}")]
     public async Task<ActionResult<ResponseDto>> Get(int id)
@@ -59,6 +80,11 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Gets a membership by user ID.
+    /// </summary>
+    /// <param name="userId">The user ID associated with the membership.</param>
+    /// <returns>The membership details.</returns>
     [HttpGet]
     [Route("GetByUserId/{userId}")]
     public async Task<ActionResult<ResponseDto>> GetByUserId(string userId)
@@ -73,7 +99,12 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
-
+    /// <summary>
+    /// Gets a membership by user email.
+    /// </summary>
+    /// <param name="userEmail">The user email associated with the membership.</param>
+    /// <returns>The membership details.</returns>
+    /// <exception cref="NotFoundException">Thrown if no membership is found with the given email.</exception>
     [HttpGet]
     [Route("{userEmail}")]
     public async Task<ActionResult<ResponseDto>> GetByUserEmail(string userEmail)
@@ -88,11 +119,15 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Creates a new membership.
+    /// </summary>
+    /// <param name="memberShipDto">The membership data transfer object.</param>
+    /// <returns>The created membership details.</returns>
     [HttpPost]
     [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Post([FromBody] MemberShipDto memberShipDto)
     {
-
       MemberShip memberShip = _mapper.Map<MemberShip>(memberShipDto);
 
       await _unitOfWork.MemberShip.AddAsync(memberShip);
@@ -103,8 +138,13 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       return Created(string.Empty, _response);
     }
 
+    /// <summary>
+    /// Updates an existing membership.
+    /// </summary>
+    /// <param name="memberShipDto">The membership data transfer object with updated values.</param>
+    /// <returns>The updated membership details.</returns>
+    /// <exception cref="NotFoundException">Thrown if the membership to update does not exist.</exception>
     [HttpPut]
-    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] MemberShipDto memberShipDto)
     {
       MemberShip memberShip = _mapper.Map<MemberShip>(memberShipDto);
@@ -120,14 +160,18 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       await _unitOfWork.MemberShip.UpdateAsync(memberShip);
       await _unitOfWork.SaveAsync();
 
-
       _response.Result = _mapper.Map<MemberShipDto>(memberShip);
 
       return Ok(_response);
     }
 
+    /// <summary>
+    /// Deletes a membership by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the membership to delete.</param>
+    /// <returns>A no content response if successful.</returns>
+    /// <exception cref="NotFoundException">Thrown if no membership is found with the given ID.</exception>
     [HttpDelete]
-    // [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var memberShip = await _unitOfWork.MemberShip.GetAsync(c => c.MemberShipId == id);
@@ -141,6 +185,6 @@ namespace CineWorld.Services.MembershipAPI.Controllers
 
       return NoContent();
     }
-
   }
+
 }

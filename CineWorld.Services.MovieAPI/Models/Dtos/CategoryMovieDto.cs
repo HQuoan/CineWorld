@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-
-namespace CineWorld.Services.MovieAPI.Models.Dtos
+﻿namespace CineWorld.Services.MovieAPI.Models.Dtos
 {
   public class CategoryMovieDto
   {

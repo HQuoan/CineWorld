@@ -6,6 +6,7 @@ using CineWorld.Services.HistoryAPI.Utilities;
 using Mango.Services.HistoryAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineWorld.Services.HistoryAPI.Controllers
 {
@@ -22,7 +23,7 @@ namespace CineWorld.Services.HistoryAPI.Controllers
             _response = new ResponseDto();
             _mapper = mapper;
         }
-        [HttpGet]
+        [HttpGet("FilterByTime")]
         [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ActionResult<ResponseDto> Get(
         [FromQuery] DateTime fromDate,
@@ -46,17 +47,35 @@ namespace CineWorld.Services.HistoryAPI.Controllers
             }
             return _response;
         }
+        [HttpGet("GetHistoryByUserId")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
+        public ActionResult<ResponseDto> Get()
+        {
+            try
+            {
+                string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                IEnumerable<WatchHistory> watchHistories = _db.watchHistories.Where(p => p.UserId == userId).ToList();
+                _response.Result = _mapper.Map<IEnumerable<WatchHistoryDto>>(watchHistories);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+            return _response;
+        }
 
 
-
-        [HttpPost]
+        [HttpPost("PostHistory")]
         [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public ResponseDto Post([FromBody] WatchHistoryDto watchHistoryDto)
         {
             try
             {
+                string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 WatchHistory obj = _mapper.Map<WatchHistory>(watchHistoryDto);
-                var existingHistories = _db.watchHistories.Where(p => p.EpisodeId == watchHistoryDto.EpisodeId).ToList();
+                obj.UserId = userId;
+                var existingHistories = _db.watchHistories.Where(p => p.EpisodeId == watchHistoryDto.EpisodeId && p.MovieId == watchHistoryDto.MovieId).ToList();
                 if (existingHistories.Any())
                 {
                     _db.watchHistories.RemoveRange(existingHistories);
@@ -94,17 +113,25 @@ namespace CineWorld.Services.HistoryAPI.Controllers
             return _response;
         }
 
-        [HttpDelete]
-        [Route("{id:int}")]
+        [HttpDelete("DeleteHistory")]
+
         [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
 
-        public ResponseDto Delete(int id)
+        public ResponseDto Delete(
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate,
+        [FromQuery] string userId)
         {
             try
             {
-                WatchHistory obj = _db.watchHistories.First(u => u.Id == id);
-                _db.watchHistories.Remove(obj);
+                IEnumerable<WatchHistory> objList = _db.watchHistories.Where(p => p.UserId == userId && p.LastWatched >= fromDate && p.LastWatched <= toDate).ToList();
+                if (objList.Any())
+                {
+                    _db.watchHistories.RemoveRange(objList);
+                }
                 _db.SaveChanges();
+                _response.Message = $"Xóa lịch sử phim trong khoảng thời gian từ {fromDate} tới {toDate} thành công!";
+
             }
             catch (Exception ex)
             {

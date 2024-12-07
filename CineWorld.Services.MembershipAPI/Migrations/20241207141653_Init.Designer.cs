@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MembershipAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241020080031_AddEmailMembership")]
-    partial class AddEmailMembership
+    [Migration("20241207141653_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Duration")
@@ -65,6 +66,10 @@ namespace CineWorld.Services.MembershipAPI.Migrations
 
                     b.HasIndex("CouponCode")
                         .IsUnique();
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("IsActive");
 
                     b.ToTable("Coupons");
                 });
@@ -90,13 +95,21 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("MemberShipId");
+
+                    b.HasIndex("ExpirationDate");
+
+                    b.HasIndex("RenewalStartDate");
+
+                    b.HasIndex("UserEmail");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("MemberShips");
                 });
@@ -127,6 +140,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("Status")
@@ -141,6 +155,56 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                     b.HasKey("PackageId");
 
                     b.ToTable("Packages");
+
+                    b.HasData(
+                        new
+                        {
+                            PackageId = 1,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "Access to basic features",
+                            Name = "Basic",
+                            Price = 10.00m,
+                            Status = true,
+                            TermInMonths = 1,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            PackageId = 2,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "Access to standard features with no ads",
+                            Name = "Standard",
+                            Price = 25.00m,
+                            Status = true,
+                            TermInMonths = 3,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            PackageId = 3,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "All features unlocked, including exclusive content",
+                            Name = "Premium",
+                            Price = 50.00m,
+                            Status = true,
+                            TermInMonths = 6,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            PackageId = 4,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "USD",
+                            Description = "Best value yearly subscription for professionals",
+                            Name = "Yearly Pro",
+                            Price = 100.00m,
+                            Status = true,
+                            TermInMonths = 12,
+                            UpdatedDate = new DateTime(2024, 11, 17, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("CineWorld.Services.MembershipAPI.Models.Receipt", b =>
@@ -152,7 +216,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReceiptId"));
 
                     b.Property<string>("CouponCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
@@ -160,19 +224,25 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PackageId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("PackagePrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PaymentIntentId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("StripeSessionId")
                         .HasColumnType("nvarchar(max)");
@@ -182,11 +252,21 @@ namespace CineWorld.Services.MembershipAPI.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ReceiptId");
 
+                    b.HasIndex("CouponCode");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("Email");
+
                     b.HasIndex("PackageId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Receipts");
                 });

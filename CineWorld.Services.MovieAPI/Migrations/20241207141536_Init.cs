@@ -181,7 +181,7 @@ namespace CineWorld.Services.MovieAPI.Migrations
                     ServerId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EpisodeId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Link = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -293,6 +293,26 @@ namespace CineWorld.Services.MovieAPI.Migrations
                 filter: "[Slug] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Episodes_CreatedDate",
+                table: "Episodes",
+                column: "CreatedDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Episodes_EpisodeNumber",
+                table: "Episodes",
+                column: "EpisodeNumber");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Episodes_MovieId",
+                table: "Episodes",
+                column: "MovieId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Episodes_Status",
+                table: "Episodes",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Movie_EpisodeNumber",
                 table: "Episodes",
                 columns: new[] { "MovieId", "EpisodeNumber" },
@@ -316,55 +336,60 @@ namespace CineWorld.Services.MovieAPI.Migrations
                 column: "MovieId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Movie_CategoryId",
+                name: "IX_Movies_CategoryId",
                 table: "Movies",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Movie_CountryId",
+                name: "IX_Movies_CountryId",
                 table: "Movies",
                 column: "CountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Movie_CreatedDate",
+                name: "IX_Movies_CreatedDate",
                 table: "Movies",
                 column: "CreatedDate");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Movie_IsHot",
+                name: "IX_Movies_IsHot",
                 table: "Movies",
                 column: "IsHot");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Movie_Name",
+                name: "IX_Movies_Name",
                 table: "Movies",
                 column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Movie_Slug",
-                table: "Movies",
-                column: "Slug",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Movie_UpdatedDate",
-                table: "Movies",
-                column: "UpdatedDate");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Movie_View",
-                table: "Movies",
-                column: "View");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Movie_Year",
-                table: "Movies",
-                column: "Year");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Movies_SeriesId",
                 table: "Movies",
                 column: "SeriesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Movies_Slug",
+                table: "Movies",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Movies_Status",
+                table: "Movies",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Movies_UpdatedDate",
+                table: "Movies",
+                column: "UpdatedDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Movies_View",
+                table: "Movies",
+                column: "View");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Movies_Year",
+                table: "Movies",
+                column: "Year");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Series_Slug",
@@ -377,6 +402,11 @@ namespace CineWorld.Services.MovieAPI.Migrations
                 name: "IX_Servers_EpisodeId",
                 table: "Servers",
                 column: "EpisodeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Servers_Name",
+                table: "Servers",
+                column: "Name");
         }
 
         /// <inheritdoc />

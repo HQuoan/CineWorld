@@ -401,6 +401,14 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.HasKey("EpisodeId");
 
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("EpisodeNumber");
+
+                    b.HasIndex("MovieId");
+
+                    b.HasIndex("Status");
+
                     b.HasIndex("MovieId", "EpisodeNumber")
                         .IsUnique()
                         .HasDatabaseName("IX_Movie_EpisodeNumber");
@@ -668,35 +676,28 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.HasKey("MovieId");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("IX_Movie_CategoryId");
+                    b.HasIndex("CategoryId");
 
-                    b.HasIndex("CountryId")
-                        .HasDatabaseName("IX_Movie_CountryId");
+                    b.HasIndex("CountryId");
 
-                    b.HasIndex("CreatedDate")
-                        .HasDatabaseName("IX_Movie_CreatedDate");
+                    b.HasIndex("CreatedDate");
 
-                    b.HasIndex("IsHot")
-                        .HasDatabaseName("IX_Movie_IsHot");
+                    b.HasIndex("IsHot");
 
-                    b.HasIndex("Name")
-                        .HasDatabaseName("IX_Movie_Name");
+                    b.HasIndex("Name");
 
                     b.HasIndex("SeriesId");
 
                     b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Movie_Slug");
+                        .IsUnique();
 
-                    b.HasIndex("UpdatedDate")
-                        .HasDatabaseName("IX_Movie_UpdatedDate");
+                    b.HasIndex("Status");
 
-                    b.HasIndex("View")
-                        .HasDatabaseName("IX_Movie_View");
+                    b.HasIndex("UpdatedDate");
 
-                    b.HasIndex("Year")
-                        .HasDatabaseName("IX_Movie_Year");
+                    b.HasIndex("View");
+
+                    b.HasIndex("Year");
 
                     b.ToTable("Movies");
                 });
@@ -768,11 +769,13 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ServerId");
 
                     b.HasIndex("EpisodeId");
+
+                    b.HasIndex("Name");
 
                     b.ToTable("Servers");
                 });

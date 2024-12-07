@@ -40,6 +40,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Duration")
@@ -62,6 +63,10 @@ namespace CineWorld.Services.MembershipAPI.Migrations
 
                     b.HasIndex("CouponCode")
                         .IsUnique();
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("IsActive");
 
                     b.ToTable("Coupons");
                 });
@@ -87,13 +92,21 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("MemberShipId");
+
+                    b.HasIndex("ExpirationDate");
+
+                    b.HasIndex("RenewalStartDate");
+
+                    b.HasIndex("UserEmail");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("MemberShips");
                 });
@@ -124,6 +137,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("Status")
@@ -199,7 +213,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReceiptId"));
 
                     b.Property<string>("CouponCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
@@ -207,23 +221,25 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PackageId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("PackagePrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PaymentIntentId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("StripeSessionId")
                         .HasColumnType("nvarchar(max)");
@@ -233,11 +249,21 @@ namespace CineWorld.Services.MembershipAPI.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ReceiptId");
 
+                    b.HasIndex("CouponCode");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("Email");
+
                     b.HasIndex("PackageId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Receipts");
                 });

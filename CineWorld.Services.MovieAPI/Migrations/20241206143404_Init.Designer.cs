@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241120053317_Init")]
+    [Migration("20241206143404_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -636,7 +636,7 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("OriginName")
                         .HasColumnType("nvarchar(max)");
@@ -671,14 +671,35 @@ namespace CineWorld.Services.MovieAPI.Migrations
 
                     b.HasKey("MovieId");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("IX_Movie_CategoryId");
 
-                    b.HasIndex("CountryId");
+                    b.HasIndex("CountryId")
+                        .HasDatabaseName("IX_Movie_CountryId");
+
+                    b.HasIndex("CreatedDate")
+                        .HasDatabaseName("IX_Movie_CreatedDate");
+
+                    b.HasIndex("IsHot")
+                        .HasDatabaseName("IX_Movie_IsHot");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_Movie_Name");
 
                     b.HasIndex("SeriesId");
 
                     b.HasIndex("Slug")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Movie_Slug");
+
+                    b.HasIndex("UpdatedDate")
+                        .HasDatabaseName("IX_Movie_UpdatedDate");
+
+                    b.HasIndex("View")
+                        .HasDatabaseName("IX_Movie_View");
+
+                    b.HasIndex("Year")
+                        .HasDatabaseName("IX_Movie_Year");
 
                     b.ToTable("Movies");
                 });

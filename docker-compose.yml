@@ -10,6 +10,11 @@ services:
       - "1400:1433"
     networks:
       - productnetwork
+    deploy:
+      resources:
+        limits:
+          memory: 600m
+          cpus: "0.5"
   
   cineworld.services.authapi:
     build:

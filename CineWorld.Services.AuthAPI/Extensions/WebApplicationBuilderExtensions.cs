@@ -15,8 +15,6 @@ namespace CineWorld.Services.AuthAPI.Extensions
       var secret = builder.Configuration.GetValue<string>("ApiSettings:JwtOptions:Secret");
       var issuer = builder.Configuration.GetValue<string>("ApiSettings:JwtOptions:Issuer");
       var audience = builder.Configuration.GetValue<string>("ApiSettings:JwtOptions:Audience");
-      var googleClientId = builder.Configuration.GetValue<string>("ApiSettings:Google:ClientId");
-      var googleClientSecret = builder.Configuration.GetValue<string>("ApiSettings:Google:ClientSecret");
 
       var key = Encoding.ASCII.GetBytes(secret);
 
@@ -36,14 +34,7 @@ namespace CineWorld.Services.AuthAPI.Extensions
           ValidateAudience = true,
           ValidAudience = audience,
         };
-      })
-      .AddGoogle(googleOptions =>
-      {
-        googleOptions.ClientId = googleClientId;
-        googleOptions.ClientSecret = googleClientSecret;
-        googleOptions.CallbackPath = "/signin-google"; // Phải khớp với cấu hình của Google Console
-      })
-      .AddCookie();
+      });
       
       return builder;
     }

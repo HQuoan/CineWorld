@@ -58,7 +58,7 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// Gets the total amount after applying the discount. Calculated as PackagePrice minus DiscountAmount.
     /// </summary>
     [NotMapped]
-    public decimal TotalAmount => PackagePrice - DiscountAmount;
+    public decimal TotalAmount => (PackagePrice - DiscountAmount) > 0 ? (PackagePrice - DiscountAmount) : 0;
 
     /// <summary>
     /// Gets or sets the date and time when the receipt was created.

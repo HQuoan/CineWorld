@@ -40,9 +40,6 @@ namespace CineWorld.Services.CommentAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("EpisodeId")
-                        .HasColumnType("int");
-
                     b.Property<int>("MovieId")
                         .HasColumnType("int");
 
@@ -59,45 +56,43 @@ namespace CineWorld.Services.CommentAPI.Migrations
                         {
                             CommentId = 1,
                             CommentContent = "This movie is amazing! I loved the characters and the plot.",
-                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9391),
+                            CreatedAt = new DateTime(2024, 11, 26, 16, 55, 10, 743, DateTimeKind.Local).AddTicks(9577),
                             MovieId = 1,
-                            UserId = "3a5a3321-ebbe-49ac-b3aa-0466a2072515"
+                            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a"
                         },
                         new
                         {
                             CommentId = 2,
                             CommentContent = "I agree, the movie was fantastic, especially the special effects!",
                             CommentParentId = 1,
-                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9412),
+                            CreatedAt = new DateTime(2024, 11, 26, 16, 55, 10, 743, DateTimeKind.Local).AddTicks(9590),
                             MovieId = 1,
-                            UserId = "af4f152c-5cdd-4027-8024-28919b019a2e"
+                            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a"
                         },
                         new
                         {
                             CommentId = 3,
                             CommentContent = "Episode 1 had a slow start, but it picked up towards the end!",
-                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9415),
-                            EpisodeId = 1,
+                            CreatedAt = new DateTime(2024, 11, 26, 16, 55, 10, 743, DateTimeKind.Local).AddTicks(9591),
                             MovieId = 2,
-                            UserId = "3a5a3321-ebbe-49ac-b3aa-0466a2072515"
+                            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a"
                         },
                         new
                         {
                             CommentId = 4,
                             CommentContent = "Totally agree, the ending was the best part!",
                             CommentParentId = 3,
-                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9418),
-                            EpisodeId = 1,
+                            CreatedAt = new DateTime(2024, 11, 26, 16, 55, 10, 743, DateTimeKind.Local).AddTicks(9592),
                             MovieId = 2,
-                            UserId = "af4f152c-5cdd-4027-8024-28919b019a2e"
+                            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a"
                         },
                         new
                         {
                             CommentId = 5,
                             CommentContent = "I didn't enjoy this movie as much as the previous ones. The pacing was off.",
-                            CreatedAt = new DateTime(2024, 11, 23, 14, 49, 58, 72, DateTimeKind.Local).AddTicks(9421),
+                            CreatedAt = new DateTime(2024, 11, 26, 16, 55, 10, 743, DateTimeKind.Local).AddTicks(9593),
                             MovieId = 3,
-                            UserId = "b736c9ed-4b4f-4f75-be82-186c25a69e4e"
+                            UserId = "4986f53c-a2db-4b71-80df-404bcad5413a"
                         });
                 });
 #pragma warning restore 612, 618

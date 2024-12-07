@@ -17,7 +17,6 @@ namespace Mango.Services.AuthAPI.Controllers
   /// </summary>
   [Route("api/users")]
   [ApiController]
-  [Authorize]
   public class UserAPIController : ControllerBase
   {
     protected ResponseDto _response;
@@ -65,6 +64,7 @@ namespace Mango.Services.AuthAPI.Controllers
     /// <response code="403">If the user is not authorized to view the details.</response>
     /// <response code="404">If the user is not found.</response>
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<IActionResult> Get(string id)
     {
 
@@ -186,6 +186,7 @@ namespace Mango.Services.AuthAPI.Controllers
     /// <response code="403">If the user is not authorized to view the details.</response>
     /// <response code="404">If the user is not found.</response>
     [HttpGet("GetByEmail/{email}")]
+    [Authorize]
     public async Task<IActionResult> GetByEmail(string email)
     {
       string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -218,6 +219,7 @@ namespace Mango.Services.AuthAPI.Controllers
     /// <response code="403">If the user is not authorized to update the information.</response>
     /// <response code="404">If the user is not found.</response>
     [HttpPut("UpdateInformation")]
+    [Authorize]
     public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
     {
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;

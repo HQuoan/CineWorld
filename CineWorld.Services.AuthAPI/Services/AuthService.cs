@@ -4,13 +4,14 @@ using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
 using CineWorld.Services.AuthAPI.Utilities;
-using Microsoft.AspNetCore.Authentication;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
+using Microsoft.Extensions.Options;
+using System.Security.Authentication;
 
 namespace CineWorld.Services.AuthAPI.Services
 {
-  public class AuthService : IAuthService
+    public class AuthService : IAuthService
   {
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -18,7 +19,8 @@ namespace CineWorld.Services.AuthAPI.Services
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IMembershipService _membershipService;
     private readonly IEmailService _emailService;
-    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator, IMembershipService membershipService, IEmailService emailService)
+    private readonly GoogleSettings _googleSettings;
+    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator, IMembershipService membershipService, IEmailService emailService, IOptions<GoogleSettings> googleSettings)
     {
       _db = db;
       _userManager = userManager;
@@ -26,6 +28,7 @@ namespace CineWorld.Services.AuthAPI.Services
       _jwtTokenGenerator = jwtTokenGenerator;
       _membershipService = membershipService;
       _emailService = emailService;
+      _googleSettings = googleSettings.Value;
     }
 
     public async Task<bool> AssignRole(string email, string roleName)
@@ -89,6 +92,7 @@ namespace CineWorld.Services.AuthAPI.Services
         Id = user.Id,
         Email = user.Email,
         FullName = user.FullName,
+        Avatar = user.Avatar,
         Gender = user.Gender,
         DateOfBirth = user.DateOfBirth,
         Role = string.Join(", ", roles),
@@ -119,7 +123,7 @@ namespace CineWorld.Services.AuthAPI.Services
         var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
         if (result.Succeeded)
         {
-      
+
 
           // Tạo token và link xác nhận
           var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -208,30 +212,51 @@ namespace CineWorld.Services.AuthAPI.Services
         throw new ApplicationException($"Email confirmation failed: {errors}");
       }
     }
+    private async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(string token)
+    {
+      try
+      {
+        var validPayload = await GoogleJsonWebSignature.ValidateAsync(token);
 
+        // Kiểm tra token hợp lệ bằng ClientId và Audience
+        if (validPayload != null&& validPayload.Issuer.ToString() == "https://accounts.google.com" && validPayload.Audience.ToString() == _googleSettings.ClientId)
+        {
+          return validPayload;
+        }
+        return null;
+      }
+      catch (Exception ex)
+      {
+        return null;
+      }
+    }
 
-    public async Task<LoginResponseDto> SignInWithGoogle(AuthenticateResult authenticateResult)
+    public async Task<LoginResponseDto> SignInWithGoogle(string token)
     {
 
-      var claims = authenticateResult.Principal?.Identities.FirstOrDefault()?.Claims;
-      var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-      var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-
-      if (string.IsNullOrEmpty(email))
+      // Xác thực mã token từ Google
+      var payload = await VerifyGoogleToken(token);
+      if (payload == null)
       {
-        throw new ApplicationException("Unable to retrieve user email.");
+        throw new UnauthorizedAccessException("Invalid Google token.");
+      }
+
+      if (string.IsNullOrEmpty(payload.Email))
+      {
+        throw new AuthenticationException("Unable to retrieve user email.");
       }
 
       // Kiểm tra nếu user đã tồn tại trong database, nếu không, tạo mới
-      var user = await _userManager.FindByEmailAsync(email);
+      var user = await _userManager.FindByEmailAsync(payload.Email);
       if (user == null)
       {
         user = new ApplicationUser
         {
-          Email = email,
-          UserName = email,
-          FullName = name ?? email.Split('@')[0],
-          NormalizedEmail = email.ToUpper(),
+          Email = payload.Email,
+          UserName = payload.Email,
+          FullName = payload.Name ?? payload.Email.Split('@')[0],
+          NormalizedEmail = payload.Email.ToUpper(),
+          Avatar = payload.Picture,
           Gender = "Male",
           DateOfBirth = new DateTime(2000, 1, 1),
           EmailConfirmed = true,
@@ -275,21 +300,21 @@ namespace CineWorld.Services.AuthAPI.Services
       {
         membershipExpiration = membership.ExpirationDate;
       }
-      var token = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
+      var tokenRespone = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
 
 
       UserDto userDto = new()
       {
-        Id = user.Id,
         Email = user.Email,
         FullName = user.FullName,
+        Avatar = user.Avatar,
         Gender = "Male",
         DateOfBirth = new DateTime(2000, 1, 1),
         Role = string.Join(", ", roles),
       };
 
       loginResponseDto.User = userDto;
-      loginResponseDto.Token = token;
+      loginResponseDto.Token = tokenRespone;
 
       return loginResponseDto;
     }

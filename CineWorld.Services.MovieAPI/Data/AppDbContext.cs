@@ -77,7 +77,7 @@ namespace CineWorld.Services.MovieAPI.Data
       // mặc định tạo CreatedDate khi tạo và không update được 
       modelBuilder.Entity<Movie>()
            .Property(m => m.CreatedDate)
-           .HasDefaultValueSql("GETDATE()") 
+           .HasDefaultValueSql("GETDATE()")
            .ValueGeneratedOnAdd()
            .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
 
@@ -105,15 +105,52 @@ namespace CineWorld.Services.MovieAPI.Data
           .HasIndex(c => c.Slug)
           .IsUnique();
 
+      // Tạo chỉ mục (index) cho các trường trong bảng Movie
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.Name)
+          .HasName("IX_Movie_Name");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.Slug)
+          .HasName("IX_Movie_Slug");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.CategoryId)
+          .HasName("IX_Movie_CategoryId");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.CountryId)
+          .HasName("IX_Movie_CountryId");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.Year)
+          .HasName("IX_Movie_Year");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.View)
+          .HasName("IX_Movie_View");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.IsHot)
+          .HasName("IX_Movie_IsHot");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.CreatedDate)
+          .HasName("IX_Movie_CreatedDate");
+
+      modelBuilder.Entity<Movie>()
+          .HasIndex(m => m.UpdatedDate)
+          .HasName("IX_Movie_UpdatedDate");
+
     }
 
     public async Task SeedDataAsync()
     {
-        await SeedEntityAsync<Movie>("Data/SeedData/movies.json", Movies);
-        await SeedEntityAsync<MovieGenre>("Data/SeedData/moviegenres.json", MovieGenres);
-        await SeedEntityAsync<Episode>("Data/SeedData/episodes.json", Episodes);
-        await SeedEntityAsync<Server>("Data/SeedData/servers.json", Servers);
-      
+      await SeedEntityAsync<Movie>("Data/SeedData/movies.json", Movies);
+      await SeedEntityAsync<MovieGenre>("Data/SeedData/moviegenres.json", MovieGenres);
+      await SeedEntityAsync<Episode>("Data/SeedData/episodes.json", Episodes);
+      await SeedEntityAsync<Server>("Data/SeedData/servers.json", Servers);
+
     }
 
     private async Task SeedEntityAsync<TEntity>(string filePath, DbSet<TEntity> dbSet) where TEntity : class

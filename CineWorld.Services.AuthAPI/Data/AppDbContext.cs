@@ -17,6 +17,26 @@ namespace CineWorld.Services.AuthAPI.Data
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
+
+      modelBuilder.Entity<ApplicationUser>()
+        .HasIndex(u => u.Email)
+        .IsUnique(); 
+
+      modelBuilder.Entity<ApplicationUser>()
+          .HasIndex(u => u.FullName);
+
+      modelBuilder.Entity<ApplicationUser>()
+          .HasIndex(u => u.Gender);
+
+      modelBuilder.Entity<ApplicationUser>()
+          .HasIndex(u => u.DateOfBirth);
+
+      modelBuilder.Entity<IdentityUserRole<string>>()
+          .HasIndex(ur => new { ur.UserId, ur.RoleId });
+
+      modelBuilder.Entity<IdentityRole>()
+          .HasIndex(r => r.Name);
+
     }
   }
 }

@@ -44,7 +44,7 @@ namespace Mango.Services.AuthAPI.Controllers
     /// <response code="200">Returns the list of users.</response>
     /// <response code="403">If the user is not authorized.</response>
     [HttpGet]
-    //[Authorize(Roles = SD.AdminRole)]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<IActionResult> Get([FromQuery] UserQueryParameters queryParameters)
     {
       // Build query parameters

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using CineWorld.EmailService;
 using CineWorld.Services.AuthAPI;
 using CineWorld.Services.AuthAPI.Attributes;
@@ -35,7 +36,10 @@ IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// Configure JWT
+//Cấu hình S3
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
+
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 builder.Services.Configure<GoogleSettings>(builder.Configuration.GetSection("ApiSettings:Google"));
 

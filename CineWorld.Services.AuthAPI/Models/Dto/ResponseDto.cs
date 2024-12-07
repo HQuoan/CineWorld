@@ -1,27 +1,28 @@
 ﻿namespace CineWorld.Services.AuthAPI.Models.Dto
 {
   /// <summary>
-  /// Represents a standardized response object for API responses.
+  /// Represents the response structure for API responses.
+  /// This class contains information about the result, success status, message, and pagination.
   /// </summary>
   public class ResponseDto
   {
     /// <summary>
-    /// The total number of items in the response (used for pagination).
+    /// Gets or sets the pagination information if applicable.
     /// </summary>
-    public int? TotalItems { get; set; }
+    public PaginationDto? Pagination { get; set; }
 
     /// <summary>
-    /// The result of the API request, can be any object (e.g., list of data, user info, etc.).
+    /// Gets or sets the result of the API request. This can be any object representing the data returned.
     /// </summary>
     public object? Result { get; set; }
 
     /// <summary>
-    /// Indicates if the request was successful.
+    /// Gets or sets a value indicating whether the API request was successful.
     /// </summary>
     public bool IsSuccess { get; set; } = true;
 
     /// <summary>
-    /// A message providing additional details about the result (e.g., error or success message).
+    /// Gets or sets a message related to the request. This can provide additional information about the result.
     /// </summary>
     public string Message { get; set; } = "";
   }

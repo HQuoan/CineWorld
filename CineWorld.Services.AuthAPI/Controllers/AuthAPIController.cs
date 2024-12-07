@@ -1,7 +1,5 @@
 ﻿using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

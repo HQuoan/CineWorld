@@ -42,6 +42,7 @@ builder.Services.AddAWSService<IAmazonS3>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 builder.Services.Configure<GoogleSettings>(builder.Configuration.GetSection("ApiSettings:Google"));
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
 
 // Configure Identity

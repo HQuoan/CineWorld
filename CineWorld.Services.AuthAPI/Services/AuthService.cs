@@ -19,8 +19,9 @@ namespace CineWorld.Services.AuthAPI.Services
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IMembershipService _membershipService;
     private readonly IEmailService _emailService;
-    private readonly GoogleSettings _googleSettings;
-    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator, IMembershipService membershipService, IEmailService emailService, IOptions<GoogleSettings> googleSettings)
+    //private readonly GoogleSettings _googleSettings;
+    private readonly ApiSettings _apiSettings;
+    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator, IMembershipService membershipService, IEmailService emailService, IOptions<ApiSettings> apiSettings)
     {
       _db = db;
       _userManager = userManager;
@@ -28,7 +29,7 @@ namespace CineWorld.Services.AuthAPI.Services
       _jwtTokenGenerator = jwtTokenGenerator;
       _membershipService = membershipService;
       _emailService = emailService;
-      _googleSettings = googleSettings.Value;
+      _apiSettings = apiSettings.Value;
     }
 
     public async Task<bool> AssignRole(string email, string roleName)
@@ -127,7 +128,7 @@ namespace CineWorld.Services.AuthAPI.Services
 
           // Tạo token và link xác nhận
           var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-          string callBackUrl = "https://localhost:7000/api/auth/confirm-email";
+          string callBackUrl = $"{_apiSettings.BaseUrl}/api/auth/confirm-email";
           var confirmationLink = $"{callBackUrl}?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
           // Gửi email
@@ -219,7 +220,7 @@ namespace CineWorld.Services.AuthAPI.Services
         var validPayload = await GoogleJsonWebSignature.ValidateAsync(token);
 
         // Kiểm tra token hợp lệ bằng ClientId và Audience
-        if (validPayload != null&& validPayload.Issuer.ToString() == "https://accounts.google.com" && validPayload.Audience.ToString() == _googleSettings.ClientId)
+        if (validPayload != null&& validPayload.Issuer.ToString() == "https://accounts.google.com" && validPayload.Audience.ToString() == _apiSettings.Google.ClientId)
         {
           return validPayload;
         }

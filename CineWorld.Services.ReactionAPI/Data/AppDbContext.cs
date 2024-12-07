@@ -14,16 +14,16 @@ namespace CineWorld.Services.ReactionAPI.Data
             modelBuilder.Entity<UserFavorites>()
        .HasKey(uf => new { uf.UserId, uf.MovieId });
             // Dữ liệu mẫu cho bảng UserFavorites
-            modelBuilder.Entity<UserFavorites>().HasData(
+            //modelBuilder.Entity<UserFavorites>().HasData(
                 
                 
-            );
+            //);
 
-            // Dữ liệu mẫu cho bảng UserRatess
-            modelBuilder.Entity<UserRates>().HasData(
+            //// Dữ liệu mẫu cho bảng UserRatess
+            //modelBuilder.Entity<UserRates>().HasData(
                 
                
-            );
+            //);
 
         }
 

@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using AutoMapper;
+using CineWorld.Services.AuthAPI.APIFeatures;
 using CineWorld.Services.AuthAPI.Data;
 using CineWorld.Services.AuthAPI.Exceptions;
 using CineWorld.Services.AuthAPI.Models;
@@ -34,7 +35,7 @@ namespace Mango.Services.AuthAPI.Controllers
             _mapper = mapper;
             _s3Client = s3Client;
         }
-        //[Authorize(Roles = SD.AdminRole)]
+    //[Authorize(Roles = SD.AdminRole)]
 
     /// <summary>
     /// Retrieves a list of all users. Only accessible by administrators.
@@ -43,22 +44,86 @@ namespace Mango.Services.AuthAPI.Controllers
     /// <response code="200">Returns the list of users.</response>
     /// <response code="403">If the user is not authorized.</response>
     [HttpGet]
-    [Authorize(Roles = SD.AdminRole)]
-    public async Task<IActionResult> Get()
+    //[Authorize(Roles = SD.AdminRole)]
+    public async Task<IActionResult> Get([FromQuery] UserQueryParameters queryParameters)
     {
-      var users = await _db.ApplicationUsers.ToListAsync();
+      // Build query parameters
+      var query = UserFeatures.Build(queryParameters);
 
+      // Apply filters, sorting, and pagination (exclude Role)
+      var queryableUsers = _db.ApplicationUsers.AsQueryable();
+
+      if (query.Filters != null && query.Filters.Any())
+      {
+        foreach (var filter in query.Filters)
+        {
+          queryableUsers = queryableUsers.Where(filter);
+        }
+      }
+
+      if (query.OrderBy != null)
+      {
+        queryableUsers = query.OrderBy(queryableUsers);
+      }
+
+      // Retrieve total items before pagination
+      var totalItemsBeforePagination = queryableUsers.Count();
+
+      var users = await queryableUsers
+          .Skip((query.PageNumber - 1) * query.PageSize)
+          .Take(query.PageSize)
+          .ToListAsync();
+
+      // Retrieve roles for each user
       foreach (var user in users)
       {
         var roles = await _userManager.GetRolesAsync(user);
         user.Role = string.Join(", ", roles);
       }
 
-      _response.TotalItems = users.Count;
-      _response.Result = _mapper.Map<IEnumerable<UserDto>>(users);
+      // Filter by Role (in-memory)
+      if (!string.IsNullOrEmpty(queryParameters.Role))
+      {
+        users = users
+            .Where(u => u.Role.ToLower().Contains(queryParameters.Role.ToLower()))
+            .ToList();
+      }
+
+      // Sort by Role (in-memory)
+      if (!string.IsNullOrEmpty(queryParameters.OrderBy))
+      {
+        var isDescending = queryParameters.OrderBy.StartsWith("-");
+        var property = isDescending ? queryParameters.OrderBy.Substring(1) : queryParameters.OrderBy;
+
+        if (property.ToLower() == "role")
+        {
+          users = isDescending
+              ? users.OrderByDescending(u => u.Role).ToList()
+              : users.OrderBy(u => u.Role).ToList();
+        }
+      }
+
+      // Calculate pagination details
+      var totalFilteredItems = users.Count; // Count after Role filter
+      var paginatedUsers = users
+          .Skip((query.PageNumber - 1) * query.PageSize)
+          .Take(query.PageSize)
+          .ToList();
+
+      // Map to DTO
+      _response.Result = _mapper.Map<IEnumerable<UserDto>>(paginatedUsers);
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalFilteredItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalFilteredItems / queryParameters.PageSize)
+      };
 
       return Ok(_response);
     }
+
+
 
     /// <summary>
     /// Retrieves detailed information about a specific user by ID.

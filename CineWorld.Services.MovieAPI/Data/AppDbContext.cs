@@ -39,29 +39,6 @@ namespace CineWorld.Services.MovieAPI.Data
 
       modelBuilder.Entity<Genre>().HasData(genres.ToArray());
 
-      //// Seed to Movies
-      //string moviesJson = System.IO.File.ReadAllText("Data/SeedData/movies.json");
-      //List<Movie> movies = System.Text.Json.JsonSerializer.Deserialize<List<Movie>>(moviesJson);
-      //modelBuilder.Entity<Movie>().HasData(movies.ToArray());
-
-      //// Seed to MovieGenres (nhiều-nhiều)
-      //string movieGenresJson = System.IO.File.ReadAllText("Data/SeedData/moviegenres.json");
-      //List<MovieGenre> movieGenres = System.Text.Json.JsonSerializer.Deserialize<List<MovieGenre>>(movieGenresJson);
-
-      //// Chắc chắn rằng MovieId và GenreId được match đúng trong bảng MovieGenre
-      //modelBuilder.Entity<MovieGenre>().HasData(movieGenres.ToArray());
-
-      //// Seed to Episodes
-      //string episodesJson = System.IO.File.ReadAllText("Data/SeedData/episodes.json");
-      //List<Episode> episodes = System.Text.Json.JsonSerializer.Deserialize<List<Episode>>(episodesJson);
-      //modelBuilder.Entity<Episode>().HasData(episodes.ToArray());
-
-      //// Seed to Servers
-      //string serversJson = System.IO.File.ReadAllText("Data/SeedData/servers.json");
-      //List<Server> servers = System.Text.Json.JsonSerializer.Deserialize<List<Server>>(serversJson);
-      //modelBuilder.Entity<Server>().HasData(servers.ToArray());
-
-
       // mặc định tạo CreatedDate khi tạo và không update được 
       modelBuilder.Entity<Episode>()
            .Property(m => m.CreatedDate)
@@ -107,41 +84,50 @@ namespace CineWorld.Services.MovieAPI.Data
 
       // Tạo chỉ mục (index) cho các trường trong bảng Movie
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.Name)
-          .HasName("IX_Movie_Name");
+          .HasIndex(m => m.Name);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.Slug)
-          .HasName("IX_Movie_Slug");
+          .HasIndex(m => m.Slug);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.CategoryId)
-          .HasName("IX_Movie_CategoryId");
+          .HasIndex(m => m.CategoryId);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.CountryId)
-          .HasName("IX_Movie_CountryId");
+          .HasIndex(m => m.CountryId);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.Year)
-          .HasName("IX_Movie_Year");
+          .HasIndex(m => m.Year);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.View)
-          .HasName("IX_Movie_View");
+          .HasIndex(m => m.View);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.IsHot)
-          .HasName("IX_Movie_IsHot");
+          .HasIndex(m => m.IsHot);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.CreatedDate)
-          .HasName("IX_Movie_CreatedDate");
+          .HasIndex(m => m.CreatedDate);
 
       modelBuilder.Entity<Movie>()
-          .HasIndex(m => m.UpdatedDate)
-          .HasName("IX_Movie_UpdatedDate");
+          .HasIndex(m => m.UpdatedDate);
 
+      modelBuilder.Entity<Movie>()
+      .HasIndex(e => e.Status);
+
+      // Đánh index cho episode 
+      modelBuilder.Entity<Episode>()
+       .HasIndex(e => e.MovieId);
+      modelBuilder.Entity<Episode>()
+          .HasIndex(e => e.EpisodeNumber);
+      modelBuilder.Entity<Episode>()
+          .HasIndex(e => e.CreatedDate);
+      modelBuilder.Entity<Episode>()
+      .HasIndex(e => e.Status);
+
+      // Đánh index cho server
+      modelBuilder.Entity<Server>()
+       .HasIndex(s => s.EpisodeId);
+      modelBuilder.Entity<Server>()
+          .HasIndex(s => s.Name);
     }
 
     public async Task SeedDataAsync()

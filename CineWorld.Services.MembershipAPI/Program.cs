@@ -105,6 +105,10 @@ builder.Services.AddScoped<IUtil, Util>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+//builder.Services.AddScoped<IPaymentMethod, PaymentWithStripe>();
+builder.Services.AddScoped<IPaymentMethod, PaymentWithPayOS>();
+
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 
 // Thêm CORS

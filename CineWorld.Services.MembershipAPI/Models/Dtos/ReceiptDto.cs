@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using CineWorld.Services.MembershipAPI.Utilities;
 
 namespace CineWorld.Services.MembershipAPI.Models.Dtos
 {
@@ -75,12 +76,14 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// Gets or sets the payment intent identifier from Stripe, if applicable.
     /// Nullable because it may not be available in some cases.
     /// </summary>
-    public string? PaymentIntentId { get; set; }
+    //public string? PaymentIntentId { get; set; }
 
     /// <summary>
     /// Gets or sets the Stripe session identifier associated with the payment, if applicable.
     /// Nullable because it may not be available in some cases.
     /// </summary>
     public string? StripeSessionId { get; set; }
+    [DefaultValue(SD.PaymentWithStripe)]
+    public string PaymentMethod { get; set; }
   }
 }

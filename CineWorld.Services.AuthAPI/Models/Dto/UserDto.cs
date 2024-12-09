@@ -39,5 +39,7 @@
     /// The role(s) assigned to the user. Optional.
     /// </summary>
     public string? Role { get; set; }
+
+    public DateTime CreatedDate { get; set; }
   }
 }

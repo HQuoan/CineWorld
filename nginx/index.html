@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineWorld API Documentation</title>
+    <link rel="icon" href="icon.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #2c3e50;
+            width: 100%;
+            padding: 1.5rem 0;
+            text-align: center;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        main {
+            max-width: 1000px;
+            width: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+            margin-top: 2rem;
+        }
+        h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        .api-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 1rem;
+        }
+        .api-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #ffffff;
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .api-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+        .api-item h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #34495e;
+        }
+        .api-item a {
+            text-decoration: none;
+            background-color: #3498db;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 3px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .api-item a:hover {
+            background-color: #2980b9;
+        }
+        footer {
+            margin-top: 3rem;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;
+            width: 100%;
+            background-color: #ecf0f1;
+            position: fixed;
+            bottom: 0;
+        }
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.6rem;
+            }
+            .api-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        CineWorld API Documentation
+    </header>
+    <main>
+        <h2>Available Services</h2>
+        <div class="api-list">
+            <div class="api-item">
+                <h3>Auth Service</h3>
+                <a href="https://cineworld.io.vn:7000/swagger" target="_blank">Go to Swagger</a>
+            </div>
+            <div class="api-item">
+                <h3>Movie Service</h3>
+                <a href="https://cineworld.io.vn:7001/swagger" target="_blank">Go to Swagger</a>
+            </div>
+            <div class="api-item">
+                <h3>Membership Service</h3>
+                <a href="https://cineworld.io.vn:7002/swagger" target="_blank">Go to Swagger</a>
+            </div>
+            <div class="api-item">
+                <h3>Comment Service</h3>
+                <a href="https://cineworld.io.vn:7003/swagger" target="_blank">Go to Swagger</a>
+            </div>
+            <div class="api-item">
+                <h3>History Service</h3>
+                <a href="https://cineworld.io.vn:7004/swagger" target="_blank">Go to Swagger</a>
+            </div>
+            <div class="api-item">
+                <h3>Reaction Service</h3>
+                <a href="https://cineworld.io.vn:7005/swagger" target="_blank">Go to Swagger</a>
+            </div>
+        </div>
+    </main>
+    <footer>
+        &copy; 2024 CineWorld. All Rights Reserved.
+    </footer>
+</body>
+</html>

@@ -97,6 +97,7 @@ namespace CineWorld.Services.AuthAPI.Services
         Gender = user.Gender,
         DateOfBirth = user.DateOfBirth,
         Role = string.Join(", ", roles),
+        CreatedDate = user.CreatedDate
       };
 
 
@@ -117,6 +118,7 @@ namespace CineWorld.Services.AuthAPI.Services
         NormalizedEmail = registrationRequestDto.Email.ToUpper(),
         Gender = registrationRequestDto.Gender,
         DateOfBirth = registrationRequestDto.DateOfBirth,
+        CreatedDate = DateTime.UtcNow,
       };
 
       try
@@ -158,7 +160,8 @@ namespace CineWorld.Services.AuthAPI.Services
             FullName = user.FullName,
             Gender = user.Gender,
             DateOfBirth = user.DateOfBirth,
-            Role = SD.CustomerRole
+            Role = SD.CustomerRole,
+            CreatedDate = user.CreatedDate,
           };
 
           return userDto;
@@ -261,6 +264,7 @@ namespace CineWorld.Services.AuthAPI.Services
           Gender = "Male",
           DateOfBirth = new DateTime(2000, 1, 1),
           EmailConfirmed = true,
+          CreatedDate = DateTime.UtcNow,
         };
 
         var result = await _userManager.CreateAsync(user);
@@ -312,6 +316,7 @@ namespace CineWorld.Services.AuthAPI.Services
         Gender = "Male",
         DateOfBirth = new DateTime(2000, 1, 1),
         Role = string.Join(", ", roles),
+        CreatedDate = user.CreatedDate,
       };
 
       loginResponseDto.User = userDto;

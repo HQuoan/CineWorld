@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.AuthAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241207135533_Init")]
+    [Migration("20241208035339_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -39,6 +39,9 @@ namespace CineWorld.Services.AuthAPI.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");

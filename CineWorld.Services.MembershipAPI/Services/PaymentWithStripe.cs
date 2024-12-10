@@ -2,11 +2,13 @@
 using CineWorld.Services.MembershipAPI.Models;
 using Stripe.Checkout;
 using CineWorld.Services.MembershipAPI.Services.IService;
+using CineWorld.Services.MembershipAPI.Utilities;
 
 namespace CineWorld.Services.MembershipAPI.Services
 {
   public class PaymentWithStripe : IPaymentMethod
   {
+    public string PaymentMethodName => SD.PaymentWithStripe;
     public async Task<PaymentSession> CreateSession(PaymentRequestDto paymentRequestDto, Receipt receipt, Package package)
     {
       var options = new SessionCreateOptions

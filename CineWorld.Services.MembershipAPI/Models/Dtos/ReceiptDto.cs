@@ -83,7 +83,13 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// Nullable because it may not be available in some cases.
     /// </summary>
     public string? StripeSessionId { get; set; }
+
+    /// <summary>
+    /// Payment method: [STRIPE, PAYOS]
+    /// </summary>
     [DefaultValue(SD.PaymentWithStripe)]
+    [RegularExpression("^(STRIPE|PAYOS)$", ErrorMessage = "PaymentMethod must be STRIPE or PAYOS.")]
     public string PaymentMethod { get; set; }
+
   }
 }

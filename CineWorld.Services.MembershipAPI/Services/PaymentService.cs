@@ -9,19 +9,19 @@ using CineWorld.Services.MembershipAPI.Utilities;
 
 namespace CineWorld.Services.MembershipAPI.Services
 {
-    public class PaymentService : IPaymentService
+  public class PaymentService : IPaymentService
   {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
     private readonly IMapper _mapper;
-    private readonly IPaymentMethod _paymentMethod;
+    private readonly IPaymentMethodFactory _paymentMethodFactory;
 
-    public PaymentService(IUnitOfWork unitOfWork, IEmailService emailService, IMapper mapper, IPaymentMethod paymentMethod)
+    public PaymentService(IUnitOfWork unitOfWork, IEmailService emailService, IMapper mapper, IPaymentMethodFactory paymentMethodFactory)
     {
       _unitOfWork = unitOfWork;
       _emailService = emailService;
       _mapper = mapper;
-      _paymentMethod = paymentMethod;
+      _paymentMethodFactory = paymentMethodFactory;
     }
 
     public async Task<string> CreateSession(PaymentRequestDto paymentRequestDto)
@@ -50,8 +50,9 @@ namespace CineWorld.Services.MembershipAPI.Services
       {
         throw new NotFoundException($"Package with ID: {receiptFromDb.PackageId} not found.");
       }
+      var paymentMethod = _paymentMethodFactory.GetPaymentMethod(receiptFromDb.PaymentMethod);
 
-      var session = await _paymentMethod.CreateSession(paymentRequestDto, receiptFromDb, package);
+      var session = await paymentMethod.CreateSession(paymentRequestDto, receiptFromDb, package);
 
       // Cap nhat 
       receiptFromDb.StripeSessionId = session.Id;
@@ -79,9 +80,10 @@ namespace CineWorld.Services.MembershipAPI.Services
 
         return responseDto;
       }
-      else if (receipt.Status == SD.Status_Pending)
+      else if (receipt.Status == SD.Status_Session_Created)
       {
-        if (await _paymentMethod.ValidateSession(receipt.StripeSessionId))
+        var paymentMethod = _paymentMethodFactory.GetPaymentMethod(receipt.PaymentMethod);
+        if (await paymentMethod.ValidateSession(receipt.StripeSessionId))
         {
           // Payment successful
           //receipt.PaymentIntentId = paymentIntent.Id;

@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CineWorld.EmailService", "C
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{878A394B-8845-487F-9007-9908B1526144}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineWorld.GatewaySolution", "..\CineWorld.GatewaySolution\CineWorld.GatewaySolution.csproj", "{CB16E5B5-67A3-4271-A391-4E499AABB1CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineWorld.GatewaySolution", "CineWorld.GatewaySolution\CineWorld.GatewaySolution.csproj", "{490104F0-4A2E-4318-B1E3-EAA6BD13AFEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,10 +81,10 @@ Global
 		{878A394B-8845-487F-9007-9908B1526144}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{878A394B-8845-487F-9007-9908B1526144}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{878A394B-8845-487F-9007-9908B1526144}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CB16E5B5-67A3-4271-A391-4E499AABB1CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CB16E5B5-67A3-4271-A391-4E499AABB1CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CB16E5B5-67A3-4271-A391-4E499AABB1CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CB16E5B5-67A3-4271-A391-4E499AABB1CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{490104F0-4A2E-4318-B1E3-EAA6BD13AFEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{490104F0-4A2E-4318-B1E3-EAA6BD13AFEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{490104F0-4A2E-4318-B1E3-EAA6BD13AFEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{490104F0-4A2E-4318-B1E3-EAA6BD13AFEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,7 +99,7 @@ Global
 		{8FD36595-4AC2-4F01-9184-BDA74F8B2520} = {638BD48D-F7CA-4449-A9B9-B347AF7F6A01}
 		{C8FCEFB8-B842-41A5-9499-69A9368A1169} = {522A04CC-07F2-41A9-8104-97F833EADECA}
 		{CB9A91B6-C64E-4699-A217-61E9D8D7FBE6} = {30B28ACD-CA74-4945-847C-A1A396A45DC4}
-		{CB16E5B5-67A3-4271-A391-4E499AABB1CA} = {24BBBF88-7375-4F58-BE1F-FCE61A2AB363}
+		{490104F0-4A2E-4318-B1E3-EAA6BD13AFEE} = {24BBBF88-7375-4F58-BE1F-FCE61A2AB363}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7523F892-D99B-4651-8610-1159CEB851E9}

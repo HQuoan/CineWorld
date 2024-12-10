@@ -4,15 +4,21 @@ using CineWorld.Services.MembershipAPI.Services.IService;
 using CineWorld.Services.MembershipAPI.Utilities;
 using Net.payOS;
 using Net.payOS.Types;
+using Microsoft.Extensions.Options;
 
 namespace CineWorld.Services.MembershipAPI.Services
 {
   public class PaymentWithPayOS : IPaymentMethod
   {
+    private readonly PayOSOptions _payOSOptions;
+    public PaymentWithPayOS(IOptions<PayOSOptions> payOSOptions)
+    {
+      _payOSOptions = payOSOptions.Value;
+    }
     public string PaymentMethodName => SD.PaymentWithPayOS;
     public async Task<PaymentSession> CreateSession(PaymentRequestDto paymentRequestDto, Receipt receipt, Package package)
     {
-      PayOS payOS = new PayOS("6e63ed43-fe2c-4f2d-81c3-d63289a396c6", "32e3fe0e-c32a-4105-b9cb-36cc3a835148", "b0d0150dbbd822e0794a13139341d228ac0158d63b436456fe6210583fa635d7");
+      PayOS payOS = new PayOS(_payOSOptions.ClientId, _payOSOptions.ApiKey, _payOSOptions.ChecksumKey);
 
       var item = new ItemData(
           package.Name,
@@ -36,7 +42,7 @@ namespace CineWorld.Services.MembershipAPI.Services
 
       if (createPayment == null || string.IsNullOrEmpty(createPayment.paymentLinkId))
       {
-        throw new Exception("Unable to create payment link. Please try again later.");
+          throw new InvalidOperationException("Unable to create payment link. Please try again later.");
       }
 
       return new PaymentSession
@@ -56,7 +62,7 @@ namespace CineWorld.Services.MembershipAPI.Services
 
     public async Task<PaymentLinkInformation> GetPaymentInformation(string sessionId)
     {
-      PayOS payOS = new PayOS("6e63ed43-fe2c-4f2d-81c3-d63289a396c6", "32e3fe0e-c32a-4105-b9cb-36cc3a835148", "b0d0150dbbd822e0794a13139341d228ac0158d63b436456fe6210583fa635d7");
+     PayOS payOS = new PayOS(_payOSOptions.ClientId, _payOSOptions.ApiKey, _payOSOptions.ChecksumKey);
 
       return await payOS.getPaymentLinkInformation(long.Parse(sessionId));
     }

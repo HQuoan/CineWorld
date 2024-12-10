@@ -3,6 +3,7 @@ using CineWorld.EmailService;
 using CineWorld.Services.MembershipAPI.Attributes;
 using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Extensions;
+using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using CineWorld.Services.MembershipAPI.Services;
@@ -46,6 +47,8 @@ builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

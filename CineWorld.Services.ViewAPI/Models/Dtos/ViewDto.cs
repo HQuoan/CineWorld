@@ -9,6 +9,6 @@
     public int EpisodeId { get; set; }
     public DateTime ViewDate { get; set; }
 
-    public GetEpsiodeWithMovieInformationDto MovieInfor { get; set; }
+    public EpisodeInforDto? EpisodeInfor { get; set; }
   }
 }

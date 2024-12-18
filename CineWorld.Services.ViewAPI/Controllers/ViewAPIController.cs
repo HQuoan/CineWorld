@@ -29,33 +29,135 @@ namespace CineWorld.Services.ViewAPI.Controllers
     }
 
     [HttpGet]
+    [Route("ViewStat")]
+    public async Task<ActionResult<ResponseDto>> ViewStat([FromQuery] ViewStatQueryParameters queryParameters)
+    {
+      var query = ViewStatFeatures.Build(queryParameters);
+      IEnumerable<View> views = await _unitOfWork.View.GetAllAsync(query);
+
+      var totalItems = views.Count();
+
+      IEnumerable<ViewStatResultDto> viewStats;
+      string statWith = queryParameters.StatWith.ToLower();
+
+      // Thống kê theo phim hoặc tập
+      if (statWith == "movie")
+      {
+        // Thống kê theo từng phim (gộp theo MovieId)
+        viewStats = views
+            .GroupBy(v => v.MovieId)
+            .Select(g => new ViewStatResultDto
+            {
+              Key = g.Key,  // MovieId
+              ViewCount = g.Count()  // Đếm số lượng view
+            });
+      }
+      else if (statWith == "episode")
+      {
+        // Thống kê theo từng tập (gộp theo EpisodeId)
+        viewStats = views
+            .GroupBy(v => v.EpisodeId)
+            .Select(g => new ViewStatResultDto
+            {
+              Key = g.Key,  // EpisodeId
+              ViewCount = g.Count()  // Đếm số lượng view
+            });
+      }
+      else
+      {
+        return BadRequest("Invalid StatWith value. It must be 'movie' or 'episode'.");
+      }
+
+      // Sắp xếp theo ViewCount
+      if (queryParameters.IsAscending)
+      {
+        viewStats = viewStats.OrderBy(c => c.ViewCount);
+      }
+      else
+      {
+        viewStats = viewStats.OrderByDescending(c => c.ViewCount);
+      }
+
+      viewStats = viewStats.Take(queryParameters.TopMovies);
+
+      var moviesInfor = new Dictionary<int, MovieInforDto>();
+      var episodesInfor = new Dictionary<int, EpisodeInforDto>();
+
+
+      if (statWith == "movie")
+      {
+        List<int> ids = views.Select(c => c.MovieId).ToList();
+        var resutl = await _movieService.GetMoviesInfor(new IdsRequestDto { Ids = ids });
+        moviesInfor = resutl.ToDictionary(m => m.MovieId);
+      }
+      else if (statWith == "episode")
+      {
+        List<int> ids = views.Select(c => c.EpisodeId).ToList();
+        var resutl = await _movieService.GetEpsiodesInfor(new IdsRequestDto { Ids = ids });
+        episodesInfor = resutl.ToDictionary(m => m.EpisodeId);
+      }
+
+
+      viewStats = viewStats.ToList();
+
+      foreach (var viewDto in viewStats)
+      {
+        if (statWith == "movie")
+        {
+          if (moviesInfor.TryGetValue(viewDto.Key, out var movieInfo))
+          {
+            viewDto.MovieInfor = movieInfo;
+          }
+        }
+        else if (statWith == "episode")
+        {
+          if (episodesInfor.TryGetValue(viewDto.Key, out var episodeInfor))
+          {
+            viewDto.EpisodeInfor = episodeInfor;
+          }
+        }
+      }
+
+
+      // Gắn thông tin ánh xạ vào _response
+      _response.Result = viewStats;
+
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalItems,
+      };
+
+      return Ok(_response);
+    }
+
+    [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] ViewQueryParameters queryParameters)
     {
       var query = ViewFeatures.Build(queryParameters);
       IEnumerable<View> views = await _unitOfWork.View.GetAllAsync(query);
 
-      List<GetEpsiodeWithMovieInformationDto> movies = new List<GetEpsiodeWithMovieInformationDto>();
+
+      var viewDtos = _mapper.Map<IEnumerable<ViewDto>>(views).ToList();
+
 
       if (queryParameters.WithMovieInformation == true)
       {
         List<int> episodeIds = views.Select(c => c.EpisodeId).Distinct().ToList();
-        movies = await _movieService.GetEpsiodeWithMovieInformatio(new GetEpsiodeWithMovieInformationRequestDto { EpisodeIds = episodeIds });
-      }
+        var movies = await _movieService.GetEpsiodesInfor(new IdsRequestDto { Ids = episodeIds });
 
-      // Tạo Dictionary để tối ưu việc tìm kiếm movie thông qua EpisodeId
-      var movieDictionary = movies.ToDictionary(m => m.EpisodeId);
+        // Tạo Dictionary để tối ưu việc tìm kiếm movie thông qua EpisodeId
+        var movieDictionary = movies.ToDictionary(m => m.EpisodeId);
 
-      // Duyệt qua từng view và thêm thông tin movie vào ViewDto
-      var viewDtos = _mapper.Map<IEnumerable<ViewDto>>(views).ToList();
-
-      foreach (var viewDto in viewDtos)
-      {
-        // Kiểm tra và lấy thông tin movie từ Dictionary
-        if (movieDictionary.TryGetValue(viewDto.EpisodeId, out var movieInfo))
+        foreach (var viewDto in viewDtos)
         {
-          viewDto.MovieInfor = movieInfo;
+          // Kiểm tra và lấy thông tin movie từ Dictionary
+          if (movieDictionary.TryGetValue(viewDto.EpisodeId, out var episodeInfo))
+          {
+            viewDto.EpisodeInfor = episodeInfo;
+          }
         }
       }
+
 
       // Gắn thông tin ánh xạ vào _response
       _response.Result = viewDtos;
@@ -64,9 +166,9 @@ namespace CineWorld.Services.ViewAPI.Controllers
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,
-        TotalItemsPerPage = queryParameters.PageSize,
+        TotalItemsPerPage = queryParameters.PageSize ?? totalItems,
         CurrentPage = queryParameters.PageNumber,
-        TotalPages = (int)Math.Ceiling((double)totalItems / queryParameters.PageSize)
+        TotalPages = (int)Math.Ceiling((double)totalItems / totalItems)
       };
 
       return Ok(_response);
@@ -75,7 +177,8 @@ namespace CineWorld.Services.ViewAPI.Controllers
 
     [HttpPost]
     [EnableRateLimiting("IpRateLimit")]
-    public async Task<ActionResult<ResponseDto>> Post([FromQuery] AddViewRequestDto model) {
+    public async Task<ActionResult<ResponseDto>> Post([FromQuery] AddViewRequestDto model)
+    {
 
       var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
       var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()

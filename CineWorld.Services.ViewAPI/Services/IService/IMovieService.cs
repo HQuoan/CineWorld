@@ -4,6 +4,7 @@ namespace CineWorld.Services.ViewAPI.Services.IService
 {
     public interface IMovieService
     {
-    Task<List<GetEpsiodeWithMovieInformationDto>> GetEpsiodeWithMovieInformatio(GetEpsiodeWithMovieInformationRequestDto model);
+    Task<List<EpisodeInforDto>> GetEpsiodesInfor(IdsRequestDto model);
+    Task<List<MovieInforDto>> GetMoviesInfor(IdsRequestDto model);
     }
 }

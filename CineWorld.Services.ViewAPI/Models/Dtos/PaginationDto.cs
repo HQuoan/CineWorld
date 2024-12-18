@@ -23,6 +23,6 @@
     /// <summary>
     /// Gets or sets the total number of items available (across all pages).
     /// </summary>
-    public int TotalItems { get; set; }
+    public int? TotalItems { get; set; }
   }
 }

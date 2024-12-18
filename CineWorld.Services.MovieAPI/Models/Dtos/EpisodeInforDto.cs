@@ -1,6 +1,6 @@
 ﻿namespace CineWorld.Services.MovieAPI.Models.Dtos
 {
-  public class GetEpsiodeWithMovieInformationDto
+  public class EpisodeInforDto
   {
     public int EpisodeId { get; set; }
     public string EpisodeName { get; set; }

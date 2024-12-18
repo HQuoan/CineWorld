@@ -56,6 +56,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    [HttpPost]
+    [Route("GetMoviesInfor")]
+    public async Task<ActionResult<ResponseDto>> GetMoviesInfor([FromBody] IdsRequestDto model)
+    {
+      var moviesInfor = await _unitOfWork.Movie.GetsAsync(c => model.Ids.Contains(c.MovieId));
+
+      _response.Result = moviesInfor;
+      return Ok(_response);
+    }
+
     /// <summary>
     /// Get a movie by its ID.
     /// </summary>

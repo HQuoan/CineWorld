@@ -35,7 +35,7 @@ namespace CineWorld.Services.ViewAPI.APIFeatures
       set => _pageNumber = (value < 1) ? 1 : value;
     }
 
-    private int _pageSize = 25;
+    private int? _pageSize = 25;
     private const int MaxPageSize = 100;
 
     /// <summary>
@@ -44,10 +44,16 @@ namespace CineWorld.Services.ViewAPI.APIFeatures
     /// </summary>
     /// 
     [DefaultValue(25)]
-    public int PageSize
+    public int? PageSize
     {
       get => _pageSize;
-      set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
+      set
+      {
+        if (value.HasValue)
+        {
+          _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
+        }
+      }
     }
   }
 

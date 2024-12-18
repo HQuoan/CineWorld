@@ -17,7 +17,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
     }
 
 
-    public async Task<List<GetEpsiodeWithMovieInformationDto>> GetsAsync(Expression<Func<Episode, bool>>? filter = null, string? includeProperties = null)
+    public async Task<List<EpisodeInforDto>> GetsAsync(Expression<Func<Episode, bool>>? filter = null, string? includeProperties = null)
     {
       IQueryable<Episode> query = _db.Episodes.AsNoTracking();
 
@@ -35,7 +35,7 @@ namespace CineWorld.Services.MovieAPI.Repositories
       }
 
       return await query
-         .Select(e => new GetEpsiodeWithMovieInformationDto
+         .Select(e => new EpisodeInforDto
          {
            EpisodeId = e.EpisodeId,
            EpisodeName = e.Name,

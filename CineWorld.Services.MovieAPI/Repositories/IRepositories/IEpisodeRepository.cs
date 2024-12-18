@@ -6,6 +6,6 @@ namespace CineWorld.Services.MovieAPI.Repositories.IRepositories
 {
   public interface IEpisodeRepository : IRepository<Episode>
   {
-    Task<List<GetEpsiodeWithMovieInformationDto>> GetsAsync(Expression<Func<Episode, bool>>? filter = null, string? includeProperties = null);
+    Task<List<EpisodeInforDto>> GetsAsync(Expression<Func<Episode, bool>>? filter = null, string? includeProperties = null);
   }
 }

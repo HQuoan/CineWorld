@@ -2,7 +2,7 @@
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
 
-namespace CineWorld.Services.MovieAPI
+namespace CineWorld.Services.MembershipAPI
 {
   public class MappingConfig
   {

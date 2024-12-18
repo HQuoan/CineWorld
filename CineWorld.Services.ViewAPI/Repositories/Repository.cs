@@ -1,9 +1,9 @@
-﻿using CineWorld.Services.MovieAPI.Data;
-using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+﻿using CineWorld.Services.ViewAPI.Data;
+using CineWorld.Services.ViewAPI.Repositories.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace CineWorld.Services.MovieAPI.Repositories
+namespace CineWorld.Services.ViewAPI.Repositories
 {
   public class Repository<T> : IRepository<T> where T : class
   {
@@ -40,26 +40,6 @@ namespace CineWorld.Services.MovieAPI.Repositories
 
       return await query.FirstOrDefaultAsync();
     }
-
-    //public async Task<List<T>> GetsAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
-    //{
-    //  IQueryable<T> query =  dbSet.AsNoTracking();
-
-    //  if (filter != null)
-    //  {
-    //    query = query.Where(filter);
-    //  }
-
-    //  if (!string.IsNullOrEmpty(includeProperties))
-    //  {
-    //    foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-    //    {
-    //      query = query.Include(includeProp);
-    //    }
-    //  }
-
-    //  return await query.ToListAsync();
-    //}
     public async Task<IEnumerable<T>> GetAllAsync(QueryParameters<T>? queryParameters)
     {
       IQueryable<T> query = dbSet;

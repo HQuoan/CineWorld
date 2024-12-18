@@ -1,30 +1,21 @@
 ﻿using AutoMapper;
-using CineWorld.EmailService;
-using CineWorld.Services.MembershipAPI.Attributes;
-using CineWorld.Services.MembershipAPI.Data;
-using CineWorld.Services.MembershipAPI.Extensions;
-using CineWorld.Services.MembershipAPI.Models;
-using CineWorld.Services.MembershipAPI.Repositories;
-using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
-using CineWorld.Services.MembershipAPI.Services;
-using CineWorld.Services.MembershipAPI.Services.IService;
-using CineWorld.Services.MembershipAPI.Utilities;
-using CineWorld.Services.MembershipAPI;
+using CineWorld.Services.ViewAPI.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Serilog;
 using System.Reflection;
+using CineWorld.Services.ViewAPI;
+using CineWorld.Services.ViewAPI.Attributes;
+using CineWorld.Services.ViewAPI.Data;
+using System.Threading.RateLimiting;
+using CineWorld.Services.ViewAPI.Repositories.IRepositories;
+using CineWorld.Services.ViewAPI.Repositories;
+using CineWorld.Services.ViewAPI.Services.IService;
+using CineWorld.Services.AuthAPI.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
-//Serilog
-//builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
-
-//  loggerConfiguration
-//  .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
-//  .ReadFrom.Services(services); //read out current app's services and make them available to serilog
-//});
 
 builder.Services.AddHttpLogging(options =>
 {
@@ -45,10 +36,31 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddRateLimiter(options =>
+{
+  options.AddPolicy<string>("IpRateLimit", httpContext =>
+  {
+    var ip = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                  ?? httpContext.Connection.RemoteIpAddress?.ToString();
+    var movieId = httpContext.Request.Query["movieId"];
+    var episodeId = httpContext.Request.Query["episodeId"];
+
+    // Tạo partition key từ IP, MovieId và EpisodeId
+    var partitionKey = $"{ip}-{movieId}-{episodeId}";
+
+    return RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey,
+        _ => new FixedWindowRateLimiterOptions
+        {
+          PermitLimit = 2,
+          Window = TimeSpan.FromMinutes(5),
+          QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+          QueueLimit = 0
+        });
+  });
+});
 
 builder.Services.AddControllers();
-
-builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -57,9 +69,9 @@ builder.Services.AddSwaggerGen(option =>
 {
   option.SwaggerDoc("v1", new OpenApiInfo
   {
-    Title = "Membership Management API",
+    Title = "View Management API",
     Version = "v1",
-    Description = "This API provides functionalities for managing memberships, user subscriptions, and related services. It includes features like creating, updating, and retrieving membership details, managing user packages, payments, and handling subscription renewals.",
+    Description = "",
     Contact = new OpenApiContact
     {
       Name = "Support Team",
@@ -104,17 +116,10 @@ builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IUtil, Util>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IMovieService, MovieService>();
 
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-
-builder.Services.AddScoped<IPaymentMethodFactory, PaymentMethodFactory>();
-builder.Services.AddScoped<IPaymentMethod, PaymentWithStripe>();
-builder.Services.AddScoped<IPaymentMethod, PaymentWithPayOS>();
-
-builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
+//builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
+builder.Services.AddHttpClient("Movie", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MovieAPI"]));
 
 // Thêm CORS
 builder.Services.AddCors(options =>
@@ -152,9 +157,9 @@ app.UseSwaggerUI(c =>
   c.SwaggerEndpoint("/swagger/v1/swagger.json", "Membership API v1");
 });
 
-Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 
 // Đăng ký middleware Serilog để ghi log các request
 //app.UseSerilogRequestLogging();

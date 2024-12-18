@@ -28,12 +28,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       _response = new ResponseDto();
       _util = util;
     }
-
-    /// <summary>
-    /// Get all movies with optional filtering and pagination. Defaults to 25 movies per page, sorted by UpdateDate in descending order.
-    /// </summary>
-    /// <param name="queryParameters">The filtering and pagination parameters for the movie query.</param>
-    /// <returns>A ResponseDto containing the list of movies and relevant metadata.</returns>
+  
     [HttpGet]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] MovieQueryParameters? queryParameters)
     {

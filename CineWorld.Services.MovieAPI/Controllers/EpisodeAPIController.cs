@@ -103,6 +103,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
       return Ok(_response);
     }
 
+    [HttpPost]
+    [Route("GetEpsiodeWithMovieInformation")]
+    public async Task<ActionResult<ResponseDto>> GetEpsiodeWithMovieInformation([FromBody] GetEpsiodeWithMovieInformationRequestDto model)
+    {
+      var episodes = await _unitOfWork.Episode.GetsAsync(c => model.EpisodeIds.Contains(c.EpisodeId), includeProperties: "Movie");
+
+      _response.Result = episodes;
+      return Ok(_response);
+    }
+
     /// <summary>
     /// Creates a new episode associated with a movie.
     /// </summary>

@@ -38,6 +38,42 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       _paymentService = paymentService;
     }
 
+    [HttpGet]
+    [Route("ReceiptStat")]
+    public async Task<ActionResult<ResponseDto>> ReceiptStat([FromQuery] TimePeriod timePeriod)
+    {
+      QueryParameters<Receipt> query = new QueryParameters<Receipt>();
+      query.Filters.Add(m => m.Status == SD.Status_Approved);
+      query.Filters.Add(m => m.CreatedDate >= timePeriod.From && m.CreatedDate <= timePeriod.To);
+
+      IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync(query);
+
+      var receiptStat = receipts
+        .GroupBy(c => c.PackageId)
+        .Select(group =>
+        {
+          var first = group.First();
+          return new ReceiptStatResultDto
+          {
+            PackageId = group.Key,
+            TermInMonths = first.TermInMonths,
+            PackagePrice = first.PackagePrice,
+            Count = group.Count(),
+          };
+        }).ToList();
+
+      // Calculate Total Revenue
+      var revenue = receiptStat.Sum(c => c.Total);
+
+      _response.Result = new
+      {
+        revenue,
+        receiptStat
+      };
+
+      return Ok(_response);
+    }
+
     /// <summary>
     /// Retrieves all receipts with pagination support.
     /// </summary>

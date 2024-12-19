@@ -8,7 +8,6 @@ using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using CineWorld.Services.MembershipAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CineWorld.Services.MembershipAPI.Controllers
 {

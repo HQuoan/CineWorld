@@ -35,7 +35,7 @@ namespace CineWorld.Services.ViewAPI.APIFeatures
       set => _pageNumber = (value < 1) ? 1 : value;
     }
 
-    private int? _pageSize = 25;
+    private int? _pageSize;
     private const int MaxPageSize = 100;
 
     /// <summary>

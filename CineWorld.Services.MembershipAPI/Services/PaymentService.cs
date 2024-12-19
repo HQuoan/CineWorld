@@ -104,6 +104,7 @@ namespace CineWorld.Services.MembershipAPI.Services
             {
               UserId = receipt.UserId,
               UserEmail = receipt.Email,
+              MemberType = SD.FirstTimeMember,
               FirstSubscriptionDate = DateTime.UtcNow,
               RenewalStartDate = DateTime.UtcNow,
               LastUpdatedDate = DateTime.UtcNow,
@@ -120,12 +121,15 @@ namespace CineWorld.Services.MembershipAPI.Services
             {
               // Membership still active
               membershipFromDb.ExpirationDate = membershipFromDb.ExpirationDate.AddMonths(receipt.TermInMonths);
+              membershipFromDb.MemberType = SD.ConsecutiveMember;
             }
             else
             {
               // Membership expired
               membershipFromDb.ExpirationDate = DateTime.UtcNow.AddMonths(receipt.TermInMonths);
               membershipFromDb.RenewalStartDate = DateTime.UtcNow;
+
+              membershipFromDb.MemberType = SD.ReturningMember;
             }
             membershipFromDb.LastUpdatedDate = DateTime.UtcNow;
 

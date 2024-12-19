@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CineWorld.Services.MembershipAPI.Utilities;
+using System.ComponentModel.DataAnnotations;
 
 namespace CineWorld.Services.MembershipAPI.Models.Dtos
 {
@@ -25,6 +26,11 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// <example>"user@example.com"</example>
     [EmailAddress]
     public string UserEmail { get; set; }
+    [Required]
+    [RegularExpression("^(First Time Member|Consecutive Member|Returning Member)$", ErrorMessage = "MemberType must be First Time Member, Consecutive Member, or Returning Member.")]
+    [DeniedValues(SD.FirstTimeMember)]
+    public string MemberType { get; set; } = SD.FirstTimeMember;
+
 
     /// <summary>
     /// Gets or sets the date when the user first subscribed to the membership.

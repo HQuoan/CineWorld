@@ -13,9 +13,11 @@
     public const string Status_Approved = "Approved";
 
 
+    public const string FirstTimeMember = "First Time Member ";
+    public const string ConsecutiveMember = "Consecutive Member  ";
+    public const string ReturningMember = "Returning Member  ";
+
     public const string Status_MembershipRenewed = "MembershipRenewed";
-    //public const string Status_Completed = "Completed";
-    //public const string Status_Refunded = "Refunded";
-    //public const string Status_Cancelled = "Cancelled";
+   
   }
 }

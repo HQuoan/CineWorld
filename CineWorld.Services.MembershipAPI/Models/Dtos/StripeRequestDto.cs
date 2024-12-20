@@ -1,8 +1,7 @@
-﻿using CineWorld.Services.MembershipAPI.Models.Dtos;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace CineWorld.Services.MembershipAPI.Models.Dto
+namespace CineWorld.Services.MembershipAPI.Models.Dtos
 {
   /// <summary>
   /// Represents a request object for Stripe payment session details.
@@ -15,23 +14,18 @@ namespace CineWorld.Services.MembershipAPI.Models.Dto
     public string? StripeSessionUrl { get; set; }
 
     /// <summary>
-    /// Gets or sets the unique ID for the Stripe session associated with the payment.
-    /// </summary>
-    public string? StripeSessionId { get; set; }
-
-    /// <summary>
     /// Gets or sets the URL where the user will be redirected after successfully approving the payment.
     /// Default is a Google Drive URL.
     /// </summary>
     [DefaultValue("https://drive.google.com/file/d/1BjNcczy3hcsiLWNdzywwM8ay30MLJdyR/view?usp=sharing")]
-    public string? ApprovedUrl { get; set; }
+    public string ApprovedUrl { get; set; }
 
     /// <summary>
     /// Gets or sets the URL where the user will be redirected if they cancel the payment.
     /// Default is a Google Drive URL.
     /// </summary>
     [DefaultValue("https://drive.google.com/file/d/1BjNcczy3hcsiLWNdzywwM8ay30MLJdyR/view?usp=sharing")]
-    public string? CancelUrl { get; set; }
+    public string CancelUrl { get; set; }
 
     /// <summary>
     /// Gets or sets the unique ID of the receipt associated with this Stripe payment request.

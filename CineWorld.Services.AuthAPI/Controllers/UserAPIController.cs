@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using AutoMapper;
+using CineWorld.Services.AuthAPI.APIFeatures;
 using CineWorld.Services.AuthAPI.Data;
 using CineWorld.Services.AuthAPI.Exceptions;
 using CineWorld.Services.AuthAPI.Models;
@@ -34,213 +35,313 @@ namespace Mango.Services.AuthAPI.Controllers
             _mapper = mapper;
             _s3Client = s3Client;
         }
-        //[Authorize(Roles = SD.AdminRole)]
+    //[Authorize(Roles = SD.AdminRole)]
 
-        /// <summary>
-        /// Retrieves a list of all users. Only accessible by administrators.
-        /// </summary>
-        /// <returns>A list of users with their roles.</returns>
-        /// <response code="200">Returns the list of users.</response>
-        /// <response code="403">If the user is not authorized.</response>
-        [HttpGet]
-        [Authorize(Roles = SD.AdminRole)]
-        public async Task<IActionResult> Get()
+    /// <summary>
+    /// Retrieves a list of all users. Only accessible by administrators.
+    /// </summary>
+    /// <returns>A list of users with their roles.</returns>
+    /// <response code="200">Returns the list of users.</response>
+    /// <response code="403">If the user is not authorized.</response>
+    [HttpGet]
+    [Authorize(Roles = SD.AdminRole)]
+    public async Task<IActionResult> Get([FromQuery] UserQueryParameters queryParameters)
+    {
+      // Build query parameters
+      var query = UserFeatures.Build(queryParameters);
+
+      // Apply filters, sorting, and pagination (exclude Role)
+      var queryableUsers = _db.ApplicationUsers.AsQueryable();
+
+      if (query.Filters != null && query.Filters.Any())
+      {
+        foreach (var filter in query.Filters)
         {
-            var users = await _db.ApplicationUsers.ToListAsync();
-
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                user.Role = string.Join(", ", roles);
-            }
-
-            _response.TotalItems = users.Count;
-            _response.Result = _mapper.Map<IEnumerable<UserDto>>(users);
-
-            return Ok(_response);
+          queryableUsers = queryableUsers.Where(filter);
         }
+      }
 
-        /// <summary>
-        /// Retrieves detailed information about a specific user by ID.
-        /// </summary>
-        /// <param name="id">The ID of the user to retrieve.</param>
-        /// <returns>The user's details.</returns>
-        /// <response code="200">Returns the user information.</response>
-        /// <response code="403">If the user is not authorized to view the details.</response>
-        /// <response code="404">If the user is not found.</response>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+      if (query.OrderBy != null)
+      {
+        queryableUsers = query.OrderBy(queryableUsers);
+      }
+
+      // Retrieve total items before pagination
+      var totalItemsBeforePagination = queryableUsers.Count();
+
+      var users = await queryableUsers
+          .Skip((query.PageNumber - 1) * query.PageSize)
+          .Take(query.PageSize)
+          .ToListAsync();
+
+      // Retrieve roles for each user
+      foreach (var user in users)
+      {
+        var roles = await _userManager.GetRolesAsync(user);
+        user.Role = string.Join(", ", roles);
+      }
+
+      // Filter by Role (in-memory)
+      if (!string.IsNullOrEmpty(queryParameters.Role))
+      {
+        users = users
+            .Where(u => u.Role.ToLower().Contains(queryParameters.Role.ToLower()))
+            .ToList();
+      }
+
+      // Sort by Role (in-memory)
+      if (!string.IsNullOrEmpty(queryParameters.OrderBy))
+      {
+        var isDescending = queryParameters.OrderBy.StartsWith("-");
+        var property = isDescending ? queryParameters.OrderBy.Substring(1) : queryParameters.OrderBy;
+
+        if (property.ToLower() == "role")
         {
-
-            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            if (!User.IsInRole(SD.AdminRole) && (userId != null && userId != id))
-            {
-                throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
-            }
-
-
-            var user = await _userManager.FindByIdAsync(id);
-
-
-            if (user == null)
-            {
-                throw new NotFoundException($"User with ID: {id} not found.");
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-            user.Role = string.Join(", ", roles);
-
-            _response.Result = _mapper.Map<UserDto>(user);
-
-            return Ok(_response);
+          users = isDescending
+              ? users.OrderByDescending(u => u.Role).ToList()
+              : users.OrderBy(u => u.Role).ToList();
         }
+      }
 
-        /// <summary>
-        /// Checks if a user exists by ID.
-        /// </summary>
-        /// <param name="id">The ID of the user to check.</param>
-        /// <returns>A boolean indicating whether the user exists.</returns>
-        /// <response code="200">Returns true if the user exists, false otherwise.</response>
-        [HttpGet("IsExistUser/{id}")]
-        public async Task<bool> IsExistUser(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
+      // Calculate pagination details
+      var totalFilteredItems = users.Count; // Count after Role filter
+      var paginatedUsers = users
+          .Skip((query.PageNumber - 1) * query.PageSize)
+          .Take(query.PageSize)
+          .ToList();
 
-            return user != null;
-        }
+      // Map to DTO
+      _response.Result = _mapper.Map<IEnumerable<UserDto>>(paginatedUsers);
+      _response.Pagination = new PaginationDto
+      {
+        TotalItems = totalFilteredItems,
+        TotalItemsPerPage = queryParameters.PageSize,
+        CurrentPage = queryParameters.PageNumber,
+        TotalPages = (int)Math.Ceiling((double)totalFilteredItems / queryParameters.PageSize)
+      };
 
-        [HttpGet("GetUserInformationById")]
-        public async Task<ActionResult<ResponseDto>> GetUserInformationById([FromQuery] List<string> ids)
-        {
-            try
-            {
-                if (ids == null || ids.Count == 0)
-                {
-                    _response.IsSuccess = false;
-                    _response.Message = "The list of IDs cannot be null or empty.";
-                    return BadRequest(_response);
-                }
-                var userInformations = new List<UserCommentDTO>();
-                foreach (var userId in ids)
-                {
-                    var user = await _userManager.FindByIdAsync(userId);
-                    if (user == null)
-                    {
-                        continue;
-                    }
-                    var userInfo = new UserCommentDTO
-                    {
-                        Id = user.Id,
-                        FullName = user.FullName,
-                        Avatar = user.Avatar,
-                    };
-                    userInformations.Add(userInfo);
-                }
-                _response.Result = userInformations;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.Message = $"An error occurred: {ex.Message}";
-                return StatusCode(500, _response);
-            }
-        }
+      return Ok(_response);
+    }
 
-        /// <summary>
-        /// Retrieves user details by email.
-        /// </summary>
-        /// <param name="email">The email of the user to retrieve.</param>
-        /// <returns>The user's details.</returns>
-        /// <response code="200">Returns the user information.</response>
-        /// <response code="403">If the user is not authorized to view the details.</response>
-        /// <response code="404">If the user is not found.</response>
-        [HttpGet("GetByEmail/{email}")]
-        public async Task<IActionResult> GetByEmail(string email)
-        {
-            string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
-            {
-                throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
-            }
 
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                throw new NotFoundException($"User with Email: {email} not found.");
-            }
+    /// <summary>
+    /// Retrieves detailed information about a specific user by ID.
+    /// </summary>
+    /// <param name="id">The ID of the user to retrieve.</param>
+    /// <returns>The user's details.</returns>
+    /// <response code="200">Returns the user information.</response>
+    /// <response code="403">If the user is not authorized to view the details.</response>
+    /// <response code="404">If the user is not found.</response>
+    [HttpGet("{id}")]
+    [Authorize]
+    public async Task<IActionResult> Get(string id)
+    {
 
-            var roles = await _userManager.GetRolesAsync(user);
-            user.Role = string.Join(", ", roles);
+      string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            _response.Result = _mapper.Map<UserDto>(user);
+      if (!User.IsInRole(SD.AdminRole) && (userId != null && userId != id))
+      {
+        throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+      }
 
-            return Ok(_response);
-        }
 
-        /// <summary>
-        /// Updates user information. Accessible by administrators or the user themselves.
-        /// </summary>
-        /// <param name="userInformation">The updated user information.</param>
-        /// <returns>The updated user information.</returns>
-        /// <response code="200">Returns the updated user information.</response>
-        /// <response code="403">If the user is not authorized to update the information.</response>
-        /// <response code="404">If the user is not found.</response>
-        [HttpPut("UpdateInformation")]
-        public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
-        {
-            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (!User.IsInRole(SD.AdminRole) || (userId != null && userId != userInformation.Id))
-            {
-                throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
-            }
+      var user = await _userManager.FindByIdAsync(id);
 
-            var user = await _userManager.FindByIdAsync(userInformation.Id);
-            if (user == null)
-            {
-                throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
-            }
 
-            user.FullName = userInformation.FullName;
-            user.Avatar = userInformation.Avatar;
-            user.Gender = userInformation.Gender;
-            user.DateOfBirth = userInformation.DateOfBirth;
+      if (user == null)
+      {
+        throw new NotFoundException($"User with ID: {id} not found.");
+      }
 
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
+      var roles = await _userManager.GetRolesAsync(user);
+      user.Role = string.Join(", ", roles);
 
-            _response.Result = userInformation;
-            return Ok(_response);
-        }
+      _response.Result = _mapper.Map<UserDto>(user);
 
-        /// <summary>
-        /// Deletes a user by ID. Only accessible by administrators.
-        /// </summary>
-        /// <param name="id">The ID of the user to delete.</param>
-        /// <returns>No content if the deletion is successful.</returns>
-        /// <response code="204">If the user is deleted successfully.</response>
-        /// <response code="403">If the user is not authorized.</response>
-        /// <response code="404">If the user is not found.</response>
-        [HttpDelete("{id}")]
-        [Authorize(Roles = SD.AdminRole)]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                throw new NotFoundException($"User with ID: {id} not found.");
-            }
+      return Ok(_response);
+    }
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
+    /// <summary>
+    /// Checks if a user exists by ID.
+    /// </summary>
+    /// <param name="id">The ID of the user to check.</param>
+    /// <returns>A boolean indicating whether the user exists.</returns>
+    /// <response code="200">Returns true if the user exists, false otherwise.</response>
+    [HttpGet("IsExistUser/{id}")]
+    public async Task<bool> IsExistUser(string id)
+    {
+      var user = await _userManager.FindByIdAsync(id);
+
+      return user != null;
+    }
+     [HttpGet("GetUserInformationById")]
+ public async Task<ActionResult<ResponseDto>> GetUserInformationById([FromQuery] List<string> ids)
+ {
+     try
+     {
+         if (ids == null || ids.Count == 0)
+         {
+             _response.IsSuccess = false;
+             _response.Message = "The list of IDs cannot be null or empty.";
+             return BadRequest(_response);
+         }
+         var userInformations = new List<UserCommentDTO>();
+         foreach (var userId in ids)
+         {
+             var user = await _userManager.FindByIdAsync(userId);
+             if (user == null)
+             {
+                 continue;
+             }
+             var userInfo = new UserCommentDTO
+             {
+                 Id = user.Id,
+                 FullName = user.FullName,
+                 Avatar = user.Avatar,
+             };
+             userInformations.Add(userInfo);
+         }
+         _response.Result = userInformations;
+         return Ok(_response);
+     }
+     catch (Exception ex)
+     {
+         _response.IsSuccess = false;
+         _response.Message = $"An error occurred: {ex.Message}";
+         return StatusCode(500, _response);
+     }
+ }
+
+ /// <summary>
+ /// Retrieves user details by email.
+ /// </summary>
+ /// <param name="email">The email of the user to retrieve.</param>
+ /// <returns>The user's details.</returns>
+ /// <response code="200">Returns the user information.</response>
+ /// <response code="403">If the user is not authorized to view the details.</response>
+ /// <response code="404">If the user is not found.</response>
+ [HttpGet("GetByEmail/{email}")]
+ public async Task<IActionResult> GetByEmail(string email)
+ {
+     string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+     if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
+     {
+         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+     }
+
+     var user = await _userManager.FindByEmailAsync(email);
+     if (user == null)
+     {
+         throw new NotFoundException($"User with Email: {email} not found.");
+     }
+
+     var roles = await _userManager.GetRolesAsync(user);
+     user.Role = string.Join(", ", roles);
+
+     _response.Result = _mapper.Map<UserDto>(user);
+
+     return Ok(_response);
+ }
+
+   
+
+    /// <summary>
+    /// Retrieves user details by email.
+    /// </summary>
+    /// <param name="email">The email of the user to retrieve.</param>
+    /// <returns>The user's details.</returns>
+    /// <response code="200">Returns the user information.</response>
+    /// <response code="403">If the user is not authorized to view the details.</response>
+    /// <response code="404">If the user is not found.</response>
+    [HttpGet("GetByEmail/{email}")]
+    [Authorize]
+    public async Task<IActionResult> GetByEmail(string email)
+    {
+      string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+      if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
+      {
+        throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+      }
+
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        throw new NotFoundException($"User with Email: {email} not found.");
+      }
+
+      var roles = await _userManager.GetRolesAsync(user);
+      user.Role = string.Join(", ", roles);
+
+      _response.Result = _mapper.Map<UserDto>(user);
+
+      return Ok(_response);
+    }
+
+    /// <summary>
+    /// Updates user information. Accessible by administrators or the user themselves.
+    /// </summary>
+    /// <param name="userInformation">The updated user information.</param>
+    /// <returns>The updated user information.</returns>
+    /// <response code="200">Returns the updated user information.</response>
+    /// <response code="403">If the user is not authorized to update the information.</response>
+    /// <response code="404">If the user is not found.</response>
+    [HttpPut("UpdateInformation")]
+    [Authorize]
+    public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
+    {
+      string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+      if (!User.IsInRole(SD.AdminRole) || (userId != null && userId != userInformation.Id))
+      {
+        throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+      }
+
+      var user = await _userManager.FindByIdAsync(userInformation.Id);
+      if (user == null)
+      {
+        throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
+      }
+
+      user.FullName = userInformation.FullName;
+      user.Avatar = userInformation.Avatar;
+      user.Gender = userInformation.Gender;
+      user.DateOfBirth = userInformation.DateOfBirth;
+
+      var result = await _userManager.UpdateAsync(user);
+      if (!result.Succeeded)
+      {
+        return BadRequest(result.Errors);
+      }
+
+      _response.Result = userInformation;
+      return Ok(_response);
+    }
+
+    /// <summary>
+    /// Deletes a user by ID. Only accessible by administrators.
+    /// </summary>
+    /// <param name="id">The ID of the user to delete.</param>
+    /// <returns>No content if the deletion is successful.</returns>
+    /// <response code="204">If the user is deleted successfully.</response>
+    /// <response code="403">If the user is not authorized.</response>
+    /// <response code="404">If the user is not found.</response>
+    [HttpDelete("{id}")]
+    [Authorize(Roles = SD.AdminRole)]
+    public async Task<IActionResult> Delete(string id)
+    {
+      var user = await _userManager.FindByIdAsync(id);
+      if (user == null)
+      {
+        throw new NotFoundException($"User with ID: {id} not found.");
+      }
+
+      var result = await _userManager.DeleteAsync(user);
+      if (!result.Succeeded)
+      {
+        return BadRequest(result.Errors);
+      }
 
             return NoContent();
         }
@@ -259,7 +360,7 @@ namespace Mango.Services.AuthAPI.Controllers
             var oldAvatarUrl = userProfile.Avatar;
             if (!string.IsNullOrEmpty(oldAvatarUrl))
             {
-
+                
                 var oldAvatarKey = oldAvatarUrl.Replace($"https://{bucketName}.s3.amazonaws.com/", string.Empty);
 
                 try
@@ -276,7 +377,7 @@ namespace Mango.Services.AuthAPI.Controllers
                     return BadRequest($"Error deleting old avatar: {ex.Message}");
                 }
             }
-
+            
             var bucketExists = await _s3Client.DoesS3BucketExistAsync(bucketName);
             if (!bucketExists) return NotFound($"Bucket {bucketName} does not exist.");
 
@@ -301,10 +402,10 @@ namespace Mango.Services.AuthAPI.Controllers
             var fileUrl = $"https://{bucketName}.s3.amazonaws.com/{key}";
 
             // Cập nhật URL vào cơ sở dữ liệu
-
+            
             if (userProfile != null)
             {
-                userProfile.Avatar = fileUrl;
+                userProfile.Avatar = fileUrl;  
                 var result = await _userManager.UpdateAsync(userProfile);
                 if (!result.Succeeded)
                 {

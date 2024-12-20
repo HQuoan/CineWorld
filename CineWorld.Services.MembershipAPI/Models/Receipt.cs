@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CineWorld.Services.MembershipAPI.Utilities;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CineWorld.Services.MembershipAPI.Models
@@ -28,5 +29,7 @@ namespace CineWorld.Services.MembershipAPI.Models
     public string? Status { get; set; }
     public string? PaymentIntentId { get; set; }
     public string? StripeSessionId { get; set; }
+    public string PaymentMethod { get; set; } = SD.PaymentWithStripe;
+    public string? PaymentSessionUrl { get; set; }
   }
 }

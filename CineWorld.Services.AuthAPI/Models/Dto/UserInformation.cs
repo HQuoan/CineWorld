@@ -29,5 +29,6 @@
     /// The user's date of birth.
     /// </summary>
     public DateTime DateOfBirth { get; set; }
+    public DateTime CreatedDate { get; set; }
   }
 }

@@ -1,4 +1,4 @@
-﻿using CineWorld.Services.ReactionAPI.Models.Common;
+using CineWorld.Services.ReactionAPI.Models.Common;
 using CineWorld.Services.ReactionAPI.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

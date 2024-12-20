@@ -3,12 +3,13 @@ using CineWorld.EmailService;
 using CineWorld.Services.MembershipAPI.Attributes;
 using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Extensions;
+using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using CineWorld.Services.MembershipAPI.Services;
 using CineWorld.Services.MembershipAPI.Services.IService;
 using CineWorld.Services.MembershipAPI.Utilities;
-using CineWorld.Services.MovieAPI;
+using CineWorld.Services.MembershipAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,8 @@ builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -104,6 +107,12 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<IPaymentMethodFactory, PaymentMethodFactory>();
+builder.Services.AddScoped<IPaymentMethod, PaymentWithStripe>();
+builder.Services.AddScoped<IPaymentMethod, PaymentWithPayOS>();
 
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 

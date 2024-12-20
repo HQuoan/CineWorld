@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
@@ -41,8 +42,32 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHttpContextAccessor();
+//builder.Services.AddRateLimiter(options =>
+//{
+//  options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+//    RateLimitPartition.GetFixedWindowLimiter(
+//        partitionKey: context.Connection.RemoteIpAddress?.ToString(), // Phân vùng theo IP
+//        factory: _ => new FixedWindowRateLimiterOptions
+//        {
+//          PermitLimit = 100,
+//          Window = TimeSpan.FromMinutes(1),
+//          QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+//          QueueLimit = 0
+//        }
+//    )
+//);
+
+
+//  options.RejectionStatusCode = 429; // HTTP Status 429 - Too Many Requests
+//});
 
 builder.Services.AddControllers();
+
+//builder.Services.AddControllers().AddJsonOptions(options =>
+//{
+//  options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+//});
+
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -139,6 +164,8 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
+
+//app.UseRateLimiter();
 
 // Đăng ký middleware Serilog để ghi log các request
 //app.UseSerilogRequestLogging();

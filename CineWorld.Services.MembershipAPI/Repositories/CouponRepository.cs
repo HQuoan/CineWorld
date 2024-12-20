@@ -1,6 +1,5 @@
 ﻿using CineWorld.Services.MembershipAPI.Data;
 using CineWorld.Services.MembershipAPI.Models;
-using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 
 namespace CineWorld.Services.MembershipAPI.Repositories

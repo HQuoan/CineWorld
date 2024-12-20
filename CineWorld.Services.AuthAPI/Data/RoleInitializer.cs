@@ -1,5 +1,4 @@
-﻿using CineWorld.Services.AuthAPI.Models.Dto;
-using CineWorld.Services.AuthAPI.Models;
+﻿using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Utilities;
 using Microsoft.AspNetCore.Identity;
 
@@ -42,6 +41,7 @@ namespace CineWorld.Services.AuthAPI.Data
           Gender = "Male",
           DateOfBirth = DateTime.UtcNow,
           EmailConfirmed = true,
+          CreatedDate = DateTime.UtcNow,
         };
 
         var result = await userManager.CreateAsync(adminUser, "Admin@123");

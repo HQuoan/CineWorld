@@ -3,6 +3,7 @@ using CineWorld.Services.MembershipAPI.APIFeatures;
 using CineWorld.Services.MembershipAPI.Exceptions;
 using CineWorld.Services.MembershipAPI.Models;
 using CineWorld.Services.MembershipAPI.Models.Dtos;
+using CineWorld.Services.MembershipAPI.Repositories;
 using CineWorld.Services.MembershipAPI.Repositories.IRepositories;
 using CineWorld.Services.MembershipAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +35,27 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
+    }
+
+    [HttpGet]
+    [Route("MemberStat")]
+    public async Task<ActionResult<ResponseDto>> MemberStat()
+    {
+      QueryParameters<MemberShip> query = new QueryParameters<MemberShip>();
+      query.Filters.Add(m => m.ExpirationDate >= DateTime.UtcNow);
+      IEnumerable<MemberShip> memberShips = await _unitOfWork.MemberShip.GetAllAsync(query);
+
+      var memberStat = memberShips
+        .GroupBy(c => c.MemberType)
+        .Select(s => new MemberStatResultDto
+          {
+            MemberType = s.Key,
+            Count = s.Count()
+          });
+
+      _response.Result = memberStat;
+
+      return Ok(_response);
     }
 
     /// <summary>

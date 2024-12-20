@@ -36,6 +36,7 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// Gets or sets the limit on how many times the coupon can be used.
     /// </summary>
     /// <default>10</default>
+    [Range(2, int.MaxValue, ErrorMessage = "UsageLimit must be greater than 1.")]
     public int UsageLimit { get; set; }
 
     /// <summary>
@@ -60,7 +61,8 @@ namespace CineWorld.Services.MembershipAPI.Models.Dtos
     /// Gets or sets the duration in months for which the coupon is valid, if the duration type is "repeating".
     /// </summary>
     /// <default>3</default>
-    public int DurationInMonths { get; set; } = 3;
+    [Range(2, int.MaxValue, ErrorMessage = "Duration must be greater than 1.")]
+    public int DurationInMonths { get; set; } = 1;
   }
 
 }

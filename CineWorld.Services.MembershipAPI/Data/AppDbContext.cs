@@ -40,9 +40,7 @@ namespace CineWorld.Services.MembershipAPI.Data
       List<Package> packages = System.Text.Json.JsonSerializer.Deserialize<List<Package>>(packagesJson);
       modelBuilder.Entity<Package>().HasData(packages.ToArray());
 
-      modelBuilder.Entity<Coupon>()
-          .HasIndex(c => c.CouponCode)
-          .IsUnique();
+
 
       // mặc định tạo CreatedDate khi tạo và không update được 
       modelBuilder.Entity<Package>()
@@ -60,6 +58,40 @@ namespace CineWorld.Services.MembershipAPI.Data
           .HasDefaultValueSql("GETDATE()")
           .ValueGeneratedOnAdd()
           .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+
+
+      // Đánh index coupon 
+      modelBuilder.Entity<Coupon>()
+       .HasIndex(c => c.CouponCode)
+       .IsUnique();
+      modelBuilder.Entity<Coupon>()
+       .HasIndex(c => c.IsActive);
+      modelBuilder.Entity<Coupon>()
+          .HasIndex(c => c.CreatedDate);
+
+      // Đánh index membership 
+      modelBuilder.Entity<MemberShip>()
+       .HasIndex(m => m.UserId);
+      modelBuilder.Entity<MemberShip>()
+          .HasIndex(m => m.ExpirationDate);
+      modelBuilder.Entity<MemberShip>()
+          .HasIndex(m => m.RenewalStartDate);
+      modelBuilder.Entity<MemberShip>()
+          .HasIndex(m => m.UserEmail);
+
+      // Đánh index receipt 
+      modelBuilder.Entity<Receipt>()
+          .HasIndex(r => r.UserId);
+      modelBuilder.Entity<Receipt>()
+          .HasIndex(r => r.Email);
+      modelBuilder.Entity<Receipt>()
+          .HasIndex(r => r.PackageId);
+      modelBuilder.Entity<Receipt>()
+          .HasIndex(r => r.CreatedDate);
+      modelBuilder.Entity<Receipt>()
+          .HasIndex(r => r.Status);
+      modelBuilder.Entity<Receipt>()
+          .HasIndex(r => r.CouponCode);
     }
 
   }

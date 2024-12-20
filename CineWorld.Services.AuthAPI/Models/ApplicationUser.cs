@@ -1,5 +1,4 @@
-﻿using CineWorld.Services.AuthAPI.Utilities;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,5 +19,7 @@ namespace CineWorld.Services.AuthAPI.Models
     public DateTime DateOfBirth { get; set; }
     [NotMapped]
     public string? Role { get; set; }
+    [Required]
+    public DateTime CreatedDate { get; set; }
   }
 }

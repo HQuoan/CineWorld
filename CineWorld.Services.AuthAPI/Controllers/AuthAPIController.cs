@@ -1,7 +1,5 @@
 ﻿using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -99,21 +97,20 @@ namespace CineWorld.Services.AuthAPI.Controllers
     /// Signs in using Google authentication.
     /// </summary>
     /// <returns>A response containing the authentication result.</returns>
-    [HttpGet("signin-google")]
-    [Authorize(Policy = "GoogleAuth")]
-    public async Task<IActionResult> SignInGoogle()
+    [HttpPost("signin-google")]
+    public async Task<IActionResult> SignInGoogle([FromBody] LoginGoogleRequest request)
     {
-      var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-      if (!authenticateResult.Succeeded)
-      {
-        return BadRequest(new { message = "Google authentication failed." });
-      }
+      //var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+      //if (!authenticateResult.Succeeded)
+      //{
+      //  return BadRequest(new { message = "Google authentication failed." });
+      //}
       try
       {
-        var response = await _authService.SignInWithGoogle(authenticateResult);
+        var response = await _authService.SignInWithGoogle(request.Token);
         return Ok(response);
       }
-      catch (ApplicationException ex)
+      catch (Exception ex)
       {
         return BadRequest(new { message = ex.Message });
       }
@@ -185,5 +182,7 @@ namespace CineWorld.Services.AuthAPI.Controllers
         return BadRequest(new { Message = ex.Message });
       }
     }
+
+
   }
 }

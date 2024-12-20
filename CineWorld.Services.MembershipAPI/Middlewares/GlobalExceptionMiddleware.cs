@@ -44,7 +44,7 @@ namespace CineWorld.Services.MembershipAPI.Attributes
             response.Message = dbEx.InnerException?.Message ?? "Đã xảy ra lỗi khi cập nhật cơ sở dữ liệu.";
             break;
           default:
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             //response.Message = "Đã xảy ra lỗi không mong muốn.";
             response.Message = ex.Message;
             break;

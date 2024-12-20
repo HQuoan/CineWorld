@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+
 namespace CineWorld.Services.ViewAPI.APIFeatures
 {
   public class ViewQueryParameters : BaseQueryParameters
@@ -16,8 +18,10 @@ namespace CineWorld.Services.ViewAPI.APIFeatures
     /// Use "-" prefix for descending order (e.g., "-Name" for descending by Name).
     /// </summary>
     public new string? OrderBy { get; set; }
-    public bool WithMovieInformation { get; set; } = false; 
+    public bool WithMovieInformation { get; set; } = false;
+    [DefaultValue(25)]
+    public new int? PageSize { get; set; } = 25;
 
-   }
+  }
 
 }

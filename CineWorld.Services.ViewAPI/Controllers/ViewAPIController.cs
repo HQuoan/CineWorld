@@ -163,12 +163,14 @@ namespace CineWorld.Services.ViewAPI.Controllers
       _response.Result = viewDtos;
 
       int totalItems = await _unitOfWork.View.CountAsync();
+      var totalItemsPerPage = queryParameters.PageSize ?? totalItems;
+
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,
-        TotalItemsPerPage = queryParameters.PageSize ?? totalItems,
+        TotalItemsPerPage = totalItemsPerPage,
         CurrentPage = queryParameters.PageNumber,
-        TotalPages = (int)Math.Ceiling((double)totalItems / totalItems)
+        TotalPages = (int)Math.Ceiling((double)totalItems / totalItemsPerPage)
       };
 
       return Ok(_response);

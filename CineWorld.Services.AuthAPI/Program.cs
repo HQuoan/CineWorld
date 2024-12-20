@@ -166,20 +166,20 @@ var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 
 // Apply migrations
-//ApplyMigration();
+ApplyMigration();
 
-// Seed roles
+//Seed roles
 using (var scope = app.Services.CreateScope())
 {
-  var services = scope.ServiceProvider;
-  try
-  {
-    await RoleInitializer.InitializeAsync(services);
-  }
-  catch (Exception ex)
-  {
-    throw new Exception("An error occurred while seeding the roles.", ex);
-  }
+    var services = scope.ServiceProvider;
+    try
+    {
+        await RoleInitializer.InitializeAsync(services);
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("An error occurred while seeding the roles.", ex);
+    }
 }
 
 

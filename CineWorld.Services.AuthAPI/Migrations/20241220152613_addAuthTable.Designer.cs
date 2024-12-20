@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.AuthAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241125095653_seedAuth")]
-    partial class seedAuth
+    [Migration("20241220152613_addAuthTable")]
+    partial class addAuthTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,6 +40,9 @@ namespace CineWorld.Services.AuthAPI.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
@@ -53,11 +56,11 @@ namespace CineWorld.Services.AuthAPI.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -94,6 +97,15 @@ namespace CineWorld.Services.AuthAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DateOfBirth");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("FullName");
+
+                    b.HasIndex("Gender");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -123,6 +135,8 @@ namespace CineWorld.Services.AuthAPI.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -215,6 +229,8 @@ namespace CineWorld.Services.AuthAPI.Migrations
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId", "RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
                 });

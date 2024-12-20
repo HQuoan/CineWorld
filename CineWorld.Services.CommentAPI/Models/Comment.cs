@@ -12,6 +12,9 @@ namespace CineWorld.Services.CommentAPI.Models
         [Required]
         public string UserId { get; set; }
         [Required]
+        public string FullName { get; set; }
+        public string? Avatar { get; set; }
+        [Required]
         public int MovieId { get; set; }
         
         [Required]

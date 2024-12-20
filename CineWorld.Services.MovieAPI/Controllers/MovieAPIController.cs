@@ -246,5 +246,50 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       return NoContent();
     }
+     [HttpGet("GetMoviesById")]
+ public async Task<ActionResult<ResponseDto>> GetMoviesById([FromQuery] List<int> ids)
+ {
+     try
+     {
+         if (ids == null || ids.Count == 0)
+         {
+             _response.IsSuccess = false;
+             _response.Message = "The list of IDs cannot be null or empty.";
+             return BadRequest(_response);
+         }
+         var filter = ids.ToArray();
+         var movies = await _unitOfWork.Movie.GetAllAsync(new QueryParameters<Movie>
+         {
+             Filters = new List<Expression<Func<Movie, bool>>>
+     {
+         movie => filter.Contains(movie.MovieId)
+     }
+         });
+         if (movies == null || !movies.Any())
+         {
+             _response.IsSuccess = false;
+             _response.Message = "No movies found for the provided IDs.";
+             return NotFound(_response);
+         }
+         var movieDtos = movies.Select(movie => new MovieResponseDto()
+         {
+             MovieId = movie.MovieId,
+             MovieName = movie.Name,
+             MovieImageUrl = movie.ImageUrl
+         }).ToList();
+
+         _response.Result = movieDtos;
+         return Ok(_response);
+     }
+     catch (Exception ex)
+     {
+
+         _response.IsSuccess = false;
+         _response.Message = $"An error occurred: {ex.Message}";
+         return StatusCode(500, _response);
+     }
+
+
+ }
   }
 }

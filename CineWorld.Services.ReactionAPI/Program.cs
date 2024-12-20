@@ -2,6 +2,10 @@ using AutoMapper;
 using CineWorld.Services.ReactionAPI;
 using CineWorld.Services.ReactionAPI.Data;
 using CineWorld.Services.ReactionAPI.Extensions;
+using CineWorld.Services.ReactionAPI.Repositories.Implement;
+using CineWorld.Services.ReactionAPI.Repositories.Interface;
+using CineWorld.Services.ReactionAPI.Services;
+using CineWorld.Services.ReactionAPI.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -16,6 +20,18 @@ builder.Services.AddDbContext<AppDbContext>(option =>
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 });
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+builder.Services.AddScoped<IRateRepository, RateRepository>();
+builder.Services.AddScoped<IWatchHistoryRepository, WatchHistoryRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IRateService, RateService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IWatchHistoryService, WatchHistoryService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+
+
+builder.Services.AddHttpClient();
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

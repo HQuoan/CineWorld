@@ -175,77 +175,77 @@ namespace Mango.Services.AuthAPI.Controllers
 
       return user != null;
     }
+     [HttpGet("GetUserInformationById")]
+ public async Task<ActionResult<ResponseDto>> GetUserInformationById([FromQuery] List<string> ids)
+ {
+     try
+     {
+         if (ids == null || ids.Count == 0)
+         {
+             _response.IsSuccess = false;
+             _response.Message = "The list of IDs cannot be null or empty.";
+             return BadRequest(_response);
+         }
+         var userInformations = new List<UserCommentDTO>();
+         foreach (var userId in ids)
+         {
+             var user = await _userManager.FindByIdAsync(userId);
+             if (user == null)
+             {
+                 continue;
+             }
+             var userInfo = new UserCommentDTO
+             {
+                 Id = user.Id,
+                 FullName = user.FullName,
+                 Avatar = user.Avatar,
+             };
+             userInformations.Add(userInfo);
+         }
+         _response.Result = userInformations;
+         return Ok(_response);
+     }
+     catch (Exception ex)
+     {
+         _response.IsSuccess = false;
+         _response.Message = $"An error occurred: {ex.Message}";
+         return StatusCode(500, _response);
+     }
+ }
 
-    [HttpGet("GetInfoById/{userId}")]
-    public async Task<IActionResult> GetInfoById(string userId)
-    {
-      try
-      {
-        if (userId == null)
-        {
-          return BadRequest("User ID cannot be empty");
-        }
+ /// <summary>
+ /// Retrieves user details by email.
+ /// </summary>
+ /// <param name="email">The email of the user to retrieve.</param>
+ /// <returns>The user's details.</returns>
+ /// <response code="200">Returns the user information.</response>
+ /// <response code="403">If the user is not authorized to view the details.</response>
+ /// <response code="404">If the user is not found.</response>
+ [HttpGet("GetByEmail/{email}")]
+ public async Task<IActionResult> GetByEmail(string email)
+ {
+     string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-          return NotFound($"User with ID {userId} not found.");
-        }
+     if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
+     {
+         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
+     }
 
-        var userInfo = new UserInformation
-        {
-          Id = user.Id,
-          FullName = user.FullName,
-          Avatar = user.Avatar,
-          Gender = user.Gender,
-          DateOfBirth = user.DateOfBirth
-        };
+     var user = await _userManager.FindByEmailAsync(email);
+     if (user == null)
+     {
+         throw new NotFoundException($"User with Email: {email} not found.");
+     }
 
+     var roles = await _userManager.GetRolesAsync(user);
+     user.Role = string.Join(", ", roles);
 
-        return Ok(userInfo);
-      }
-      catch (Exception ex)
-      {
-        return StatusCode(500, new { Success = false, Message = ex.Message });
-      }
-    }
+     _response.Result = _mapper.Map<UserDto>(user);
 
-    [HttpGet("GetInfoByIds/{id}")]
-    public async Task<IActionResult> GetInfoByIds(List<string> userIds)
-    {
-      try
-      {
-        if (userIds == null || userIds.Count == 0)
-        {
-          return BadRequest("User IDs cannot be empty");
-        }
-        var userInformations = new List<UserInformation>();
-        foreach (var userId in userIds)
-        {
-          var user = await _userManager.FindByIdAsync(userId);
-          if (user == null)
-          {
-            continue;
-          }
-          var userInfo = new UserInformation
-          {
-            Id = user.Id,
-            FullName = user.FullName,
-            Avatar = user.Avatar,
-            Gender = user.Gender,
-            DateOfBirth = user.DateOfBirth
-          };
-          userInformations.Add(userInfo);
+     return Ok(_response);
+ }
 
-        }
-        return Ok(userInformations);
-
-      }
-      catch (Exception ex)
-      {
-        return StatusCode(500, new { Success = false, Message = ex.Message });
-      }
-    }
+   
 
     /// <summary>
     /// Retrieves user details by email.

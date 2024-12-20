@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.HistoryAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241104110717_seedTable")]
-    partial class seedTable
+    [Migration("20241127170440_addAndSeedTable")]
+    partial class addAndSeedTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,17 @@ namespace CineWorld.Services.HistoryAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EpisodeId")
+                    b.Property<int?>("EpisodeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LastWatched")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MovieUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -56,6 +62,8 @@ namespace CineWorld.Services.HistoryAPI.Migrations
                             Id = 1,
                             EpisodeId = 2,
                             LastWatched = new DateTime(2024, 11, 1, 17, 30, 0, 0, DateTimeKind.Local),
+                            MovieId = 1,
+                            MovieUrl = "seedTable.com",
                             UserId = "user123",
                             WatchedDuration = new TimeSpan(0, 0, 20, 0, 0)
                         },
@@ -64,6 +72,8 @@ namespace CineWorld.Services.HistoryAPI.Migrations
                             Id = 2,
                             EpisodeId = 1,
                             LastWatched = new DateTime(2024, 11, 2, 18, 0, 0, 0, DateTimeKind.Local),
+                            MovieId = 2,
+                            MovieUrl = "seedTable.com",
                             UserId = "user456",
                             WatchedDuration = new TimeSpan(0, 0, 15, 0, 0)
                         },
@@ -72,6 +82,8 @@ namespace CineWorld.Services.HistoryAPI.Migrations
                             Id = 3,
                             EpisodeId = 3,
                             LastWatched = new DateTime(2024, 11, 3, 21, 45, 0, 0, DateTimeKind.Local),
+                            MovieId = 3,
+                            MovieUrl = "seedTable.com",
                             UserId = "user789",
                             WatchedDuration = new TimeSpan(0, 0, 5, 0, 0)
                         },
@@ -80,6 +92,8 @@ namespace CineWorld.Services.HistoryAPI.Migrations
                             Id = 4,
                             EpisodeId = 1,
                             LastWatched = new DateTime(2024, 11, 4, 23, 0, 0, 0, DateTimeKind.Local),
+                            MovieId = 4,
+                            MovieUrl = "seedTable.com",
                             UserId = "user123",
                             WatchedDuration = new TimeSpan(0, 0, 30, 0, 0)
                         },
@@ -88,6 +102,8 @@ namespace CineWorld.Services.HistoryAPI.Migrations
                             Id = 5,
                             EpisodeId = 2,
                             LastWatched = new DateTime(2024, 11, 6, 1, 15, 0, 0, DateTimeKind.Local),
+                            MovieId = 5,
+                            MovieUrl = "seedTable.com",
                             UserId = "user456",
                             WatchedDuration = new TimeSpan(0, 0, 10, 0, 0)
                         });

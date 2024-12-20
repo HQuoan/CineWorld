@@ -8,12 +8,14 @@ using CineWorld.Services.CommentAPI.Utilities;
 using Mango.Services.CommentAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace CineWorld.Services.CommentAPI.Controllers
 {
     [Route("api/comment")]
     [ApiController]
-    //[Authorize]
+
     public class CommentAPIController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -43,29 +45,16 @@ namespace CineWorld.Services.CommentAPI.Controllers
             return _response;
         }
 
-        [HttpGet("GetCommentByFilm/{id:int}")]
+        [HttpGet("GetCommentByFilmId/{id:int}")]
 
-        public async Task<ResponseDto> GetCommentByFilm(int id)
+        public async Task<ResponseDto> GetCommentsByFilmId(int id)
         {
             try
             {
                 UserInformation user = new UserInformation();
-                IEnumerable<Comment> obj = _db.Comments.Where(u => u.MovieId == id).ToList();
-                //_response.Result = _mapper.Map<IEnumerable<CommentDto>>(obj);
-                List<CommentDto> result = new List<CommentDto>();
-                foreach (Comment cmt in obj)
-                {
-                    user = await _commentService.GetUserInformationAsync(cmt.UserId);
-                    if (user == null)
-                    {
-                        Console.WriteLine(user + "null rồi");
-                    }
-                    CommentDto dto = _mapper.Map<CommentDto>(cmt);
-                    dto.UserName = user.FullName;
-                    result.Add(dto);
+                IEnumerable<Comment> comments = _db.Comments.Where(u => u.MovieId == id).ToList();
 
-                }
-                _response.Result = result;
+                _response.Result = _mapper.Map<IEnumerable<CommentDto>>(comments);
             }
             catch (Exception ex)
             {
@@ -77,11 +66,21 @@ namespace CineWorld.Services.CommentAPI.Controllers
 
         [HttpPost]
         [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
-        public ResponseDto Post([FromBody] CommentDto CommentDto)
+        public async Task<ResponseDto> Post([FromBody] CommentDto CommentDto)
         {
+            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var fullNameClaim = User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
+            var avatarClaim = User.FindFirst("Avatar")?.Value;
+            if (fullNameClaim == null || userId == null)
+            {
+                _response.Message = "You are not allowed to access data that does not belong to you.";
+            }
             try
             {
                 Comment obj = _mapper.Map<Comment>(CommentDto);
+                obj.Avatar = avatarClaim;
+                obj.FullName = fullNameClaim;
+                obj.UserId = userId;
                 _db.Comments.Add(obj);
                 _db.SaveChanges();
                 _response.Result = _mapper.Map<CommentDto>(obj);

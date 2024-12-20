@@ -22,120 +22,150 @@ namespace CineWorld.Services.ReactionAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CineWorld.Services.ReactionAPI.Models.UserFavorites", b =>
+            modelBuilder.Entity("CineWorld.Services.ReactionAPI.Models.Entities.Comment", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("CommentContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("comment_content");
+
+                    b.Property<int?>("CommentParentId")
+                        .HasColumnType("int")
+                        .HasColumnName("parent_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
 
                     b.Property<int>("MovieId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("movie_id");
 
-                    b.Property<DateTime>("FavoritedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("CommentId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("CineWorld.Services.ReactionAPI.Models.Entities.UserFavorite", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int")
+                        .HasColumnName("movie_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("UserId", "MovieId");
 
                     b.ToTable("UserFavorites");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "user1",
-                            MovieId = 101,
-                            FavoritedAt = new DateTime(2024, 11, 1, 10, 30, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            UserId = "user1",
-                            MovieId = 102,
-                            FavoritedAt = new DateTime(2024, 11, 1, 11, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            UserId = "user2",
-                            MovieId = 101,
-                            FavoritedAt = new DateTime(2024, 11, 1, 12, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            UserId = "user3",
-                            MovieId = 103,
-                            FavoritedAt = new DateTime(2024, 11, 2, 9, 15, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            UserId = "user1",
-                            MovieId = 103,
-                            FavoritedAt = new DateTime(2024, 11, 2, 10, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
-            modelBuilder.Entity("CineWorld.Services.ReactionAPI.Models.UserRates", b =>
+            modelBuilder.Entity("CineWorld.Services.ReactionAPI.Models.Entities.UserRate", b =>
                 {
-                    b.Property<int>("RatingId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RatingId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EpisodeId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
 
-                    b.Property<DateTime>("RatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int")
+                        .HasColumnName("movie_id");
 
                     b.Property<double>("RatingValue")
-                        .HasColumnType("float");
+                        .HasColumnType("float")
+                        .HasColumnName("rating_value");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("RatingId");
+                    b.HasKey("Id");
 
                     b.ToTable("UserRates");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            RatingId = 1,
-                            EpisodeId = 101,
-                            RatedAt = new DateTime(2024, 11, 1, 10, 45, 0, 0, DateTimeKind.Unspecified),
-                            RatingValue = 4.0,
-                            UserId = "user1"
-                        },
-                        new
-                        {
-                            RatingId = 2,
-                            EpisodeId = 101,
-                            RatedAt = new DateTime(2024, 11, 1, 12, 30, 0, 0, DateTimeKind.Unspecified),
-                            RatingValue = 5.0,
-                            UserId = "user2"
-                        },
-                        new
-                        {
-                            RatingId = 3,
-                            EpisodeId = 102,
-                            RatedAt = new DateTime(2024, 11, 1, 11, 15, 0, 0, DateTimeKind.Unspecified),
-                            RatingValue = 3.0,
-                            UserId = "user1"
-                        },
-                        new
-                        {
-                            RatingId = 4,
-                            EpisodeId = 103,
-                            RatedAt = new DateTime(2024, 11, 2, 9, 30, 0, 0, DateTimeKind.Unspecified),
-                            RatingValue = 2.0,
-                            UserId = "user3"
-                        },
-                        new
-                        {
-                            RatingId = 5,
-                            EpisodeId = 103,
-                            RatedAt = new DateTime(2024, 11, 2, 10, 5, 0, 0, DateTimeKind.Unspecified),
-                            RatingValue = 4.0,
-                            UserId = "user1"
-                        });
+            modelBuilder.Entity("CineWorld.Services.ReactionAPI.Models.Entities.WatchHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("EpisodeId")
+                        .HasColumnType("int")
+                        .HasColumnName("episode_id");
+
+                    b.Property<string>("EpisodeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("episode_name");
+
+                    b.Property<DateTime>("LastWatched")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("last_watched");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int")
+                        .HasColumnName("movie_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("user_id");
+
+                    b.Property<TimeSpan>("WatchedDuration")
+                        .HasColumnType("time")
+                        .HasColumnName("watched_duration");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WatchHistories");
                 });
 #pragma warning restore 612, 618
         }

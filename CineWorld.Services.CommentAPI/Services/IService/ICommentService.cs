@@ -5,6 +5,6 @@ namespace CineWorld.Services.CommentAPI.Services.IService
 {
     public interface ICommentService
     {
-        Task<UserInformation> GetUserInformationAsync(string userId);
+        //Task<UserInformation> GetUserInformationAsync(string userId);
     }
 }

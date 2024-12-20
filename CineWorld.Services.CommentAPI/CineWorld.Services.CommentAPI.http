@@ -1,6 +1,0 @@
-@CineWorld.Services.CommentAPI_HostAddress = http://localhost:5100
-
-GET {{CineWorld.Services.CommentAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

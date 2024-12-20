@@ -15,26 +15,26 @@ using System.Security.Claims;
 
 namespace Mango.Services.AuthAPI.Controllers
 {
-    [Route("api/users")]
-    [ApiController]
-    //[Authorize]
-    public class UserAPIController : ControllerBase
+  [Route("api/users")]
+  [ApiController]
+  //[Authorize]
+  public class UserAPIController : ControllerBase
+  {
+    protected ResponseDto _response;
+    private readonly AppDbContext _db;
+    private readonly IMapper _mapper;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IAmazonS3 _s3Client;
+    public UserAPIController(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IMapper mapper, IAmazonS3 s3Client)
     {
-        protected ResponseDto _response;
-        private readonly AppDbContext _db;
-        private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IAmazonS3 _s3Client;
-        public UserAPIController(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IMapper mapper, IAmazonS3 s3Client)
-        {
-            _db = db;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _response = new();
-            _mapper = mapper;
-            _s3Client = s3Client;
-        }
+      _db = db;
+      _userManager = userManager;
+      _roleManager = roleManager;
+      _response = new();
+      _mapper = mapper;
+      _s3Client = s3Client;
+    }
     //[Authorize(Roles = SD.AdminRole)]
 
     /// <summary>
@@ -175,77 +175,43 @@ namespace Mango.Services.AuthAPI.Controllers
 
       return user != null;
     }
-     [HttpGet("GetUserInformationById")]
- public async Task<ActionResult<ResponseDto>> GetUserInformationById([FromQuery] List<string> ids)
- {
-     try
-     {
-         if (ids == null || ids.Count == 0)
-         {
-             _response.IsSuccess = false;
-             _response.Message = "The list of IDs cannot be null or empty.";
-             return BadRequest(_response);
-         }
-         var userInformations = new List<UserCommentDTO>();
-         foreach (var userId in ids)
-         {
-             var user = await _userManager.FindByIdAsync(userId);
-             if (user == null)
-             {
-                 continue;
-             }
-             var userInfo = new UserCommentDTO
-             {
-                 Id = user.Id,
-                 FullName = user.FullName,
-                 Avatar = user.Avatar,
-             };
-             userInformations.Add(userInfo);
-         }
-         _response.Result = userInformations;
-         return Ok(_response);
-     }
-     catch (Exception ex)
-     {
-         _response.IsSuccess = false;
-         _response.Message = $"An error occurred: {ex.Message}";
-         return StatusCode(500, _response);
-     }
- }
-
- /// <summary>
- /// Retrieves user details by email.
- /// </summary>
- /// <param name="email">The email of the user to retrieve.</param>
- /// <returns>The user's details.</returns>
- /// <response code="200">Returns the user information.</response>
- /// <response code="403">If the user is not authorized to view the details.</response>
- /// <response code="404">If the user is not found.</response>
- [HttpGet("GetByEmail/{email}")]
- public async Task<IActionResult> GetByEmail(string email)
- {
-     string userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-
-     if (!User.IsInRole(SD.AdminRole) && (userEmail != null && userEmail != email))
-     {
-         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
-     }
-
-     var user = await _userManager.FindByEmailAsync(email);
-     if (user == null)
-     {
-         throw new NotFoundException($"User with Email: {email} not found.");
-     }
-
-     var roles = await _userManager.GetRolesAsync(user);
-     user.Role = string.Join(", ", roles);
-
-     _response.Result = _mapper.Map<UserDto>(user);
-
-     return Ok(_response);
- }
-
-   
+    [HttpGet("GetUserInformationById")]
+    public async Task<ActionResult<ResponseDto>> GetUserInformationById([FromQuery] List<string> ids)
+    {
+      try
+      {
+        if (ids == null || ids.Count == 0)
+        {
+          _response.IsSuccess = false;
+          _response.Message = "The list of IDs cannot be null or empty.";
+          return BadRequest(_response);
+        }
+        var userInformations = new List<UserCommentDTO>();
+        foreach (var userId in ids)
+        {
+          var user = await _userManager.FindByIdAsync(userId);
+          if (user == null)
+          {
+            continue;
+          }
+          var userInfo = new UserCommentDTO
+          {
+            Id = user.Id,
+            FullName = user.FullName,
+            Avatar = user.Avatar,
+          };
+          userInformations.Add(userInfo);
+        }
+        _response.Result = userInformations;
+        return Ok(_response);
+      }
+      catch (Exception ex)
+      {
+        _response.IsSuccess = false;
+        _response.Message = $"An error occurred: {ex.Message}";
+        return StatusCode(500, _response);
+      }
+    }
 
     /// <summary>
     /// Retrieves user details by email.
@@ -343,80 +309,80 @@ namespace Mango.Services.AuthAPI.Controllers
         return BadRequest(result.Errors);
       }
 
-            return NoContent();
-        }
+      return NoContent();
+    }
 
-        [HttpPost("updateAvatar")]
-        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
-        public async Task<IActionResult> UpdateAvatar(IFormFile file, string? prefix = null)
+    [HttpPost("updateAvatar")]
+    [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
+    public async Task<IActionResult> UpdateAvatar(IFormFile file, string? prefix = null)
+    {
+      string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+      var userProfile = await _userManager.FindByIdAsync(userId);
+      const string bucketName = "cineworld-user-avatars"; // Bucket cố định
+      if (userProfile == null)
+      {
+        return NotFound("User profile not found.");
+      }
+      var oldAvatarUrl = userProfile.Avatar;
+      if (!string.IsNullOrEmpty(oldAvatarUrl))
+      {
+
+        var oldAvatarKey = oldAvatarUrl.Replace($"https://{bucketName}.s3.amazonaws.com/", string.Empty);
+
+        try
         {
-            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var userProfile = await _userManager.FindByIdAsync(userId);
-            const string bucketName = "cineworld-user-avatars"; // Bucket cố định
-            if (userProfile == null)
-            {
-                return NotFound("User profile not found.");
-            }
-            var oldAvatarUrl = userProfile.Avatar;
-            if (!string.IsNullOrEmpty(oldAvatarUrl))
-            {
-                
-                var oldAvatarKey = oldAvatarUrl.Replace($"https://{bucketName}.s3.amazonaws.com/", string.Empty);
-
-                try
-                {
-                    var deleteRequest = new DeleteObjectRequest
-                    {
-                        BucketName = bucketName,
-                        Key = oldAvatarKey
-                    };
-                    await _s3Client.DeleteObjectAsync(deleteRequest);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest($"Error deleting old avatar: {ex.Message}");
-                }
-            }
-            
-            var bucketExists = await _s3Client.DoesS3BucketExistAsync(bucketName);
-            if (!bucketExists) return NotFound($"Bucket {bucketName} does not exist.");
-
-            // Tạo key cho file
-            var sanitizedPrefix = string.IsNullOrEmpty(prefix) ? $"users/{userId}" : $"{prefix.TrimEnd('/')}/users/{userId}";
-            var key = $"{sanitizedPrefix}/{Guid.NewGuid()}_{file.FileName}";
-
-            // Tạo request upload
-            var request = new PutObjectRequest()
-            {
-                BucketName = bucketName,
-                Key = key,
-                InputStream = file.OpenReadStream(),
-                ContentType = file.ContentType, // Gán Content-Type từ file
-                CannedACL = S3CannedACL.PublicRead
-            };
-            request.Metadata.Add("Content-Type", file.ContentType); // Thêm Metadata Content-Type
-
-            // Upload file lên S3
-            await _s3Client.PutObjectAsync(request);
-
-            var fileUrl = $"https://{bucketName}.s3.amazonaws.com/{key}";
-
-            // Cập nhật URL vào cơ sở dữ liệu
-            
-            if (userProfile != null)
-            {
-                userProfile.Avatar = fileUrl;  
-                var result = await _userManager.UpdateAsync(userProfile);
-                if (!result.Succeeded)
-                {
-                    return BadRequest(result.Errors);
-                }
-                _response.Result = $"File uploaded successfully to S3 at URL: {fileUrl}";
-            }
-
-            return Ok(_response);
-
+          var deleteRequest = new DeleteObjectRequest
+          {
+            BucketName = bucketName,
+            Key = oldAvatarKey
+          };
+          await _s3Client.DeleteObjectAsync(deleteRequest);
         }
+        catch (Exception ex)
+        {
+          return BadRequest($"Error deleting old avatar: {ex.Message}");
+        }
+      }
+
+      var bucketExists = await _s3Client.DoesS3BucketExistAsync(bucketName);
+      if (!bucketExists) return NotFound($"Bucket {bucketName} does not exist.");
+
+      // Tạo key cho file
+      var sanitizedPrefix = string.IsNullOrEmpty(prefix) ? $"users/{userId}" : $"{prefix.TrimEnd('/')}/users/{userId}";
+      var key = $"{sanitizedPrefix}/{Guid.NewGuid()}_{file.FileName}";
+
+      // Tạo request upload
+      var request = new PutObjectRequest()
+      {
+        BucketName = bucketName,
+        Key = key,
+        InputStream = file.OpenReadStream(),
+        ContentType = file.ContentType, // Gán Content-Type từ file
+        CannedACL = S3CannedACL.PublicRead
+      };
+      request.Metadata.Add("Content-Type", file.ContentType); // Thêm Metadata Content-Type
+
+      // Upload file lên S3
+      await _s3Client.PutObjectAsync(request);
+
+      var fileUrl = $"https://{bucketName}.s3.amazonaws.com/{key}";
+
+      // Cập nhật URL vào cơ sở dữ liệu
+
+      if (userProfile != null)
+      {
+        userProfile.Avatar = fileUrl;
+        var result = await _userManager.UpdateAsync(userProfile);
+        if (!result.Succeeded)
+        {
+          return BadRequest(result.Errors);
+        }
+        _response.Result = $"File uploaded successfully to S3 at URL: {fileUrl}";
+      }
+
+      return Ok(_response);
 
     }
+
+  }
 }

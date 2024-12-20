@@ -1,6 +1,0 @@
-@CineWorld.Services.HistoryAPI_HostAddress = http://localhost:5049
-
-GET {{CineWorld.Services.HistoryAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

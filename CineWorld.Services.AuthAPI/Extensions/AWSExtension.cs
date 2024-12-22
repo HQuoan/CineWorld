@@ -12,7 +12,8 @@ namespace CineWorld.Services.AuthAPI.Extensions
             var s3Settings = configuration.GetSection("AWSS3").Get<AWSS3Settings>();
             AWSOptions aWSOptions = new AWSOptions
             {
-                Credentials = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey)
+                Credentials = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey),
+                Region = Amazon.RegionEndpoint.GetBySystemName(s3Settings.region)
             };
             services.AddDefaultAWSOptions(aWSOptions);
             services.AddAWSService<IAmazonS3>();

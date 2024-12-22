@@ -9,6 +9,7 @@ using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Services;
 using CineWorld.Services.AuthAPI.Services.IService;
 using CineWorld.Services.AuthAPI.Utilities;
+using CineWorld.Services.AuthAPI.Utilities.AWSS3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,8 +38,9 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 //Cấu hình S3
-builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
-builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.ConfigureAWSS3(builder.Configuration);
+builder.Services.AddScoped<IConfigAWSS3, ConfigAWSS3>();
+builder.Services.AddScoped<IS3Service, S3Service>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 builder.Services.Configure<GoogleSettings>(builder.Configuration.GetSection("ApiSettings:Google"));
@@ -168,18 +170,18 @@ app.UseCors("AllowAllOrigins");
 // Apply migrations
 ApplyMigration();
 
-// Seed roles
+//Seed roles
 using (var scope = app.Services.CreateScope())
 {
-  var services = scope.ServiceProvider;
-  try
-  {
-    await RoleInitializer.InitializeAsync(services);
-  }
-  catch (Exception ex)
-  {
-    throw new Exception("An error occurred while seeding the roles.", ex);
-  }
+    var services = scope.ServiceProvider;
+    try
+    {
+        await RoleInitializer.InitializeAsync(services);
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("An error occurred while seeding the roles.", ex);
+    }
 }
 
 

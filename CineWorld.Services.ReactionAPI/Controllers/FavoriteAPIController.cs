@@ -79,6 +79,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
            
         }
         [HttpGet("GetUserFavorites")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public async Task<ActionResult<ResponseDTO>> Get([FromQuery] FavoriteParam? reqParams)
         {
             try

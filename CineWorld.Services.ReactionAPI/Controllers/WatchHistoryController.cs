@@ -74,6 +74,7 @@ namespace CineWorld.Services.ReactionAPI.Controllers
             }
         }
         [HttpGet("GetWatchHistories")]
+        [Authorize(Roles = $"{SD.AdminRole},{SD.CustomerRole}")]
         public async Task<ActionResult<ResponseDTO>> Get([FromQuery] WatchHistoryParam? reqParams)
         {
             try

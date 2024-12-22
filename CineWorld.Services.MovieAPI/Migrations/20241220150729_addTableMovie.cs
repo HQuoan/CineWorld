@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class addTableMovie : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

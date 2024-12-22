@@ -133,34 +133,44 @@ namespace Mango.Services.AuthAPI.Controllers
     /// <response code="200">Returns the user information.</response>
     /// <response code="403">If the user is not authorized to view the details.</response>
     /// <response code="404">If the user is not found.</response>
-    [HttpGet("{id}")]
+    [HttpGet("GetById")]
     [Authorize]
-    public async Task<IActionResult> Get(string id)
+    public async Task<IActionResult> GetById([FromQuery] string? id)
     {
-
+      // Lấy userId từ claim
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-      if (!User.IsInRole(SD.AdminRole) && (userId != null && userId != id))
+      // Xác định ID sẽ sử dụng
+      string targetId = id ?? userId;
+
+      if (targetId == null)
+      {
+        throw new BadHttpRequestException("Please fill out id or log in.");
+      }
+
+      // Kiểm tra quyền truy cập
+      if (!User.IsInRole(SD.AdminRole) && targetId != userId)
       {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
 
-
-      var user = await _userManager.FindByIdAsync(id);
-
-
+      // Tìm người dùng theo targetId
+      var user = await _userManager.FindByIdAsync(targetId);
       if (user == null)
       {
-        throw new NotFoundException($"User with ID: {id} not found.");
+        throw new NotFoundException($"User with ID: {targetId} not found.");
       }
 
+      // Lấy vai trò của user
       var roles = await _userManager.GetRolesAsync(user);
       user.Role = string.Join(", ", roles);
 
+      // Ánh xạ sang DTO
       _response.Result = _mapper.Map<UserDto>(user);
 
       return Ok(_response);
     }
+
 
     /// <summary>
     /// Checks if a user exists by ID.
@@ -259,12 +269,24 @@ namespace Mango.Services.AuthAPI.Controllers
     public async Task<IActionResult> UpdateInformation(UserInformation userInformation)
     {
       string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-      if (!User.IsInRole(SD.AdminRole) || (userId != null && userId != userInformation.Id))
+
+      string targetId = userInformation.Id ?? userId;
+
+      if (targetId == null)
+      {
+        throw new BadHttpRequestException("Please fill out id or log in.");
+      }
+
+      // Kiểm tra quyền truy cập
+      if (!User.IsInRole(SD.AdminRole) && targetId != userId)
       {
         throw new UnauthorizedAccessException("You are not allowed to access data that does not belong to you.");
       }
 
-      var user = await _userManager.FindByIdAsync(userInformation.Id);
+      // Tìm người dùng theo targetId
+      var user = await _userManager.FindByIdAsync(targetId);
+
+
       if (user == null)
       {
         throw new NotFoundException($"User with ID: {userInformation.Id} not found.");
@@ -301,6 +323,11 @@ namespace Mango.Services.AuthAPI.Controllers
       if (user == null)
       {
         throw new NotFoundException($"User with ID: {id} not found.");
+      }
+
+      if (user.Email == SD.AdminEmail)
+      {
+        throw new BadHttpRequestException("You cannot delete for this account.");
       }
 
       var result = await _userManager.DeleteAsync(user);

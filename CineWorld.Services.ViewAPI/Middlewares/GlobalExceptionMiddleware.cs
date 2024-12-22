@@ -39,6 +39,9 @@ namespace CineWorld.Services.ViewAPI.Attributes
           case NotFoundException _:
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             break;
+          case BadHttpRequestException _:
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            break;
           case DbUpdateException dbEx:
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             response.Message = dbEx.InnerException?.Message ?? "Đã xảy ra lỗi khi cập nhật cơ sở dữ liệu.";
@@ -46,7 +49,6 @@ namespace CineWorld.Services.ViewAPI.Attributes
           default:
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             //response.Message = "Đã xảy ra lỗi không mong muốn.";
-            response.Message = ex.Message;
             break;
         }
 

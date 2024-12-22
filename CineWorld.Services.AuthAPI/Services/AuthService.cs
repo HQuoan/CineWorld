@@ -146,7 +146,7 @@ namespace CineWorld.Services.AuthAPI.Services
           if (!emailResponse.IsSuccess)
           {
             await _userManager.DeleteAsync(user);
-            throw new ApplicationException($"Registration failed: {emailResponse.Message}");
+            throw new BadHttpRequestException($"Registration failed: {emailResponse.Message}");
           }
 
           // Gán role mặc định là CUSTOMER
@@ -169,7 +169,7 @@ namespace CineWorld.Services.AuthAPI.Services
         else
         {
           var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-          throw new ApplicationException($"Registration failed: {errors}");
+          throw new BadHttpRequestException($"Registration failed: {errors}");
         }
       }
       catch (Exception ex)
@@ -182,13 +182,13 @@ namespace CineWorld.Services.AuthAPI.Services
     {
       if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
       {
-        throw new ApplicationException("Invalid email confirmation request.");
+        throw new BadHttpRequestException("Invalid email confirmation request.");
       }
 
       var user = await _userManager.FindByIdAsync(userId);
       if (user == null)
       {
-        throw new ApplicationException("User not found.");
+        throw new BadHttpRequestException("User not found.");
       }
 
       var result = await _userManager.ConfirmEmailAsync(user, token);
@@ -205,7 +205,7 @@ namespace CineWorld.Services.AuthAPI.Services
         var emailResponse = await _emailService.SendEmailAsync(emailRequest);
         if (!emailResponse.IsSuccess)
         {
-          throw new ApplicationException($"Email confirmation succeeded, but failed to send notification email: {emailResponse.Message}");
+          throw new BadHttpRequestException($"Email confirmation succeeded, but failed to send notification email: {emailResponse.Message}");
         }
 
         return true;
@@ -213,7 +213,7 @@ namespace CineWorld.Services.AuthAPI.Services
       else
       {
         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-        throw new ApplicationException($"Email confirmation failed: {errors}");
+        throw new BadHttpRequestException($"Email confirmation failed: {errors}");
       }
     }
     private async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(string token)
@@ -270,7 +270,7 @@ namespace CineWorld.Services.AuthAPI.Services
         var result = await _userManager.CreateAsync(user);
         if (!result.Succeeded)
         {
-          throw new ApplicationException($"Failed to register Google user: {string.Join("; ", result.Errors.Select(e => e.Description))}");
+          throw new BadHttpRequestException($"Failed to register Google user: {string.Join("; ", result.Errors.Select(e => e.Description))}");
         }
 
         await _userManager.AddToRoleAsync(user, SD.CustomerRole);
@@ -330,20 +330,25 @@ namespace CineWorld.Services.AuthAPI.Services
       var user = await _userManager.FindByIdAsync(userId);
       if (user == null)
       {
-        throw new ApplicationException("User not found.");
+        throw new BadHttpRequestException("User not found.");
+      }
+
+      if (user.PasswordHash == null)
+      {
+        throw new BadHttpRequestException("Password change is not allowed for users who logged in with a Google account.");
       }
 
       // Kiểm tra mật khẩu cũ
       var passwordValid = await _userManager.CheckPasswordAsync(user, changePasswordDto.CurrentPassword);
       if (!passwordValid)
       {
-        throw new ApplicationException("Current password is incorrect.");
+        throw new BadHttpRequestException("Current password is incorrect.");
       }
 
       // Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
       if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
       {
-        throw new ApplicationException("New password and confirmation password do not match.");
+        throw new BadHttpRequestException("New password and confirmation password do not match.");
       }
 
       // Thực hiện thay đổi mật khẩu
@@ -351,7 +356,7 @@ namespace CineWorld.Services.AuthAPI.Services
       if (!result.Succeeded)
       {
         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-        throw new ApplicationException($"Password change failed: {errors}");
+        throw new BadHttpRequestException($"Password change failed: {errors}");
       }
 
       return true;
@@ -361,7 +366,7 @@ namespace CineWorld.Services.AuthAPI.Services
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
-        throw new ApplicationException("User not found.");
+        throw new BadHttpRequestException("User not found.");
       }
 
       // Tạo token để đặt lại mật khẩu
@@ -378,7 +383,7 @@ namespace CineWorld.Services.AuthAPI.Services
 
       if (!emailResponse.IsSuccess)
       {
-        throw new ApplicationException($"Failed to send password reset email: {emailResponse.Message}");
+        throw new BadHttpRequestException($"Failed to send password reset email: {emailResponse.Message}");
       }
 
       return true;
@@ -389,7 +394,7 @@ namespace CineWorld.Services.AuthAPI.Services
       var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
       if (user == null)
       {
-        throw new ApplicationException("User not found.");
+        throw new BadHttpRequestException("User not found.");
       }
 
       // Reset mật khẩu
@@ -397,7 +402,7 @@ namespace CineWorld.Services.AuthAPI.Services
       if (!result.Succeeded)
       {
         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-        throw new ApplicationException($"Password reset failed: {errors}");
+        throw new BadHttpRequestException($"Password reset failed: {errors}");
       }
 
       return true;

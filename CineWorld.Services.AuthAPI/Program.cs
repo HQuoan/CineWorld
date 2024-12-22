@@ -166,7 +166,7 @@ var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 
 // Apply migrations
-//ApplyMigration();
+ApplyMigration();
 
 // Seed roles
 using (var scope = app.Services.CreateScope())

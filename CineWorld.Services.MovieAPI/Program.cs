@@ -10,10 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Serilog;
 using System.Reflection;
-using System.Text;
-using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 //Serilog
@@ -63,14 +60,6 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 
-//builder.Services.AddControllers().AddJsonOptions(options =>
-//{
-//  options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-//});
-
-
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
@@ -83,7 +72,7 @@ builder.Services.AddSwaggerGen(option =>
     {
       Name = "Support Team",
       Email = "vuongvodtan@gmail.com",
-      Url = new Uri("https://cineworld.io.vn/support")
+      Url = new Uri("https://cineworld.io.vn")
     },
   });
 

@@ -18,14 +18,16 @@ namespace CineWorld.Services.ViewAPI.Controllers
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMovieService _movieService;
+    private readonly IConfiguration _configuration;
 
     private readonly ResponseDto _response;
-    public ViewAPIController(IUnitOfWork unitOfWork, IMapper mapper, IMovieService movieService)
+    public ViewAPIController(IUnitOfWork unitOfWork, IMapper mapper, IMovieService movieService, IConfiguration configuration)
     {
       _response = new ResponseDto();
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _movieService = movieService;
+      _configuration = configuration;
     }
 
     [HttpGet]
@@ -186,10 +188,10 @@ namespace CineWorld.Services.ViewAPI.Controllers
       var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
                  ?? HttpContext.Connection.RemoteIpAddress?.ToString();
 
-      //if( ip == null && userId == null )
-      //{
-      //  throw new NotFoundException("Can't find IpAddress, please try again or login your account!");
-      //} 
+      if (ip == null && userId == null)
+      {
+        throw new NotFoundException("Can't find IpAddress, please try again or login your account!");
+      }
 
       View view = new View
       {
@@ -204,7 +206,17 @@ namespace CineWorld.Services.ViewAPI.Controllers
       await _unitOfWork.View.AddAsync(view);
       await _unitOfWork.SaveAsync();
 
+      var configApiKey = _configuration["ApiSettings:ApiKey"];
+
+      var message = await _movieService.IncreaseMovieView(new IncreaseMovieViewDto
+      {
+        MovieId = model.MovieId,
+        ApiKey = configApiKey
+      });
+
       _response.Result = view;
+      _response.Message = message;
+
       return Created(string.Empty, _response);
     }
 

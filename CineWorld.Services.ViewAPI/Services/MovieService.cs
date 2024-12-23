@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CineWorld.Services.AuthAPI.Services
 {
-    public class MovieService : IMovieService
+  public class MovieService : IMovieService
   {
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -77,5 +77,35 @@ namespace CineWorld.Services.AuthAPI.Services
       return null;
     }
 
+    public async Task<string> IncreaseMovieView(IncreaseMovieViewDto model)
+    {
+      var client = _httpClientFactory.CreateClient("Movie");
+
+      // Chuyển đổi model thành JSON body
+      var jsonContent = JsonConvert.SerializeObject(model);
+      var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+      var response = await client.PostAsync("/api/movies/IncreaseMovieView", content);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        return null;
+      }
+
+      var apiContent = await response.Content.ReadAsStringAsync();
+      var resp = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
+
+      if (resp == null)
+      {
+        return null;
+      }
+
+      if (resp.IsSuccess)
+      {
+        return resp.Message;
+      }
+
+      return null;
+    }
   }
 }

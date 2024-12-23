@@ -1,5 +1,6 @@
 ﻿using CineWorld.Services.AuthAPI.Models.Dto;
 using CineWorld.Services.AuthAPI.Services.IService;
+using CineWorld.Services.AuthAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -81,6 +82,7 @@ namespace CineWorld.Services.AuthAPI.Controllers
     /// <param name="model">The user email and role details.</param>
     /// <returns>A success message if the role is assigned.</returns>
     [HttpPost("AssignRole")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<IActionResult> AssignRole([FromBody] AssignRoleDto model)
     {
       var assignRoleSuccessful = await _authService.AssignRole(model.Email, model.Role.ToUpper());

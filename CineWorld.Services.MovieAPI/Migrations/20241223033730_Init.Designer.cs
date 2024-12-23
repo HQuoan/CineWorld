@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MovieAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241220150729_addTableMovie")]
-    partial class addTableMovie
+    [Migration("20241223033730_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -52,12 +52,14 @@ builder.Services.AddRateLimiter(options =>
         partitionKey,
         _ => new FixedWindowRateLimiterOptions
         {
-          PermitLimit = 2,
+          PermitLimit = 1,
           Window = TimeSpan.FromMinutes(5),
           QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
           QueueLimit = 0
         });
   });
+
+  options.RejectionStatusCode = 429;
 });
 
 builder.Services.AddControllers();
@@ -76,7 +78,7 @@ builder.Services.AddSwaggerGen(option =>
     {
       Name = "Support Team",
       Email = "vuongvodtan@gmail.com",
-      Url = new Uri("https://cineworld.io.vn/support")
+      Url = new Uri("https://cineworld.io.vn")
     },
   });
 
@@ -118,7 +120,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMovieService, MovieService>();
 
-//builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 builder.Services.AddHttpClient("Movie", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MovieAPI"]));
 
 // Thêm CORS
@@ -139,7 +140,7 @@ builder.WebHost.ConfigureKestrel((context, options) =>
 {
   if (context.HostingEnvironment.IsProduction())
   {
-    options.ListenAnyIP(7002, listenOptions =>
+    options.ListenAnyIP(7004, listenOptions =>
     {
       listenOptions.UseHttps("/app/HttpsCerf/certificate.pfx", "yourpassword");
     });
@@ -154,7 +155,7 @@ app.UseCors("AllowAllOrigins");
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-  c.SwaggerEndpoint("/swagger/v1/swagger.json", "Membership API v1");
+  c.SwaggerEndpoint("/swagger/v1/swagger.json", "View API v1");
 });
 
 

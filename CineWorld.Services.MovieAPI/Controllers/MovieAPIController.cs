@@ -21,13 +21,15 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IMapper _mapper;
     private ResponseDto _response;
     private readonly IUtil _util;
+    private readonly IConfiguration _configuration;
 
-    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util)
+    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IConfiguration configuration)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
+      _configuration = configuration;
     }
 
     [HttpGet]
@@ -152,21 +154,27 @@ namespace CineWorld.Services.MovieAPI.Controllers
     /// </summary>
     /// <param name="id">The ID of the movie whose view count will be increased.</param>
     /// <returns>A response confirming the success of the operation.</returns>
-    [HttpPost("IncreaseMovieView/{id}")]
-    public async Task<ActionResult<ResponseDto>> IncreaseMovieView(int id)
+    [HttpPost("IncreaseMovieView")]
+    public async Task<ActionResult<ResponseDto>> IncreaseMovieView([FromBody] IncreaseMovieViewDto increaseMovieViewDto)
     {
-      Movie movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == id);
+      var configApiKey = _configuration["ApiSettings:ApiKey"]; 
+      if (increaseMovieViewDto.ApiKey != configApiKey)
+      {
+        return BadRequest("Invalid Api Key");
+      }
+
+      Movie movie = await _unitOfWork.Movie.GetAsync(c => c.MovieId == increaseMovieViewDto.MovieId);
 
       if (movie == null)
       {
-        throw new NotFoundException($"Movie with ID: {id} not found.");
+        throw new NotFoundException($"Movie with ID: {increaseMovieViewDto.MovieId} not found.");
       }
 
       movie.View++;
       await _unitOfWork.Movie.UpdateAsync(movie);
       await _unitOfWork.SaveAsync();
 
-      _response.Message = $"Successfully added one view to the movie with ID: {id}.";
+      _response.Message = $"Successfully added one view to the movie with ID: {increaseMovieViewDto.MovieId}.";
       return Ok(_response);
     }
 

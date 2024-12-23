@@ -6,11 +6,29 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineWorld.Services.ReactionAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class addTableToDB : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    parent_id = table.Column<int>(type: "int", nullable: true),
+                    user_id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    movie_id = table.Column<int>(type: "int", nullable: false),
+                    comment_content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "UserFavorites",
                 columns: table => new
@@ -53,7 +71,9 @@ namespace CineWorld.Services.ReactionAPI.Migrations
                     episode_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     episode_id = table.Column<int>(type: "int", nullable: false),
                     watched_duration = table.Column<TimeSpan>(type: "time", nullable: false),
-                    last_watched = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    last_watched = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -64,6 +84,9 @@ namespace CineWorld.Services.ReactionAPI.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Comments");
+
             migrationBuilder.DropTable(
                 name: "UserFavorites");
 

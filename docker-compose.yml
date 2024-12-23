@@ -62,10 +62,10 @@ services:
       - productnetwork
     restart: on-failure
 
-  cineworld.services.commentapi:
+  cineworld.services.reactionapi:
     build:
       context: .
-      dockerfile: CineWorld.Services.CommentAPI/Dockerfile
+      dockerfile: CineWorld.Services.ReactionAPI/Dockerfile
     ports:
       - "7003:7003"
     depends_on:
@@ -79,10 +79,10 @@ services:
       - productnetwork
     restart: on-failure
 
-  cineworld.services.historyapi:
+  cineworld.services.viewapi:
     build:
       context: .
-      dockerfile: CineWorld.Services.HistoryAPI/Dockerfile
+      dockerfile: CineWorld.Services.ViewAPI/Dockerfile
     ports:
       - "7004:7004"
     depends_on:
@@ -90,23 +90,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=https://+:7004
-    volumes:
-      - ./HttpsCerf:/app/HttpsCerf
-    networks:
-      - productnetwork
-    restart: on-failure
-
-  cineworld.services.reactionapi:
-    build:
-      context: .
-      dockerfile: CineWorld.Services.ReactionAPI/Dockerfile
-    ports:
-      - "7005:7005"
-    depends_on:
-      - sqlserver
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=https://+:7005
     volumes:
       - ./HttpsCerf:/app/HttpsCerf
     networks:

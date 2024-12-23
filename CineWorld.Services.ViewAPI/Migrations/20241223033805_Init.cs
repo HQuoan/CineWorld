@@ -18,7 +18,7 @@ namespace CineWorld.Services.ViewAPI.Migrations
                     ViewId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IpAddress = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     MovieId = table.Column<int>(type: "int", nullable: false),
                     EpisodeId = table.Column<int>(type: "int", nullable: false),
                     ViewDate = table.Column<DateTime>(type: "datetime2", nullable: false)

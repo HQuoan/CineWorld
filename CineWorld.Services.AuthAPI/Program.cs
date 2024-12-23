@@ -83,7 +83,7 @@ builder.Services.AddSwaggerGen(option =>
     {
       Name = "Support Team",
       Email = "vuongvodtan@gmail.com",
-      Url = new Uri("https://cineworld.io.vn/support")
+      Url = new Uri("https://cineworld.io.vn")
     },
   });
 

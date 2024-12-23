@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.MembershipAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241219052828_AddMemberType")]
-    partial class AddMemberType
+    [Migration("20241223033710_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

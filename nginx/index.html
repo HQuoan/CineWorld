@@ -40,27 +40,34 @@
             color: #333;
         }
         .api-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Căn giữa các item */
             gap: 1.5rem;
             padding: 0 1rem;
         }
         .api-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex: 1 1 calc(33.333% - 2rem); /* Tự động điều chỉnh kích thước */
+            max-width: 280px; /* Giới hạn kích thước tối đa */
             background: #ffffff;
             padding: 1.5rem;
             border: 1px solid #ddd;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Căn giữa theo chiều ngang */
+            justify-content: center; /* Căn giữa theo chiều dọc */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center; /* Căn giữa text */
         }
         .api-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
         }
         .api-item h3 {
+            margin-top: 0;
             font-size: 1.4rem;
             margin-bottom: 1rem;
             color: #34495e;
@@ -92,8 +99,8 @@
             header {
                 font-size: 1.6rem;
             }
-            .api-list {
-                grid-template-columns: 1fr;
+            .api-item {
+                flex: 1 1 100%; /* Mỗi item chiếm toàn bộ hàng trên màn hình nhỏ */
             }
         }
     </style>
@@ -118,16 +125,12 @@
                 <a href="https://cineworld.io.vn:7002/swagger" target="_blank">Go to Swagger</a>
             </div>
             <div class="api-item">
-                <h3>Comment Service</h3>
+                <h3>Reaction Service</h3>
                 <a href="https://cineworld.io.vn:7003/swagger" target="_blank">Go to Swagger</a>
             </div>
             <div class="api-item">
-                <h3>History Service</h3>
+                <h3>View Service</h3>
                 <a href="https://cineworld.io.vn:7004/swagger" target="_blank">Go to Swagger</a>
-            </div>
-            <div class="api-item">
-                <h3>Reaction Service</h3>
-                <a href="https://cineworld.io.vn:7005/swagger" target="_blank">Go to Swagger</a>
             </div>
         </div>
     </main>

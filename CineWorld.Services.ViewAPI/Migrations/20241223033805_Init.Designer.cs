@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineWorld.Services.ViewAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241218043854_nullableUserId")]
-    partial class nullableUserId
+    [Migration("20241223033805_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

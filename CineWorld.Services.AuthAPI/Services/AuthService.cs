@@ -369,6 +369,11 @@ namespace CineWorld.Services.AuthAPI.Services
         throw new BadHttpRequestException("User not found.");
       }
 
+      if (user.PasswordHash == null)
+      {
+        throw new BadHttpRequestException("Password change is not allowed for users who logged in with a Google account.");
+      }
+
       // Tạo token để đặt lại mật khẩu
       var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 

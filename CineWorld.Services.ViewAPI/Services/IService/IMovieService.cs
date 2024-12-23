@@ -6,5 +6,6 @@ namespace CineWorld.Services.ViewAPI.Services.IService
     {
     Task<List<EpisodeInforDto>> GetEpsiodesInfor(IdsRequestDto model);
     Task<List<MovieInforDto>> GetMoviesInfor(IdsRequestDto model);
+    Task<string> IncreaseMovieView(IncreaseMovieViewDto model);
     }
 }

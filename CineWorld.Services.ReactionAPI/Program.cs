@@ -35,7 +35,8 @@ builder.Services.AddHttpClient();
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
@@ -83,7 +84,7 @@ builder.WebHost.ConfigureKestrel((context, options) =>
 {
   if (context.HostingEnvironment.IsProduction())
   {
-    options.ListenAnyIP(7005, listenOptions =>
+    options.ListenAnyIP(7003, listenOptions =>
     {
       listenOptions.UseHttps("/app/HttpsCerf/certificate.pfx", "yourpassword");
     });

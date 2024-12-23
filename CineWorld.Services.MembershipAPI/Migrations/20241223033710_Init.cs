@@ -41,6 +41,7 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UserEmail = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    MemberType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirstSubscriptionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RenewalStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -87,7 +88,9 @@ namespace CineWorld.Services.MembershipAPI.Migrations
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     Status = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     PaymentIntentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StripeSessionId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    StripeSessionId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentSessionUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

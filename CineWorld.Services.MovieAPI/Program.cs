@@ -5,6 +5,8 @@ using CineWorld.Services.MovieAPI.Data;
 using CineWorld.Services.MovieAPI.Extensions;
 using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Services;
+using CineWorld.Services.MovieAPI.Services.IService;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
@@ -114,6 +116,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
+builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 
 // Thêm CORS
 builder.Services.AddCors(options =>

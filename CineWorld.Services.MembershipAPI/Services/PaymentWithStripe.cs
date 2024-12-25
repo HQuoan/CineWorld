@@ -30,6 +30,7 @@ namespace CineWorld.Services.MembershipAPI.Services
           ProductData = new SessionLineItemPriceDataProductDataOptions
           {
             Name = package.Name,
+            Description = package.Description,
           }
         },
         Quantity = 1

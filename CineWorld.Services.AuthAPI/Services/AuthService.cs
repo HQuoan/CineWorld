@@ -126,8 +126,6 @@ namespace CineWorld.Services.AuthAPI.Services
         var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
         if (result.Succeeded)
         {
-
-
           // Tạo token và link xác nhận
           var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
           string callBackUrl = $"{_apiSettings.BaseUrl}/api/auth/confirm-email";

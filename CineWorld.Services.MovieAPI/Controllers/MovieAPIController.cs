@@ -5,6 +5,7 @@ using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Services.IService;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,14 +23,16 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private ResponseDto _response;
     private readonly IUtil _util;
     private readonly IConfiguration _configuration;
+    private readonly IAuthService _authService;
 
-    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IConfiguration configuration)
+    public MovieAPIController(IUnitOfWork unitOfWork, IMapper mapper, IUtil util, IConfiguration configuration, IAuthService authService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _response = new ResponseDto();
       _util = util;
       _configuration = configuration;
+      _authService = authService;
     }
 
     [HttpGet]
@@ -147,6 +150,30 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       _response.Result = _mapper.Map<MovieDto>(movie);
       return Created(string.Empty, _response);
+    }
+
+    [HttpPut]
+    [Route("UploadImage")]
+    [Authorize(Roles = SD.AdminRole)]
+    public async Task<ActionResult<ResponseDto>> UploadImage(IFormFile file, int movieId)
+    {
+      string pictureName;
+
+      var movieFromDb = await _unitOfWork.Movie.GetAsync(m => m.MovieId == movieId);
+      if (movieFromDb == null)
+      {
+        throw new NotFoundException($"Movie with ID: {movieId} not found.");
+      }
+
+      var imageUrl = await _authService.UploadImage(file, movieFromDb.Slug);
+
+      movieFromDb.ImageUrl = imageUrl;
+
+      await _unitOfWork.Movie.UpdateAsync(movieFromDb);
+      await _unitOfWork.SaveAsync();
+
+      _response.Result = _mapper.Map<MovieDto>(movieFromDb);
+      return Ok(_response);
     }
 
     /// <summary>

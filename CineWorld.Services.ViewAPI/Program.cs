@@ -13,6 +13,7 @@ using CineWorld.Services.ViewAPI.Repositories.IRepositories;
 using CineWorld.Services.ViewAPI.Repositories;
 using CineWorld.Services.ViewAPI.Services.IService;
 using CineWorld.Services.AuthAPI.Services;
+using CineWorld.Services.ViewAPI.Utilities;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,15 +39,23 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddRateLimiter(options =>
 {
+  var cookieHandler = new DeviceCookieHandler();
+
   options.AddPolicy<string>("IpRateLimit", httpContext =>
   {
-    var ip = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
-                  ?? httpContext.Connection.RemoteIpAddress?.ToString();
+    //var ip = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+    //              ?? httpContext.Connection.RemoteIpAddress?.ToString();
+    var deviceId = cookieHandler.Get(httpContext);
+    if (deviceId == null)
+    {
+      deviceId = cookieHandler.Set(httpContext);
+    }
+
     var movieId = httpContext.Request.Query["movieId"];
     var episodeId = httpContext.Request.Query["episodeId"];
 
     // Tạo partition key từ IP, MovieId và EpisodeId
-    var partitionKey = $"{ip}-{movieId}-{episodeId}";
+    var partitionKey = $"{deviceId}-{movieId}-{episodeId}";
 
     return RateLimitPartition.GetFixedWindowLimiter(
         partitionKey,

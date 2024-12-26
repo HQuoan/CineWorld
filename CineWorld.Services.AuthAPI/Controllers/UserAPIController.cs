@@ -4,7 +4,6 @@ using CineWorld.Services.AuthAPI.Data;
 using CineWorld.Services.AuthAPI.Exceptions;
 using CineWorld.Services.AuthAPI.Models;
 using CineWorld.Services.AuthAPI.Models.Dto;
-using CineWorld.Services.AuthAPI.Models.Dtos;
 using CineWorld.Services.AuthAPI.Services.IService;
 using CineWorld.Services.AuthAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;

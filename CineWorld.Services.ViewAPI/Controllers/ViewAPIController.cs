@@ -191,34 +191,33 @@ namespace CineWorld.Services.ViewAPI.Controllers
       var cookieHandle = new DeviceCookieHandler();
       var ip = cookieHandle.Get(HttpContext);
 
-      //if (ip == null && userId == null)
-      //{
-      //  throw new NotFoundException("Can't find IpAddress, please try again or login your account!");
-      //}
+      if (ip == null && userId == null)
+      {
+        throw new NotFoundException("Can't find IpAddress, please try again or login your account!");
+      }
 
-      //View view = new View
-      //{
-      //  IpAddress = ip,
-      //  UserId = userId,
-      //  MovieId = model.MovieId,
-      //  EpisodeId = model.EpisodeId,
-      //  ViewDate = DateTime.UtcNow,
-      //};
+      View view = new View
+      {
+        IpAddress = ip,
+        UserId = userId,
+        MovieId = model.MovieId,
+        EpisodeId = model.EpisodeId,
+        ViewDate = DateTime.UtcNow,
+      };
 
 
-      //await _unitOfWork.View.AddAsync(view);
-      //await _unitOfWork.SaveAsync();
+      await _unitOfWork.View.AddAsync(view);
+      await _unitOfWork.SaveAsync();
 
-      //var configApiKey = _configuration["ApiSettings:ApiKey"];
+      var configApiKey = _configuration["ApiSettings:ApiKey"];
 
-      //var message = await _movieService.IncreaseMovieView(new IncreaseMovieViewDto
-      //{
-      //  MovieId = model.MovieId,
-      //  ApiKey = configApiKey
-      //});
+      var message = await _movieService.IncreaseMovieView(new IncreaseMovieViewDto
+      {
+        MovieId = model.MovieId,
+        ApiKey = configApiKey
+      });
 
-      _response.Result = ip;
-      //_response.Message = message;
+      _response.Message = message;
 
       return Created(string.Empty, _response);
     }

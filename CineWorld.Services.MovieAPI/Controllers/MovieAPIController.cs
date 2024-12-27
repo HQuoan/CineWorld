@@ -50,7 +50,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       _response.Result = _mapper.Map<IEnumerable<MovieDetailsDto>>(movies);
 
-      int totalItems = await _unitOfWork.Movie.CountAsync();
+      int totalItems = await _unitOfWork.Movie.CountAsync(query);
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,

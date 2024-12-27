@@ -70,7 +70,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       IEnumerable<MemberShip> memberShips = await _unitOfWork.MemberShip.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<MemberShipDto>>(memberShips);
 
-      int totalItems = await _unitOfWork.MemberShip.CountAsync();
+      int totalItems = await _unitOfWork.MemberShip.CountAsync(query);
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,

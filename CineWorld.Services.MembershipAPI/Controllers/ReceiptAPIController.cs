@@ -87,7 +87,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       IEnumerable<Receipt> receipts = await _unitOfWork.Receipt.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<ReceiptDto>>(receipts);
 
-      int totalItems = await _unitOfWork.Receipt.CountAsync();
+      int totalItems = await _unitOfWork.Receipt.CountAsync(query);
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,

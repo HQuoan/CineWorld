@@ -41,7 +41,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       _response.Result = _mapper.Map<IEnumerable<CountryDto>>(countries);
 
-      int totalItems = await _unitOfWork.Country.CountAsync();
+      int totalItems = await _unitOfWork.Country.CountAsync(query);
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,

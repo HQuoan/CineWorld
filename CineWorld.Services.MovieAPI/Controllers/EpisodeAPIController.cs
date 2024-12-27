@@ -43,7 +43,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       IEnumerable<Episode> episodes = await _unitOfWork.Episode.GetAllAsync(query);
 
-      int totalItems = await _unitOfWork.Episode.CountAsync();
+      int totalItems = await _unitOfWork.Episode.CountAsync(query);
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,

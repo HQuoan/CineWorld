@@ -165,7 +165,7 @@ namespace CineWorld.Services.ViewAPI.Controllers
       // Gắn thông tin ánh xạ vào _response
       _response.Result = viewDtos;
 
-      int totalItems = await _unitOfWork.View.CountAsync();
+      int totalItems = await _unitOfWork.View.CountAsync(query);
       var totalItemsPerPage = queryParameters.PageSize ?? totalItems;
 
       _response.Pagination = new PaginationDto

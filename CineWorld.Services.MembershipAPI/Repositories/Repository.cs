@@ -85,9 +85,19 @@ namespace CineWorld.Services.MembershipAPI.Repositories
     }
 
 
-    public async Task<int> CountAsync()
+    public async Task<int> CountAsync(QueryParameters<T>? queryParameters)
     {
-      return await dbSet.CountAsync();
+      IQueryable<T> query = dbSet;
+
+      if (queryParameters != null && queryParameters.Filters != null && queryParameters.Filters.Any())
+      {
+        foreach (var filter in queryParameters.Filters)
+        {
+          query = query.Where(filter);
+        }
+      }
+
+      return await query.CountAsync();
     }
 
     public async Task RemoveAsync(T entity)

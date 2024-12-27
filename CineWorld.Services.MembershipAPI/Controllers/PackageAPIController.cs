@@ -45,7 +45,7 @@ namespace CineWorld.Services.MembershipAPI.Controllers
       IEnumerable<Package> packages = await _unitOfWork.Package.GetAllAsync(query);
       _response.Result = _mapper.Map<IEnumerable<PackageDto>>(packages);
 
-      int totalItems = await _unitOfWork.Package.CountAsync();
+      int totalItems = await _unitOfWork.Package.CountAsync(query);
       _response.Pagination = new PaginationDto
       {
         TotalItems = totalItems,

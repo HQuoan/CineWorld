@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using CineWorld.Services.ReactionAPI;
 using CineWorld.Services.ReactionAPI.Data;
 using CineWorld.Services.ReactionAPI.Extensions;
@@ -70,13 +70,13 @@ builder.AddAppAuthentication();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowAllOrigins",
-      policy =>
-      {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:7000")
+        policy =>
+        {
+          policy.SetIsOriginAllowed(_ => true) // Cho phép tất cả các origin
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
-      });
+        });
 });
 
 // Configure Kestrel using Let's Encrypt certificate

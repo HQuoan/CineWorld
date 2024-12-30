@@ -38,7 +38,7 @@ namespace CineWorld.Services.MovieAPI.APIFeatures
     /// <summary>
     /// Filters movies by release year.
     /// </summary>
-    public string? Year { get; set; }
+    public int? Year { get; set; }
 
     /// <summary>
     /// Filters movies that are marked as "hot".

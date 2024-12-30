@@ -127,13 +127,13 @@ builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builde
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowAllOrigins",
-      policy =>
-      {
-        policy.WithOrigins("http://localhost:5173")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-      });
+        policy =>
+        {
+          policy.SetIsOriginAllowed(_ => true) // Cho phép tất cả các origin
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
 
 // Configure Kestrel using Let's Encrypt certificate

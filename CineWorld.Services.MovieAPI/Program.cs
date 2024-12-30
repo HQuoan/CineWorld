@@ -117,9 +117,11 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUtil, Util>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
+builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
 
 // Thêm CORS
 builder.Services.AddCors(options =>

@@ -1,8 +1,8 @@
-﻿using CineWorld.Services.AuthAPI.Models.Dto;
-using CineWorld.Services.AuthAPI.Services.IService;
+﻿using CineWorld.Services.MovieAPI.Models.Dtos;
+using CineWorld.Services.MovieAPI.Services.IService;
 using Newtonsoft.Json;
 
-namespace CineWorld.Services.AuthAPI.Services
+namespace CineWorld.Services.MovieAPI.Services
 {
     public class MembershipService : IMembershipService
   {

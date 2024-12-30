@@ -131,10 +131,7 @@ builder.AddAppAuthentication();
 //});
 
 // Register other services
-builder.Services.AddScoped<IMembershipService, MembershipService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-builder.Services.AddHttpClient("Membership", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:MembershipAPI"]));
 
 // Add CORS
 builder.Services.AddCors(options =>

@@ -17,7 +17,7 @@ namespace CineWorld.Services.AuthAPI.Services
       _jwtOptions = jwtOptions.Value;
     }
 
-    public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles, DateTime membershipExpiration)
+    public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles)
     {
       var tokenHandler = new JwtSecurityTokenHandler();
       
@@ -28,7 +28,7 @@ namespace CineWorld.Services.AuthAPI.Services
         new Claim(JwtRegisteredClaimNames.Email, applicationUser.Email),
         new Claim(JwtRegisteredClaimNames.Sub, applicationUser.Id),
         new Claim(JwtRegisteredClaimNames.Name, applicationUser.FullName),
-        new Claim("MembershipExpiration", membershipExpiration.ToString("o")),
+        //new Claim("MembershipExpiration", membershipExpiration.ToString("o")),
         new Claim("Avatar", applicationUser.Avatar??"")
       };
 

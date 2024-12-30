@@ -1,6 +1,6 @@
-﻿using CineWorld.Services.AuthAPI.Models.Dto;
+﻿using CineWorld.Services.MovieAPI.Models.Dtos;
 
-namespace CineWorld.Services.AuthAPI.Services.IService
+namespace CineWorld.Services.MovieAPI.Services.IService
 {
     public interface IMembershipService
     {

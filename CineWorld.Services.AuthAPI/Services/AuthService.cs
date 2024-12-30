@@ -17,17 +17,15 @@ namespace CineWorld.Services.AuthAPI.Services
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly IMembershipService _membershipService;
     private readonly IEmailService _emailService;
     //private readonly GoogleSettings _googleSettings;
     private readonly ApiSettings _apiSettings;
-    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator, IMembershipService membershipService, IEmailService emailService, IOptions<ApiSettings> apiSettings)
+    public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJwtTokenGenerator jwtTokenGenerator,  IEmailService emailService, IOptions<ApiSettings> apiSettings)
     {
       _db = db;
       _userManager = userManager;
       _roleManager = roleManager;
       _jwtTokenGenerator = jwtTokenGenerator;
-      _membershipService = membershipService;
       _emailService = emailService;
       _apiSettings = apiSettings.Value;
     }
@@ -68,25 +66,25 @@ namespace CineWorld.Services.AuthAPI.Services
       }
 
       LoginResponseDto loginResponseDto = new LoginResponseDto();
-      MemberShipDto membership = new MemberShipDto();
-      try
-      {
-        membership = await _membershipService.GetMembership(user.Id);
-      }
-      catch (Exception)
-      {
-        loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
-      }
+      //MemberShipDto membership = new MemberShipDto();
+      //try
+      //{
+      //  membership = await _membershipService.GetMembership(user.Id);
+      //}
+      //catch (Exception)
+      //{
+      //  loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
+      //}
 
-      var membershipExpiration = DateTime.UtcNow.AddDays(-1);
-      if (membership != null)
-      {
-        membershipExpiration = membership.ExpirationDate;
-      }
+      //var membershipExpiration = DateTime.UtcNow.AddDays(-1);
+      //if (membership != null)
+      //{
+      //  membershipExpiration = membership.ExpirationDate;
+      //}
 
       // if user was found, Generate JWT Token
       var roles = await _userManager.GetRolesAsync(user);
-      var token = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
+      var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
       UserDto userDto = new()
       {
@@ -288,22 +286,22 @@ namespace CineWorld.Services.AuthAPI.Services
 
       // Tạo token JWT
       LoginResponseDto loginResponseDto = new LoginResponseDto();
-      MemberShipDto membership = new MemberShipDto();
-      try
-      {
-        membership = await _membershipService.GetMembership(user.Id);
-      }
-      catch (Exception)
-      {
-        loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
-      }
+      //MemberShipDto membership = new MemberShipDto();
+      //try
+      //{
+      //  membership = await _membershipService.GetMembership(user.Id);
+      //}
+      //catch (Exception)
+      //{
+      //  loginResponseDto.Message = "Unable to retrieve membership expiration details from the Membership API. Please try again later.";
+      //}
 
-      var membershipExpiration = DateTime.UtcNow.AddDays(-1);
-      if (membership != null)
-      {
-        membershipExpiration = membership.ExpirationDate;
-      }
-      var tokenRespone = _jwtTokenGenerator.GenerateToken(user, roles, membershipExpiration);
+      //var membershipExpiration = DateTime.UtcNow.AddDays(-1);
+      //if (membership != null)
+      //{
+      //  membershipExpiration = membership.ExpirationDate;
+      //}
+      var tokenRespone = _jwtTokenGenerator.GenerateToken(user, roles);
 
 
       UserDto userDto = new()

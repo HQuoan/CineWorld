@@ -4,9 +4,11 @@ using CineWorld.Services.MovieAPI.Exceptions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
+using CineWorld.Services.MovieAPI.Services.IService;
 using CineWorld.Services.MovieAPI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
@@ -18,11 +20,14 @@ namespace CineWorld.Services.MovieAPI.Controllers
     private readonly IMapper _mapper;
     private ResponseDto _response;
 
-    public EpisodeAPIController(IMapper mapper, IUnitOfWork unitOfWork)
+    private readonly IMembershipService _membershipService;
+
+    public EpisodeAPIController(IMapper mapper, IUnitOfWork unitOfWork, IMembershipService membershipService)
     {
       _mapper = mapper;
       _response = new ResponseDto();
       _unitOfWork = unitOfWork;
+      _membershipService = membershipService;
     }
 
     /// <summary>
@@ -69,16 +74,27 @@ namespace CineWorld.Services.MovieAPI.Controllers
     {
       bool isAdmin = User.IsInRole(SD.AdminRole);
 
-      string? expirationString = User.Claims.FirstOrDefault(c => c.Type == "MembershipExpiration")?.Value;
-      DateTime? membershipExpiration = null;
+      //string? expirationString = User.Claims.FirstOrDefault(c => c.Type == "MembershipExpiration")?.Value;
+      //DateTime? membershipExpiration = null;
 
-      if (!string.IsNullOrEmpty(expirationString) && DateTime.TryParse(expirationString, null, System.Globalization.DateTimeStyles.RoundtripKind, out var parsedDate))
+      //if (!string.IsNullOrEmpty(expirationString) && DateTime.TryParse(expirationString, null, System.Globalization.DateTimeStyles.RoundtripKind, out var parsedDate))
+      //{
+      //  membershipExpiration = parsedDate;
+      //}
+
+      var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+      var membershipExpiration = DateTime.MinValue;
+
+      var membership = await _membershipService.GetMembership(userIdClaim);
+      if (membership != null)
       {
-        membershipExpiration = parsedDate;
+        membershipExpiration = membership.ExpirationDate;
       }
 
+
       Episode episode;
-      if (isAdmin || (membershipExpiration ?? DateTime.MinValue) > DateTime.UtcNow)
+      if (isAdmin || membershipExpiration > DateTime.UtcNow)
       {
         episode = await _unitOfWork.Episode.GetAsync(c => c.EpisodeId == id, includeProperties: "Servers");
       }
@@ -89,7 +105,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
 
       if (episode == null)
       {
-        if (!isAdmin && (membershipExpiration ?? DateTime.MinValue) <= DateTime.UtcNow)
+        if (!isAdmin && membershipExpiration <= DateTime.UtcNow)
         {
           throw new NotFoundException($"Episode with ID: {id} not found or not accessible due to inactive membership.");
         }
@@ -107,7 +123,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [Route("GetEpsiodesInfor")]
     public async Task<ActionResult<ResponseDto>> GetEpsiodesInfor([FromBody] IdsRequestDto model)
     {
-      var episodes = await _unitOfWork.Episode.GetsAsync(c => model.Ids.Contains(c.EpisodeId), includeProperties: "Movie") ;
+      var episodes = await _unitOfWork.Episode.GetsAsync(c => model.Ids.Contains(c.EpisodeId), includeProperties: "Movie");
 
       _response.Result = episodes;
       return Ok(_response);

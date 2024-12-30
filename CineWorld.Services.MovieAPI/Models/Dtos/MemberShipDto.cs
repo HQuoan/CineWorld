@@ -1,4 +1,4 @@
-﻿namespace CineWorld.Services.AuthAPI.Models.Dto
+﻿namespace CineWorld.Services.MovieAPI.Models.Dtos
 {
   public class MemberShipDto
   {

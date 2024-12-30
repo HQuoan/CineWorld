@@ -145,7 +145,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
 
       var query = MovieFeatures.Build(queryParameters);
-      query.Filters.Add(c => c.Slug == slug);
+      query.Filters.Add(c => c.SeriesId == series.SeriesId);
 
       if (!User.IsInRole(SD.AdminRole))
       {

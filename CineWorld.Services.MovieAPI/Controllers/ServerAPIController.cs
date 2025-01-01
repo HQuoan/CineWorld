@@ -143,7 +143,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
     [HttpGet("generate-signed-cookie")]
     public IActionResult GenerateSignedCookie()
     {
-      string resourceUrl = "https://dowzz3da2124w.cloudfront.net/*";
+      string resourceUrl = "https://cdn.cineworld.io.vn/*";
       DateTime expiresOn = DateTime.UtcNow.AddHours(1);
       //string privateKeyPath = "E:\\private-key-s3.pem";
       string privateKeyPath = "/app/HttpsCerf/private-key-s3.pem";

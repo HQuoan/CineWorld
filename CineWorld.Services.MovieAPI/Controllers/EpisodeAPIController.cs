@@ -82,11 +82,13 @@ namespace CineWorld.Services.MovieAPI.Controllers
       //  membershipExpiration = parsedDate;
       //}
 
-      var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+      var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
       var membershipExpiration = DateTime.MinValue;
 
-      var membership = await _membershipService.GetMembership(userIdClaim);
+      var membership = userIdClaim != null
+                      ? await _membershipService.GetMembership(userIdClaim.Value)
+                      : null;
       if (membership != null)
       {
         membershipExpiration = membership.ExpirationDate;

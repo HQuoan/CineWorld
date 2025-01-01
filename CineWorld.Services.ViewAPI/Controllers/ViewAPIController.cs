@@ -6,6 +6,7 @@ using CineWorld.Services.ViewAPI.Models.Dtos;
 using CineWorld.Services.ViewAPI.Repositories.IRepositories;
 using CineWorld.Services.ViewAPI.Services.IService;
 using CineWorld.Services.ViewAPI.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
@@ -33,6 +34,7 @@ namespace CineWorld.Services.ViewAPI.Controllers
 
     [HttpGet]
     [Route("ViewStat")]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> ViewStat([FromQuery] ViewStatQueryParameters queryParameters)
     {
       var query = ViewStatFeatures.Build(queryParameters);
@@ -134,6 +136,7 @@ namespace CineWorld.Services.ViewAPI.Controllers
     }
 
     [HttpGet]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Get([FromQuery] ViewQueryParameters queryParameters)
     {
       var query = ViewFeatures.Build(queryParameters);
@@ -223,6 +226,7 @@ namespace CineWorld.Services.ViewAPI.Controllers
     }
 
     [HttpPut]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Put([FromBody] ViewDto viewDto)
     {
       View view = _mapper.Map<View>(viewDto);
@@ -248,6 +252,7 @@ namespace CineWorld.Services.ViewAPI.Controllers
     /// <returns>A no content response if successful.</returns>
     /// <exception cref="NotFoundException">Thrown if no view is found with the given ID.</exception>
     [HttpDelete]
+    [Authorize(Roles = SD.AdminRole)]
     public async Task<ActionResult<ResponseDto>> Delete(int id)
     {
       var view = await _unitOfWork.View.GetAsync(c => c.ViewId == id);

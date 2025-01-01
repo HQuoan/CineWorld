@@ -15,22 +15,34 @@ namespace CineWorld.Services.MovieAPI.Services
 
     public async Task<MemberShipDto> GetMembership(string userId)
     {
-      var client = _httpClientFactory.CreateClient("Membership");
-      var response = await client.GetAsync($"/api/memberships/GetByUserId/{userId}");
-      var apiContent = await response.Content.ReadAsStringAsync();
-      var resp = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
+      try
+      {
+        var client = _httpClientFactory.CreateClient("Membership");
+        var response = await client.GetAsync($"/api/memberships/GetByUserId/{userId}");
 
-      if (resp == null )
+        // Nếu phản hồi không thành công, trả về null
+        if (!response.IsSuccessStatusCode)
+        {
+          return null;
+        }
+
+        var apiContent = await response.Content.ReadAsStringAsync();
+        var resp = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
+
+        // Nếu resp là null hoặc không thành công, trả về null
+        if (resp == null || !resp.IsSuccess)
+        {
+          return null;
+        }
+
+        // Deserialize thành MembershipDto nếu có kết quả
+        return JsonConvert.DeserializeObject<MemberShipDto>(Convert.ToString(resp.Result));
+      }
+      catch (Exception ex)
       {
         return null;
       }
-
-      if (resp.IsSuccess)
-      {
-        return JsonConvert.DeserializeObject<MemberShipDto>(Convert.ToString(resp.Result));
-      }
-
-      return null;
     }
+
   }
 }

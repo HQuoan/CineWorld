@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CineWorld.Services.MovieAPI.APIFeatures;
 using CineWorld.Services.MovieAPI.Exceptions;
+using CineWorld.Services.MovieAPI.Extensions;
 using CineWorld.Services.MovieAPI.Models;
 using CineWorld.Services.MovieAPI.Models.Dtos;
 using CineWorld.Services.MovieAPI.Repositories.IRepositories;
@@ -10,10 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CineWorld.Services.MovieAPI.Controllers
 {
-  /// <summary>
-  /// Controller for managing servers. Only accessible by Admin role.
-  /// </summary>
-  [Route("api/servers")]
+    /// <summary>
+    /// Controller for managing servers. Only accessible by Admin role.
+    /// </summary>
+    [Route("api/servers")]
   [ApiController]
   [Authorize(Roles = SD.AdminRole)]
   public class ServerAPIController : ControllerBase

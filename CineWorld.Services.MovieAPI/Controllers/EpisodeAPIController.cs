@@ -153,6 +153,7 @@ namespace CineWorld.Services.MovieAPI.Controllers
       }
 
       movie.EpisodeTotal++;
+      movie.UpdatedDate = DateTime.UtcNow;
 
       Episode episode = _mapper.Map<Episode>(episodeDto);
 

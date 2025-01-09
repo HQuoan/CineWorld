@@ -147,12 +147,14 @@ namespace CineWorld.Services.MembershipAPI.Services
           };
 
           // Gửi email gia hạn gói thành công 
+          Package package = await _unitOfWork.Package.GetAsync(c => c.PackageId == receipt.PackageId);
+
           var responeSendMail = await _emailService.SendEmailAsync(new EmailRequest
           {
             //To = membershipToReturn.UserEmail,
             To = receipt.Email,
             Subject = "Payment Successful",
-            Message = "Payment Successful"
+            Message = GenerateEmailBody.PaymentSuccess(receipt, package, membershipToReturn)
           });
 
           responseDto.Result = new
@@ -171,6 +173,8 @@ namespace CineWorld.Services.MembershipAPI.Services
 
       return responseDto;
     }
+
+    
 
   }
 }

@@ -69,7 +69,7 @@ namespace CineWorld.Services.MembershipAPI.Utilities
 <body>
     <div class='container'>
         <div class='header'>
-            <h2>CineWorld - Payment Successful</h2>
+            <h2>CineWorld - Payment Successful.</h2>
         </div>
         <div class='content'>
             <p>Dear Customer,</p>
